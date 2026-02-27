@@ -1,2 +1,2 @@
-# personal-finance-manager
-A personal finance management app.
+# inventory-manager
+An inventory management system.

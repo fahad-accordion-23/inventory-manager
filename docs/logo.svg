@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="512"
+   height="512"
+   viewBox="0 0 135.46666 135.46667"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   sodipodi:docname="logo.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     inkscape:zoom="1.1201172"
+     inkscape:cx="207.56757"
+     inkscape:cy="228.9939"
+     inkscape:window-width="1920"
+     inkscape:window-height="991"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     id="g1"
+     transform="translate(-1.1810504,2.383416)">
+    <g
+       inkscape:groupmode="layer"
+       id="layer1"
+       inkscape:label="name"
+       transform="translate(1.181052,5.5012319)"
+       style="display:inline">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16.9333px;font-family:Bahnschrift;-inkscape-font-specification:Bahnschrift;text-align:start;letter-spacing:2.64583px;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000040;fill-opacity:1;stroke-width:0.264583"
+         x="67.443947"
+         y="117.16408"
+         id="text1"><tspan
+           sodipodi:role="line"
+           id="tspan1"
+           style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-family:Bahnschrift;-inkscape-font-specification:'Bahnschrift Semi-Bold';text-align:center;letter-spacing:2.64583px;text-anchor:middle;fill:#000040;fill-opacity:1;stroke-width:0.264583"
+           x="68.766861"
+           y="117.16408">LEDGE</tspan></text>
+    </g>
+    <g
+       inkscape:groupmode="layer"
+       id="layer3"
+       inkscape:label="body"
+       transform="translate(0,18.492804)">
+      <circle
+         style="display:inline;fill:none;stroke:#000040;stroke-width:2.2225;stroke-dasharray:none;stroke-opacity:1"
+         id="path1"
+         cx="68.914383"
+         cy="36.248955"
+         r="46.107925" />
+      <g
+         id="g69"
+         transform="translate(0,-5.2916669)">
+        <g
+           id="g56"
+           inkscape:label="boxes"
+           transform="translate(-0.88573607,11.730303)"
+           inkscape:transform-center-x="0.059054603"
+           inkscape:transform-center-y="-4.1041238">
+          <path
+             id="path53"
+             style="fill:none;stroke:#000040;stroke-width:2.2225;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+             d="m 69.800117,28.343514 -13.229167,7.637777 0.02015,0.01188 v 0.02325 15.252298 l 13.209013,-7.626407 z" />
+          <path
+             id="path40"
+             style="fill:none;stroke:#000040;stroke-width:2.2225;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+             d="m 69.800117,28.343514 v 15.298808 l 13.209013,7.626407 v -15.252298 -0.02325 l 0.02015,-0.01188 z" />
+          <path
+             d="M 69.800117,-2.2546179 56.550797,5.3950443 69.800117,13.04419 83.049437,5.3950443 Z"
+             style="display:inline;fill:none;stroke:#000040;stroke-width:2.2225;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+             id="path46" />
+          <path
+             d="m 43.32163,28.3554 -0.02015,0.01137 v 15.275554 l 13.249321,7.649662 v -15.29881 z"
+             style="fill:none;stroke:#000040;stroke-width:2.2225;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+             id="path51" />
+          <path
+             d="M 83.049437,51.291984 96.298758,43.642322 V 28.366768 l -0.02015,-0.01137 -13.229167,7.637776 z"
+             style="fill:none;stroke:#000040;stroke-width:2.2225;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+             id="path41" />
+          <path
+             id="path45"
+             style="fill:none;stroke:#000040;stroke-width:2.2225;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+             d="M 83.049438,5.3950448 69.800117,13.04419 v 15.299325 l 13.249321,-7.649663 z" />
+          <path
+             id="path43"
+             style="fill:none;stroke:#000040;stroke-width:2.2225;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+             d="m 83.049437,20.693852 -13.24932,7.649662 13.229166,7.637777 0.02015,-0.01137 13.209013,-7.626408 0.02015,0.01189 0.02015,-0.01189 z" />
+          <path
+             id="path50"
+             style="display:inline;fill:none;stroke:#000040;stroke-width:2.2225;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+             d="m 56.550797,20.693852 -13.249321,7.649662 0.02015,0.01189 0.02015,-0.01189 13.209013,7.626408 0.02015,0.01137 13.229167,-7.637777 z" />
+          <path
+             id="path48"
+             style="display:inline;fill:none;stroke:#000040;stroke-width:2.2225;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
+             d="M 56.550797,5.3950443 V 20.693852 l 13.24932,7.649662 V 13.04419 Z" />
+        </g>
+        <path
+           style="fill:#009933;fill-opacity:1;stroke:none;stroke-width:1.41685;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+           d="M 98.977147,47.392997 V 57.440446 L 68.967093,74.76652 38.957555,57.440446 V 47.392997 L 35.743798,45.537296 V 59.29563 l 3.213757,1.8557 30.009538,17.326074 30.010054,-17.326074 3.213753,-1.8557 V 45.537296 Z"
+           id="path69" />
+      </g>
+    </g>
+  </g>
+</svg>
