@@ -4,8 +4,8 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableView;
 import ledge.application.InventoryEventBroker;
-import ledge.application.InventoryRefreshRequestedEvent;
-import ledge.application.ProductsUpdatedEvent;
+import ledge.application.event.InventoryRefreshRequestedEvent;
+import ledge.application.event.ProductsUpdatedEvent;
 import ledge.application.dto.ProductDTO;
 
 public class InventoryDashboard {

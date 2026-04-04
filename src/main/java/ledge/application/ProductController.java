@@ -3,6 +3,7 @@ package ledge.application;
 import ledge.domain.Product;
 import ledge.domain.ProductService;
 import ledge.application.dto.ProductDTO;
+import ledge.application.event.*;
 
 import java.util.List;
 import java.util.Optional;

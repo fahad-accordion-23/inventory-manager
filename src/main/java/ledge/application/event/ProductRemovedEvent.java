@@ -1,8 +1,7 @@
-package ledge.application;
+package ledge.application.event;
 
 import java.util.UUID;
-
-import ledge.application.event.Event;
+import ledge.util.event.Event;
 
 /**
  * Published when an existing product is removed from the system.

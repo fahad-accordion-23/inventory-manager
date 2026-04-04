@@ -1,7 +1,7 @@
 package ledge.application;
 
-import ledge.application.event.Event;
-import ledge.application.event.EventBroker;
+import ledge.util.event.Event;
+import ledge.util.event.EventBroker;
 
 /**
  * Concrete implementation of the event broker for the inventory manager.

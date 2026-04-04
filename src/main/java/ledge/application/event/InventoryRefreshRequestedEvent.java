@@ -1,6 +1,6 @@
-package ledge.application;
+package ledge.application.event;
 
-import ledge.application.event.Event;
+import ledge.util.event.Event;
 
 /**
  * Published by the UI when it needs the latest baseline of data (e.g., on dashboard load).

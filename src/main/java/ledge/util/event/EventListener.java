@@ -1,4 +1,4 @@
-package ledge.application.event;
+package ledge.util.event;
 
 /**
  * Functional interface for receiving and handling system events.

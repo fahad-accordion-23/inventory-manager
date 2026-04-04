@@ -1,6 +1,7 @@
-package ledge.application;
+package ledge.application.event;
 
-import ledge.application.event.Event;
+import ledge.util.event.Event;
+
 import ledge.application.dto.ProductDTO;
 import java.util.List;
 

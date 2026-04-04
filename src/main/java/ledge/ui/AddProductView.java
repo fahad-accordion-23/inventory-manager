@@ -3,7 +3,7 @@ package ledge.ui;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import ledge.application.InventoryEventBroker;
-import ledge.application.ProductAddedEvent;
+import ledge.application.event.ProductAddedEvent;
 import ledge.application.dto.ProductDTO;
 
 import java.math.BigDecimal;
@@ -34,23 +34,29 @@ public class AddProductView {
     @FXML
     public void handleAddProduct() {
         try {
-            String name = nameField.getText();
-            BigDecimal purchasePrice = new BigDecimal(purchasePriceField.getText());
-            BigDecimal sellingPrice = new BigDecimal(sellingPriceField.getText());
-            int stock = Integer.parseInt(stockField.getText());
-            BigDecimal taxRate = new BigDecimal(taxField.getText());
-
-            ProductDTO dto = new ProductDTO(null, name, purchasePrice, sellingPrice, stock, taxRate);
+            ProductDTO dto = createProductFromInput();
             eventBroker.publish(new ProductAddedEvent(dto));
-            
-            // Clear fields
-            nameField.clear();
-            purchasePriceField.clear();
-            sellingPriceField.clear();
-            stockField.clear();
-            taxField.clear();
+            clearFormFields();
         } catch (Exception e) {
             System.err.println("Failed to parse form inputs: " + e.getMessage());
         }
+    }
+
+    private ProductDTO createProductFromInput() {
+        String name = nameField.getText();
+        BigDecimal purchasePrice = new BigDecimal(purchasePriceField.getText());
+        BigDecimal sellingPrice = new BigDecimal(sellingPriceField.getText());
+        int stock = Integer.parseInt(stockField.getText());
+        BigDecimal taxRate = new BigDecimal(taxField.getText());
+
+        return new ProductDTO(null, name, purchasePrice, sellingPrice, stock, taxRate);
+    }
+
+    private void clearFormFields() {
+        nameField.clear();
+        purchasePriceField.clear();
+        sellingPriceField.clear();
+        stockField.clear();
+        taxField.clear();
     }
 }

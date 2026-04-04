@@ -1,4 +1,4 @@
-package ledge.application.event;
+package ledge.util.event;
 
 import java.util.ArrayList;
 import java.util.HashMap;
