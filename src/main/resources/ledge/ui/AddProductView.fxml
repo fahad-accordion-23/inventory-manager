@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="ledge.ui.AddProductView"
+      spacing="10">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="Add New Product" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+    <Label text="Product Name"/>
+    <TextField fx:id="nameField" promptText="Enter product name"/>
+
+    <Label text="Purchase Price"/>
+    <TextField fx:id="purchasePriceField" promptText="e.g. 10.00"/>
+
+    <Label text="Selling Price"/>
+    <TextField fx:id="sellingPriceField" promptText="e.g. 15.00"/>
+
+    <Label text="Stock Quantity"/>
+    <TextField fx:id="stockField" promptText="Enter stock quantity"/>
+
+    <Label text="Tax Rate"/>
+    <TextField fx:id="taxField" promptText="e.g. 0.15 for 15%"/>
+
+    <Button text="Add Product" onAction="#handleAddProduct"/>
+
+</VBox>
