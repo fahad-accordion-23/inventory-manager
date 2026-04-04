@@ -21,10 +21,12 @@ public class ProductController {
 
     private void handleProductAdded(ProductAddedEvent event) {
         productService.addProduct(event.getProduct());
+        eventBroker.publish(new ProductsUpdatedEvent(productService.getAllProducts()));
     }
 
     private void handleProductRemoved(ProductRemovedEvent event) {
         productService.deleteProduct(event.getProductId());
+        eventBroker.publish(new ProductsUpdatedEvent(productService.getAllProducts()));
     }
 
     public Optional<Product> getProductById(UUID id) {
