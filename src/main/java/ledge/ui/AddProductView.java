@@ -2,6 +2,8 @@ package ledge.ui;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import ledge.application.InventoryEventBroker;
 import ledge.application.event.ProductAddedEvent;
 import ledge.application.dto.ProductDTO;
@@ -37,7 +39,18 @@ public class AddProductView {
             ProductDTO dto = createProductFromInput();
             eventBroker.publish(new ProductAddedEvent(dto));
             clearFormFields();
+            
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle("Success");
+            alert.setHeaderText(null);
+            alert.setContentText("Product successfully added!");
+            alert.showAndWait();
         } catch (Exception e) {
+            Alert alert = new Alert(AlertType.ERROR);
+            alert.setTitle("Validation Error");
+            alert.setHeaderText("Invalid Input");
+            alert.setContentText("Please check your numbers and try again.\nError: " + e.getMessage());
+            alert.showAndWait();
             System.err.println("Failed to parse form inputs: " + e.getMessage());
         }
     }
@@ -47,7 +60,9 @@ public class AddProductView {
         BigDecimal purchasePrice = new BigDecimal(purchasePriceField.getText());
         BigDecimal sellingPrice = new BigDecimal(sellingPriceField.getText());
         int stock = Integer.parseInt(stockField.getText());
-        BigDecimal taxRate = new BigDecimal(taxField.getText());
+        
+        String taxText = taxField.getText();
+        BigDecimal taxRate = (taxText == null || taxText.trim().isEmpty()) ? null : new BigDecimal(taxText);
 
         return new ProductDTO(null, name, purchasePrice, sellingPrice, stock, taxRate);
     }
