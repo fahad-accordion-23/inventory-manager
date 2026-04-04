@@ -15,7 +15,7 @@ public class MainLayout {
     @FXML
     public void initialize() {
         // Load the initial view
-        showAddProduct();
+        showInventoryDashboard();
     }
 
     @FXML
@@ -26,6 +26,19 @@ public class MainLayout {
             
             contentArea.getChildren().clear();
             contentArea.getChildren().add(addProductView);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    public void showInventoryDashboard() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/InventoryDashboard.fxml"));
+            Parent dashboardView = loader.load();
+            
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(dashboardView);
         } catch (IOException e) {
             e.printStackTrace();
         }
