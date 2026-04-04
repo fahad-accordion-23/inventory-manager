@@ -12,9 +12,9 @@ public class Product {
     private int stockQuantity;
     private BigDecimal taxRate;
 
-    public Product(String name, BigDecimal purchasePrice, BigDecimal sellingPrice, int stockQuantity, BigDecimal taxRate) {
-        // US-2.1: Automatic generation of ID
-        this.id = UUID.randomUUID();
+    public Product(UUID id, String name, BigDecimal purchasePrice, BigDecimal sellingPrice, int stockQuantity, BigDecimal taxRate) {
+        // US-2.1: Automatic generation of ID if not provided
+        this.id = (id == null) ? UUID.randomUUID() : id;
         
         // Using setters to ensure consistent validation during initialization
         setName(name);

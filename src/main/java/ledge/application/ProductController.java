@@ -2,10 +2,12 @@ package ledge.application;
 
 import ledge.domain.Product;
 import ledge.domain.ProductService;
+import ledge.application.dto.ProductDTO;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class ProductController {
     private final ProductService productService;
@@ -20,20 +22,44 @@ public class ProductController {
     }
 
     private void handleProductAdded(ProductAddedEvent event) {
-        productService.addProduct(event.getProduct());
-        eventBroker.publish(new ProductsUpdatedEvent(productService.getAllProducts()));
+        ProductDTO dto = event.getProduct();
+        
+        Product domainProduct = new Product(
+            dto.getId(),
+            dto.getName(),
+            dto.getPurchasePrice(),
+            dto.getSellingPrice(),
+            dto.getStockQuantity(),
+            dto.getTaxRate()
+        );
+        
+        productService.addProduct(domainProduct);
+        eventBroker.publish(new ProductsUpdatedEvent(getAllProducts()));
     }
 
     private void handleProductRemoved(ProductRemovedEvent event) {
         productService.deleteProduct(event.getProductId());
-        eventBroker.publish(new ProductsUpdatedEvent(productService.getAllProducts()));
+        eventBroker.publish(new ProductsUpdatedEvent(getAllProducts()));
     }
 
-    public Optional<Product> getProductById(UUID id) {
-        return productService.getProductById(id);
+    public Optional<ProductDTO> getProductById(UUID id) {
+        return productService.getProductById(id).map(this::toDTO);
     }
 
-    public List<Product> getAllProducts() {
-        return productService.getAllProducts();
+    public List<ProductDTO> getAllProducts() {
+        return productService.getAllProducts().stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    private ProductDTO toDTO(Product product) {
+        return new ProductDTO(
+            product.getId(),
+            product.getName(),
+            product.getPurchasePrice(),
+            product.getSellingPrice(),
+            product.getStockQuantity(),
+            product.getTaxRate()
+        );
     }
 }

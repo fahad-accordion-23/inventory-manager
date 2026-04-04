@@ -1,19 +1,19 @@
 package ledge.application;
 
 import ledge.application.event.Event;
-import ledge.domain.Product;
+import ledge.application.dto.ProductDTO;
 
 /**
  * Published when a new product is successfully added to the system.
  */
 public class ProductAddedEvent implements Event {
-    private final Product product;
+    private final ProductDTO product;
 
-    public ProductAddedEvent(Product product) {
+    public ProductAddedEvent(ProductDTO product) {
         this.product = product;
     }
 
-    public Product getProduct() {
+    public ProductDTO getProduct() {
         return product;
     }
 }

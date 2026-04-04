@@ -2,12 +2,12 @@ package ledge.ui;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TableView;
-import ledge.domain.Product;
+import ledge.application.dto.ProductDTO;
 
 public class InventoryDashboard {
 
     @FXML
-    private TableView<Product> inventoryTable;
+    private TableView<ProductDTO> inventoryTable;
 
     @FXML
     public void initialize() {
