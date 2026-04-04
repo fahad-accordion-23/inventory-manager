@@ -2,8 +2,19 @@ package ledge.ui;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
+import ledge.application.InventoryEventBroker;
+import ledge.application.ProductAddedEvent;
+import ledge.application.dto.ProductDTO;
+
+import java.math.BigDecimal;
 
 public class AddProductView {
+
+    private final InventoryEventBroker eventBroker;
+
+    public AddProductView(InventoryEventBroker eventBroker) {
+        this.eventBroker = eventBroker;
+    }
 
     @FXML
     private TextField nameField;
@@ -22,11 +33,24 @@ public class AddProductView {
 
     @FXML
     public void handleAddProduct() {
-        System.out.println("Add Product button clicked! Form data:");
-        System.out.println("Name: " + nameField.getText());
-        System.out.println("Purchase Price: " + purchasePriceField.getText());
-        System.out.println("Selling Price: " + sellingPriceField.getText());
-        System.out.println("Stock: " + stockField.getText());
-        System.out.println("Tax: " + taxField.getText());
+        try {
+            String name = nameField.getText();
+            BigDecimal purchasePrice = new BigDecimal(purchasePriceField.getText());
+            BigDecimal sellingPrice = new BigDecimal(sellingPriceField.getText());
+            int stock = Integer.parseInt(stockField.getText());
+            BigDecimal taxRate = new BigDecimal(taxField.getText());
+
+            ProductDTO dto = new ProductDTO(null, name, purchasePrice, sellingPrice, stock, taxRate);
+            eventBroker.publish(new ProductAddedEvent(dto));
+            
+            // Clear fields
+            nameField.clear();
+            purchasePriceField.clear();
+            sellingPriceField.clear();
+            stockField.clear();
+            taxField.clear();
+        } catch (Exception e) {
+            System.err.println("Failed to parse form inputs: " + e.getMessage());
+        }
     }
 }

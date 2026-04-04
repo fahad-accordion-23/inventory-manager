@@ -19,6 +19,7 @@ public class ProductController {
         
         this.eventBroker.subscribe(ProductAddedEvent.class, this::handleProductAdded);
         this.eventBroker.subscribe(ProductRemovedEvent.class, this::handleProductRemoved);
+        this.eventBroker.subscribe(InventoryRefreshRequestedEvent.class, this::handleRefreshRequested);
     }
 
     private void handleProductAdded(ProductAddedEvent event) {
@@ -39,6 +40,10 @@ public class ProductController {
 
     private void handleProductRemoved(ProductRemovedEvent event) {
         productService.deleteProduct(event.getProductId());
+        eventBroker.publish(new ProductsUpdatedEvent(getAllProducts()));
+    }
+
+    private void handleRefreshRequested(InventoryRefreshRequestedEvent event) {
         eventBroker.publish(new ProductsUpdatedEvent(getAllProducts()));
     }
 
