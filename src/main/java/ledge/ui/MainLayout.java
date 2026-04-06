@@ -3,14 +3,8 @@ package ledge.ui;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import ledge.application.InventoryEventBroker;
-import ledge.domain.Action;
-import ledge.domain.Resource;
-import ledge.domain.User;
-import ledge.security.SecurityContext;
-import ledge.security.event.LogoutRequestedEvent;
 
 import java.io.IOException;
 
@@ -20,10 +14,7 @@ public class MainLayout {
     private VBox contentArea;
     
     @FXML
-    private Button dashboardBtn;
-    
-    @FXML
-    private Button addProductBtn;
+    private Sidebar sidebarController;
     
     private final InventoryEventBroker eventBroker;
 
@@ -33,31 +24,15 @@ public class MainLayout {
 
     @FXML
     public void initialize() {
-        applyRoleVisibility();
-        // Load the initial view based on visibility
-        if (dashboardBtn.isVisible()) {
+        sidebarController.setCallbacks(this::showInventoryDashboard, this::showAddProduct);
+        if (sidebarController.isDashboardVisible()) {
             showInventoryDashboard();
-        } else if (addProductBtn.isVisible()) {
+        } else if (sidebarController.isAddProductVisible()) {
             showAddProduct();
         }
     }
 
-    private void applyRoleVisibility() {
-        if (!SecurityContext.isAuthenticated()) {
-            return;
-        }
-        User user = SecurityContext.getCurrentUser();
-        dashboardBtn.setVisible(user.getRole().hasPermission(Resource.PRODUCT, Action.READ));
-        dashboardBtn.setManaged(dashboardBtn.isVisible());
-        
-        addProductBtn.setVisible(user.getRole().hasPermission(Resource.PRODUCT, Action.CREATE));
-        addProductBtn.setManaged(addProductBtn.isVisible());
-    }
 
-    @FXML
-    public void handleLogout() {
-        eventBroker.publish(new LogoutRequestedEvent());
-    }
 
     @FXML
     public void showAddProduct() {

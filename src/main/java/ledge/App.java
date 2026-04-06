@@ -18,6 +18,7 @@ import ledge.security.event.LoginSucceededEvent;
 import ledge.security.event.LogoutRequestedEvent;
 import ledge.ui.LoginView;
 import ledge.ui.MainLayout;
+import ledge.ui.Sidebar;
 
 public class App extends Application {
 
@@ -85,6 +86,9 @@ public class App extends Application {
             loader.setControllerFactory(param -> {
                 if (param == MainLayout.class) {
                     return new MainLayout(eventBroker);
+                }
+                if (param == Sidebar.class) {
+                    return new Sidebar(eventBroker);
                 }
                 try {
                     return param.getDeclaredConstructor().newInstance();
