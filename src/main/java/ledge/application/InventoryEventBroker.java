@@ -1,5 +1,6 @@
 package ledge.application;
 
+import ledge.security.AccessPolicy;
 import ledge.util.event.Event;
 import ledge.util.event.EventBroker;
 
@@ -11,5 +12,13 @@ public class InventoryEventBroker extends EventBroker<Event> {
     
     public InventoryEventBroker() {
         super();
+    }
+
+    @Override
+    public <E extends Event> void publish(E event) {
+        event.getRequiredPermission().ifPresent(permission -> {
+            AccessPolicy.require(permission.resource(), permission.action());
+        });
+        super.publish(event);
     }
 }
