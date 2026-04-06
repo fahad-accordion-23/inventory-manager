@@ -2,10 +2,10 @@ package ledge.application.event;
 
 import java.util.Optional;
 import java.util.UUID;
-import ledge.util.event.Event;
 import ledge.domain.Action;
 import ledge.domain.Permission;
 import ledge.domain.Resource;
+import ledge.util.event.Event;
 
 /**
  * Published when an existing product is removed from the system.
@@ -25,6 +25,6 @@ public class ProductRemovedEvent implements Event {
 
     @Override
     public Optional<Permission> getRequiredPermission() {
-        return Optional.of(new Permission(Resource.PRODUCT, Action.DELETE));
+        return Optional.of(REQUIRED);
     }
 }

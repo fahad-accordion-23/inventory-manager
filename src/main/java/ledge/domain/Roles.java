@@ -1,6 +1,7 @@
 package ledge.domain;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public final class Roles {
@@ -30,6 +31,13 @@ public final class Roles {
         salesPerms.add(new Permission(Resource.INVOICE, Action.CREATE));
         SALES_STAFF = new Role("SALES_STAFF", salesPerms);
     }
+
+    /** Lookup map for deserialisation — keyed by Role.getName(). */
+    public static final Map<String, Role> BY_NAME = Map.of(
+        ADMIN.getName(),             ADMIN,
+        INVENTORY_MANAGER.getName(), INVENTORY_MANAGER,
+        SALES_STAFF.getName(),       SALES_STAFF
+    );
 
     private Roles() {
         // Utility class

@@ -16,9 +16,7 @@ public class InventoryEventBroker extends EventBroker<Event> {
 
     @Override
     public <E extends Event> void publish(E event) {
-        event.getRequiredPermission().ifPresent(permission -> {
-            AccessPolicy.require(permission.resource(), permission.action());
-        });
+        event.getRequiredPermission().ifPresent(AccessPolicy::require);
         super.publish(event);
     }
 }

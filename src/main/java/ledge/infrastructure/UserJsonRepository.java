@@ -90,16 +90,11 @@ public class UserJsonRepository implements UserRepository {
         @Override
         public Role deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
             String roleName = json.getAsString();
-            switch (roleName) {
-                case "ADMIN":
-                    return Roles.ADMIN;
-                case "INVENTORY_MANAGER":
-                    return Roles.INVENTORY_MANAGER;
-                case "SALES_STAFF":
-                    return Roles.SALES_STAFF;
-                default:
-                    throw new JsonParseException("Unknown role: " + roleName);
+            Role role = Roles.BY_NAME.get(roleName);
+            if (role == null) {
+                throw new JsonParseException("Unknown role: " + roleName);
             }
+            return role;
         }
     }
 }
