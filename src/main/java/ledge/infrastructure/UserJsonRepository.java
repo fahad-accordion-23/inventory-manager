@@ -40,8 +40,6 @@ public class UserJsonRepository implements UserRepository {
 
     private void seedDatabase() {
         save(new User(UUID.randomUUID(), "admin", PasswordHasher.hash("admin123"), Roles.ADMIN));
-        save(new User(UUID.randomUUID(), "manager", PasswordHasher.hash("manager123"), Roles.INVENTORY_MANAGER));
-        save(new User(UUID.randomUUID(), "sales", PasswordHasher.hash("sales123"), Roles.SALES_STAFF));
     }
 
     private void loadDatabase() {
