@@ -1,0 +1,34 @@
+package ledge.security;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+public class PasswordHasher {
+
+    public static String hash(String plaintext) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] encodedhash = digest.digest(plaintext.getBytes(StandardCharsets.UTF_8));
+            return bytesToHex(encodedhash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 algorithm not found", e);
+        }
+    }
+
+    public static boolean verify(String plaintext, String hash) {
+        return hash(plaintext).equals(hash);
+    }
+
+    private static String bytesToHex(byte[] hash) {
+        StringBuilder hexString = new StringBuilder(2 * hash.length);
+        for (int i = 0; i < hash.length; i++) {
+            String hex = Integer.toHexString(0xff & hash[i]);
+            if (hex.length() == 1) {
+                hexString.append('0');
+            }
+            hexString.append(hex);
+        }
+        return hexString.toString();
+    }
+}
