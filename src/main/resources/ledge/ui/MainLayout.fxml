@@ -14,8 +14,10 @@
             <padding>
                 <Insets top="20" right="10" bottom="20" left="10"/>
             </padding>
-            <Button text="Inventory Dashboard" onAction="#showInventoryDashboard" maxWidth="Infinity" />
-            <Button text="Add Product" onAction="#showAddProduct" maxWidth="Infinity" />
+            <Button fx:id="dashboardBtn" text="Inventory Dashboard" onAction="#showInventoryDashboard" maxWidth="Infinity" />
+            <Button fx:id="addProductBtn" text="Add Product" onAction="#showAddProduct" maxWidth="Infinity" />
+            <VBox VBox.vgrow="ALWAYS" />
+            <Button text="Logout" onAction="#handleLogout" maxWidth="Infinity" style="-fx-text-fill: red;" />
         </VBox>
     </left>
     <center>
