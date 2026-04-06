@@ -11,6 +11,8 @@ import java.util.Optional;
  * Published when a new product is successfully added to the system.
  */
 public class ProductAddedEvent implements Event {
+    public static final Permission REQUIRED = new Permission(Resource.PRODUCT, Action.CREATE);
+
     private final ProductDTO product;
 
     public ProductAddedEvent(ProductDTO product) {
@@ -23,6 +25,6 @@ public class ProductAddedEvent implements Event {
 
     @Override
     public Optional<Permission> getRequiredPermission() {
-        return Optional.of(new Permission(Resource.PRODUCT, Action.CREATE));
+        return Optional.of(REQUIRED);
     }
 }

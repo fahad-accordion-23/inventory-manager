@@ -2,76 +2,63 @@ package ledge.ui;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.layout.VBox;
 import ledge.application.InventoryEventBroker;
-import ledge.domain.Action;
-import ledge.domain.Resource;
-import ledge.domain.User;
+import ledge.domain.Role;
 import ledge.security.SecurityContext;
 import ledge.security.event.LogoutRequestedEvent;
+
+import java.util.List;
 
 public class Sidebar {
 
     @FXML
-    private Button dashboardBtn;
-
-    @FXML
-    private Button addProductBtn;
+    private VBox navArea;
 
     private final InventoryEventBroker eventBroker;
-    private Runnable onShowDashboard;
-    private Runnable onShowAddProduct;
 
     public Sidebar(InventoryEventBroker eventBroker) {
         this.eventBroker = eventBroker;
     }
 
-    public void setCallbacks(Runnable onShowDashboard, Runnable onShowAddProduct) {
-        this.onShowDashboard = onShowDashboard;
-        this.onShowAddProduct = onShowAddProduct;
-    }
-
     @FXML
     public void initialize() {
-        applyRoleVisibility();
+        // Nav items are provided later via setNavItems() — nothing to do here yet.
     }
 
-    private void applyRoleVisibility() {
+    /**
+     * Builds nav buttons from the provided items, showing only those the current
+     * user's role has permission for. The permission check uses each NavItem's own
+     * REQUIRED constant — no (Resource, Action) pairs hardcoded here.
+     */
+    public void setNavItems(List<NavItem> items) {
+        navArea.getChildren().clear();
+
         if (!SecurityContext.isAuthenticated()) {
             return;
         }
-        User user = SecurityContext.getCurrentUser();
-        
-        dashboardBtn.setVisible(user.getRole().hasPermission(Resource.PRODUCT, Action.READ));
-        dashboardBtn.setManaged(dashboardBtn.isVisible());
 
-        addProductBtn.setVisible(user.getRole().hasPermission(Resource.PRODUCT, Action.CREATE));
-        addProductBtn.setManaged(addProductBtn.isVisible());
-    }
+        Role role = SecurityContext.getCurrentUser().getRole();
+        boolean first = true;
 
-    @FXML
-    public void showInventoryDashboard() {
-        if (onShowDashboard != null) {
-            onShowDashboard.run();
-        }
-    }
+        for (NavItem item : items) {
+            if (role.hasPermission(item.required())) {
+                Button btn = new Button(item.label());
+                btn.setMaxWidth(Double.MAX_VALUE);
+                btn.setOnAction(_ -> item.action().run());
+                navArea.getChildren().add(btn);
 
-    @FXML
-    public void showAddProduct() {
-        if (onShowAddProduct != null) {
-            onShowAddProduct.run();
+                // Auto-navigate to the first accessible item
+                if (first) {
+                    item.action().run();
+                    first = false;
+                }
+            }
         }
     }
 
     @FXML
     public void handleLogout() {
         eventBroker.publish(new LogoutRequestedEvent());
-    }
-
-    public boolean isDashboardVisible() {
-        return dashboardBtn.isVisible();
-    }
-
-    public boolean isAddProductVisible() {
-        return addProductBtn.isVisible();
     }
 }

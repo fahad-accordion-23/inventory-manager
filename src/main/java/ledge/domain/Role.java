@@ -24,4 +24,8 @@ public class Role {
     public boolean hasPermission(Resource resource, Action action) {
         return permissions.contains(new Permission(resource, action));
     }
+
+    public boolean hasPermission(Permission permission) {
+        return permissions.contains(permission);
+    }
 }

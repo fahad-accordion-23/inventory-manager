@@ -10,11 +10,13 @@ import java.util.Optional;
  * Published by the UI when it needs the latest baseline of data (e.g., on dashboard load).
  */
 public class InventoryRefreshRequestedEvent implements Event {
+    public static final Permission REQUIRED = new Permission(Resource.PRODUCT, Action.READ);
+
     public InventoryRefreshRequestedEvent() {
     }
 
     @Override
     public Optional<Permission> getRequiredPermission() {
-        return Optional.of(new Permission(Resource.PRODUCT, Action.READ));
+        return Optional.of(REQUIRED);
     }
 }
