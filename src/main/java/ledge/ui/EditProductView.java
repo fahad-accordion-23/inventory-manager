@@ -1,22 +1,21 @@
 package ledge.ui;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.TextField;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.TextField;
 import ledge.application.InventoryEventBroker;
-import ledge.application.event.ProductAddedEvent;
 import ledge.application.dto.ProductDTO;
+import ledge.application.event.ProductUpdatedEvent;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
-public class AddProductView {
+public class EditProductView {
 
     private final InventoryEventBroker eventBroker;
-
-    public AddProductView(InventoryEventBroker eventBroker) {
-        this.eventBroker = eventBroker;
-    }
+    private final Runnable onCancel;
+    private UUID productId;
 
     @FXML
     private TextField nameField;
@@ -33,8 +32,24 @@ public class AddProductView {
     @FXML
     private TextField taxField;
 
+    public EditProductView(InventoryEventBroker eventBroker, Runnable onCancel) {
+        this.eventBroker = eventBroker;
+        this.onCancel = onCancel;
+    }
+
+    /** Pre-populate the form with an existing product's data. Call after FXML load. */
+    public void setProduct(ProductDTO product) {
+        this.productId = product.getId();
+        nameField.setText(product.getName());
+        purchasePriceField.setText(product.getPurchasePrice().toPlainString());
+        sellingPriceField.setText(product.getSellingPrice().toPlainString());
+        stockField.setText(String.valueOf(product.getStockQuantity()));
+        BigDecimal tax = product.getTaxRate();
+        taxField.setText(tax != null ? tax.toPlainString() : "");
+    }
+
     @FXML
-    public void handleAddProduct() {
+    public void handleSave() {
         FormValidator v = new FormValidator();
 
         String name = v.requireNonBlank(nameField, "Product name");
@@ -52,22 +67,20 @@ public class AddProductView {
             return;
         }
 
-        ProductDTO dto = new ProductDTO(null, name, purchasePrice, sellingPrice, stock, taxRate);
-        eventBroker.publish(new ProductAddedEvent(dto));
-        clearFormFields();
+        ProductDTO dto = new ProductDTO(productId, name, purchasePrice, sellingPrice, stock, taxRate);
+        eventBroker.publish(new ProductUpdatedEvent(dto));
 
         Alert alert = new Alert(AlertType.INFORMATION);
         alert.setTitle("Success");
         alert.setHeaderText(null);
-        alert.setContentText("Product successfully added!");
+        alert.setContentText("Product successfully updated!");
         alert.showAndWait();
+
+        onCancel.run(); // Navigate back to dashboard
     }
 
-    private void clearFormFields() {
-        nameField.clear();
-        purchasePriceField.clear();
-        sellingPriceField.clear();
-        stockField.clear();
-        taxField.clear();
+    @FXML
+    public void handleCancel() {
+        onCancel.run();
     }
 }

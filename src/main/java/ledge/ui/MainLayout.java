@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.layout.VBox;
 import ledge.application.InventoryEventBroker;
+import ledge.application.dto.ProductDTO;
 import ledge.application.event.InventoryRefreshRequestedEvent;
 import ledge.application.event.ProductAddedEvent;
 
@@ -58,7 +59,7 @@ public class MainLayout {
         if (dashboardViewCache == null) {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/InventoryDashboard.fxml"));
-                loader.setControllerFactory(param -> new InventoryDashboard(eventBroker));
+                loader.setControllerFactory(param -> new InventoryDashboard(eventBroker, this::showEditProduct));
                 dashboardViewCache = loader.load();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -67,5 +68,21 @@ public class MainLayout {
         }
         contentArea.getChildren().clear();
         contentArea.getChildren().add(dashboardViewCache);
+    }
+
+    public void showEditProduct(ProductDTO product) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/EditProductView.fxml"));
+            loader.setControllerFactory(param -> new EditProductView(eventBroker, this::showInventoryDashboard));
+            Parent editView = loader.load();
+
+            EditProductView controller = loader.getController();
+            controller.setProduct(product);
+
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(editView);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
