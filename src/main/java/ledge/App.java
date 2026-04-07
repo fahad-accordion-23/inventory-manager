@@ -19,6 +19,7 @@ import ledge.security.event.LogoutRequestedEvent;
 import ledge.ui.LoginView;
 import ledge.ui.MainLayout;
 import ledge.ui.Sidebar;
+import ledge.util.event.Subscribe;
 
 public class App extends Application {
 
@@ -47,9 +48,17 @@ public class App extends Application {
         AuthService authService = new AuthService(userRepository);
         authController = new AuthController(authService, eventBroker);
         
-        // Subscribe to auth events for scene switching
-        eventBroker.subscribe(LoginSucceededEvent.class, _ -> Platform.runLater(this::showMainScene));
-        eventBroker.subscribe(LogoutRequestedEvent.class, _ -> Platform.runLater(this::showLoginScene));
+        eventBroker.register(this);
+    }
+
+    @Subscribe
+    private void onLoginSucceeded(LoginSucceededEvent event) {
+        Platform.runLater(this::showMainScene);
+    }
+
+    @Subscribe
+    private void onLogoutRequested(LogoutRequestedEvent event) {
+        Platform.runLater(this::showLoginScene);
     }
 
     @Override

@@ -4,6 +4,7 @@ import ledge.domain.Product;
 import ledge.domain.ProductService;
 import ledge.application.dto.ProductDTO;
 import ledge.application.event.*;
+import ledge.util.event.Subscribe;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,21 +18,22 @@ public class ProductController {
         this.productService = productService;
         this.eventBroker = eventBroker;
         
-        this.eventBroker.subscribe(ProductAddedEvent.class, this::handleProductAdded);
-        this.eventBroker.subscribe(ProductRemovedEvent.class, this::handleProductRemoved);
-        this.eventBroker.subscribe(InventoryRefreshRequestedEvent.class, this::handleRefreshRequested);
+        this.eventBroker.register(this);
     }
 
+    @Subscribe
     private void handleProductAdded(ProductAddedEvent event) {
         productService.addProduct(fromDTO(event.getProduct()));
         eventBroker.publish(new ProductsUpdatedEvent(getAllProducts()));
     }
 
+    @Subscribe
     private void handleProductRemoved(ProductRemovedEvent event) {
         productService.deleteProduct(event.getProductId());
         eventBroker.publish(new ProductsUpdatedEvent(getAllProducts()));
     }
 
+    @Subscribe
     private void handleRefreshRequested(InventoryRefreshRequestedEvent event) {
         eventBroker.publish(new ProductsUpdatedEvent(getAllProducts()));
     }

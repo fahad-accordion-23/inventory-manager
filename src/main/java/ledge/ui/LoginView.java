@@ -8,6 +8,7 @@ import javafx.scene.control.TextField;
 import ledge.application.InventoryEventBroker;
 import ledge.security.event.LoginFailedEvent;
 import ledge.security.event.LoginRequestedEvent;
+import ledge.util.event.Subscribe;
 
 public class LoginView {
 
@@ -24,7 +25,7 @@ public class LoginView {
 
     public LoginView(InventoryEventBroker eventBroker) {
         this.eventBroker = eventBroker;
-        this.eventBroker.subscribe(LoginFailedEvent.class, this::handleLoginFailed);
+        this.eventBroker.register(this);
     }
 
     @FXML
@@ -37,7 +38,7 @@ public class LoginView {
         errorLabel.setText("");
         String username = usernameField.getText();
         String password = passwordField.getText();
-        
+
         if (username.isEmpty() || password.isEmpty()) {
             errorLabel.setText("Please enter username and password");
             return;
@@ -46,6 +47,7 @@ public class LoginView {
         eventBroker.publish(new LoginRequestedEvent(username, password));
     }
 
+    @Subscribe
     private void handleLoginFailed(LoginFailedEvent event) {
         Platform.runLater(() -> errorLabel.setText(event.getReason()));
     }

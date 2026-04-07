@@ -7,6 +7,7 @@ import ledge.security.event.LoginFailedEvent;
 import ledge.security.event.LoginRequestedEvent;
 import ledge.security.event.LoginSucceededEvent;
 import ledge.security.event.LogoutRequestedEvent;
+import ledge.util.event.Subscribe;
 
 public class AuthController {
     private final AuthService authService;
@@ -15,11 +16,10 @@ public class AuthController {
     public AuthController(AuthService authService, InventoryEventBroker eventBroker) {
         this.authService = authService;
         this.eventBroker = eventBroker;
-
-        this.eventBroker.subscribe(LoginRequestedEvent.class, this::handleLoginRequested);
-        this.eventBroker.subscribe(LogoutRequestedEvent.class, this::handleLogoutRequested);
+        this.eventBroker.register(this);
     }
 
+    @Subscribe
     private void handleLoginRequested(LoginRequestedEvent event) {
         try {
             User user = authService.login(event.getUsername(), event.getPassword());
@@ -29,6 +29,7 @@ public class AuthController {
         }
     }
 
+    @Subscribe
     private void handleLogoutRequested(LogoutRequestedEvent event) {
         authService.logout();
     }

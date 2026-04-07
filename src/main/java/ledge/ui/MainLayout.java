@@ -20,6 +20,9 @@ public class MainLayout {
     private Sidebar sidebarController;
 
     private final InventoryEventBroker eventBroker;
+    
+    private Parent dashboardViewCache;
+    private Parent addProductViewCache;
 
     public MainLayout(InventoryEventBroker eventBroker) {
         this.eventBroker = eventBroker;
@@ -36,29 +39,33 @@ public class MainLayout {
 
     @FXML
     public void showAddProduct() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/AddProductView.fxml"));
-            loader.setControllerFactory(param -> new AddProductView(eventBroker));
-            Parent addProductView = loader.load();
-
-            contentArea.getChildren().clear();
-            contentArea.getChildren().add(addProductView);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (addProductViewCache == null) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/AddProductView.fxml"));
+                loader.setControllerFactory(param -> new AddProductView(eventBroker));
+                addProductViewCache = loader.load();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
         }
+        contentArea.getChildren().clear();
+        contentArea.getChildren().add(addProductViewCache);
     }
 
     @FXML
     public void showInventoryDashboard() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/InventoryDashboard.fxml"));
-            loader.setControllerFactory(param -> new InventoryDashboard(eventBroker));
-            Parent dashboardView = loader.load();
-
-            contentArea.getChildren().clear();
-            contentArea.getChildren().add(dashboardView);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (dashboardViewCache == null) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/InventoryDashboard.fxml"));
+                loader.setControllerFactory(param -> new InventoryDashboard(eventBroker));
+                dashboardViewCache = loader.load();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
         }
+        contentArea.getChildren().clear();
+        contentArea.getChildren().add(dashboardViewCache);
     }
 }
