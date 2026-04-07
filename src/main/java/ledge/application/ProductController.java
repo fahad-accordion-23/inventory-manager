@@ -34,6 +34,12 @@ public class ProductController {
     }
 
     @Subscribe
+    private void handleProductUpdated(ProductUpdatedEvent event) {
+        productService.updateProduct(fromDTO(event.getProduct()));
+        eventBroker.publish(new ProductsUpdatedEvent(getAllProducts()));
+    }
+
+    @Subscribe
     private void handleRefreshRequested(InventoryRefreshRequestedEvent event) {
         eventBroker.publish(new ProductsUpdatedEvent(getAllProducts()));
     }

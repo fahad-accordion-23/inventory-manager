@@ -28,6 +28,13 @@ public class ProductService {
         return repository.findAll();
     }
 
+    public Product updateProduct(Product product) {
+        if (product == null || product.getId() == null) {
+            throw new IllegalArgumentException("Cannot update a null product or product without ID");
+        }
+        return repository.save(product);
+    }
+
     public boolean deleteProduct(UUID id) {
         return repository.deleteById(id);
     }
