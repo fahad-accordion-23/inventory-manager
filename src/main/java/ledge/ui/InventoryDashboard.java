@@ -25,6 +25,11 @@ public class InventoryDashboard {
     public void initialize() {
         eventBroker.publish(new InventoryRefreshRequestedEvent());
     }
+
+    @FXML
+    public void handleRefreshAction() {
+        eventBroker.publish(new InventoryRefreshRequestedEvent());
+    }
     
     @Subscribe
     private void handleProductsUpdated(ProductsUpdatedEvent event) {

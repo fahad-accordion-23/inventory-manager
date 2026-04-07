@@ -9,8 +9,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Brokers system events using the publish-subscribe pattern with weak references.
- * Automatically cleans up listeners when their parent objects are Garbage Collected.
+ * Brokers system events using the publish-subscribe pattern with weak
+ * references.
+ * Automatically cleans up listeners when their parent objects are Garbage
+ * Collected.
  */
 public abstract class EventBroker<T extends Event> {
 
@@ -58,11 +60,11 @@ public abstract class EventBroker<T extends Event> {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public <E extends T> void publish(E event) {
         List<SubscriberProxy> proxies = registry.get(event.getClass());
         if (proxies != null) {
-            // Evaluates invoke() for each subscriber and removes them if they return false (GC'd)
+            // Evaluates invoke() for each subscriber and removes them if they return false
+            // (GC'd)
             proxies.removeIf(proxy -> !proxy.invoke(event));
         }
     }
