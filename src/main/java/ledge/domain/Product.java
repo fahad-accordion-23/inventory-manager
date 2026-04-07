@@ -1,7 +1,6 @@
 package ledge.domain;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 import java.util.UUID;
 
 public class Product {
@@ -34,8 +33,10 @@ public class Product {
     }
 
     public void setName(String name) {
-        // Requirement: isNotNull check
-        this.name = Objects.requireNonNull(name, "Product name cannot be null");
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Product name cannot be blank");
+        }
+        this.name = name.trim();
     }
 
     public BigDecimal getPurchasePrice() {
@@ -43,8 +44,10 @@ public class Product {
     }
 
     public void setPurchasePrice(BigDecimal purchasePrice) {
-        // Requirement: isNotNull check
-        this.purchasePrice = Objects.requireNonNull(purchasePrice, "Purchase price cannot be null");
+        if (purchasePrice == null || purchasePrice.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Purchase price must be positive");
+        }
+        this.purchasePrice = purchasePrice;
     }
 
     public BigDecimal getSellingPrice() {
@@ -52,8 +55,10 @@ public class Product {
     }
 
     public void setSellingPrice(BigDecimal sellingPrice) {
-        // Requirement: isNotNull check
-        this.sellingPrice = Objects.requireNonNull(sellingPrice, "Selling price cannot be null");
+        if (sellingPrice == null || sellingPrice.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Selling price must be positive");
+        }
+        this.sellingPrice = sellingPrice;
     }
 
     public int getStockQuantity() {
@@ -72,8 +77,14 @@ public class Product {
     }
 
     public void setTaxRate(BigDecimal taxRate) {
-        // Requirement: if isNull for tax, set to 0%
-        this.taxRate = (taxRate == null) ? BigDecimal.ZERO : taxRate;
+        if (taxRate == null) {
+            this.taxRate = BigDecimal.ZERO;
+            return;
+        }
+        if (taxRate.compareTo(BigDecimal.ZERO) < 0 || taxRate.compareTo(BigDecimal.ONE) > 0) {
+            throw new IllegalArgumentException("Tax rate must be between 0 and 1");
+        }
+        this.taxRate = taxRate;
     }
 
     @Override
