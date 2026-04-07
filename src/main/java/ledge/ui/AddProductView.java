@@ -35,36 +35,32 @@ public class AddProductView {
 
     @FXML
     public void handleAddProduct() {
-        try {
-            ProductDTO dto = createProductFromInput();
-            eventBroker.publish(new ProductAddedEvent(dto));
-            clearFormFields();
-            
-            Alert alert = new Alert(AlertType.INFORMATION);
-            alert.setTitle("Success");
-            alert.setHeaderText(null);
-            alert.setContentText("Product successfully added!");
-            alert.showAndWait();
-        } catch (Exception e) {
+        FormValidator v = new FormValidator();
+
+        String name = v.requireNonBlank(nameField, "Product name");
+        BigDecimal purchasePrice = v.requirePositiveDecimal(purchasePriceField, "Purchase price");
+        BigDecimal sellingPrice = v.requirePositiveDecimal(sellingPriceField, "Selling price");
+        int stock = v.requireNonNegativeInt(stockField, "Stock quantity");
+        BigDecimal taxRate = v.optionalDecimalInRange(taxField, "Tax rate", BigDecimal.ZERO, BigDecimal.ONE);
+
+        if (v.hasErrors()) {
             Alert alert = new Alert(AlertType.ERROR);
             alert.setTitle("Validation Error");
-            alert.setHeaderText("Invalid Input");
-            alert.setContentText("Please check your numbers and try again.\nError: " + e.getMessage());
+            alert.setHeaderText("Please fix the following:");
+            alert.setContentText(v.getErrorSummary());
             alert.showAndWait();
-            System.err.println("Failed to parse form inputs: " + e.getMessage());
+            return;
         }
-    }
 
-    private ProductDTO createProductFromInput() {
-        String name = nameField.getText();
-        BigDecimal purchasePrice = new BigDecimal(purchasePriceField.getText());
-        BigDecimal sellingPrice = new BigDecimal(sellingPriceField.getText());
-        int stock = Integer.parseInt(stockField.getText());
-        
-        String taxText = taxField.getText();
-        BigDecimal taxRate = (taxText == null || taxText.trim().isEmpty()) ? null : new BigDecimal(taxText);
+        ProductDTO dto = new ProductDTO(null, name, purchasePrice, sellingPrice, stock, taxRate);
+        eventBroker.publish(new ProductAddedEvent(dto));
+        clearFormFields();
 
-        return new ProductDTO(null, name, purchasePrice, sellingPrice, stock, taxRate);
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setTitle("Success");
+        alert.setHeaderText(null);
+        alert.setContentText("Product successfully added!");
+        alert.showAndWait();
     }
 
     private void clearFormFields() {
