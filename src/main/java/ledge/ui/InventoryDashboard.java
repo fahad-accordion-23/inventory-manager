@@ -1,6 +1,9 @@
 package ledge.ui;
 
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
@@ -8,7 +11,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import ledge.application.InventoryEventBroker;
 import ledge.application.dto.ProductDTO;
@@ -25,14 +30,22 @@ import java.util.function.Consumer;
 
 public class InventoryDashboard {
 
+    private static final int LOW_STOCK_THRESHOLD = 10;
+
     @FXML
     private TableView<ProductDTO> inventoryTable;
 
     @FXML
     private TableColumn<ProductDTO, Void> actionsColumn;
 
+    @FXML
+    private TextField searchField;
+
     private final InventoryEventBroker eventBroker;
     private final Consumer<ProductDTO> onEditRequested;
+
+    private final ObservableList<ProductDTO> allProducts = FXCollections.observableArrayList();
+    private final FilteredList<ProductDTO> filteredProducts = new FilteredList<>(allProducts, _ -> true);
 
     public InventoryDashboard(InventoryEventBroker eventBroker, Consumer<ProductDTO> onEditRequested) {
         this.eventBroker = eventBroker;
@@ -42,6 +55,31 @@ public class InventoryDashboard {
 
     @FXML
     public void initialize() {
+        inventoryTable.setItems(filteredProducts);
+
+        // US-4.3: Search by product name
+        searchField.textProperty().addListener((_, _, newValue) -> {
+            filteredProducts.setPredicate(product -> {
+                if (newValue == null || newValue.isBlank()) return true;
+                return product.getName().toLowerCase().contains(newValue.toLowerCase());
+            });
+        });
+
+        // US-4.4: Low-stock highlighting
+        inventoryTable.setRowFactory(_ -> new TableRow<>() {
+            @Override
+            protected void updateItem(ProductDTO item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setStyle("");
+                } else if (item.getStockQuantity() < LOW_STOCK_THRESHOLD) {
+                    setStyle("-fx-background-color: #ffcccc;");
+                } else {
+                    setStyle("");
+                }
+            }
+        });
+
         setupActionsColumn();
         eventBroker.publish(new InventoryRefreshRequestedEvent());
     }
@@ -104,7 +142,7 @@ public class InventoryDashboard {
     @Subscribe
     private void handleProductsUpdated(ProductsUpdatedEvent event) {
         Platform.runLater(() -> {
-            inventoryTable.getItems().setAll(event.getProducts());
+            allProducts.setAll(event.getProducts());
         });
     }
 }
