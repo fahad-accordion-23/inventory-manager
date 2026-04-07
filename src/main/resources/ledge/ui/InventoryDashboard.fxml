@@ -5,6 +5,9 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.cell.PropertyValueFactory?>
 
 <VBox xmlns="http://javafx.com/javafx"
@@ -15,7 +18,11 @@
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
 
-    <Label text="Current Inventory" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Current Inventory" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+        <Region HBox.hgrow="ALWAYS" />
+        <Button text="Refresh" onAction="#handleRefreshAction" />
+    </HBox>
 
     <TableView fx:id="inventoryTable" VBox.vgrow="ALWAYS">
         <columns>

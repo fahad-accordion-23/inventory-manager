@@ -7,6 +7,7 @@ import ledge.application.InventoryEventBroker;
 import ledge.application.event.InventoryRefreshRequestedEvent;
 import ledge.application.event.ProductsUpdatedEvent;
 import ledge.application.dto.ProductDTO;
+import ledge.util.event.Subscribe;
 
 public class InventoryDashboard {
 
@@ -17,14 +18,20 @@ public class InventoryDashboard {
 
     public InventoryDashboard(InventoryEventBroker eventBroker) {
         this.eventBroker = eventBroker;
+        this.eventBroker.register(this);
     }
 
     @FXML
     public void initialize() {
-        eventBroker.subscribe(ProductsUpdatedEvent.class, this::handleProductsUpdated);
+        eventBroker.publish(new InventoryRefreshRequestedEvent());
+    }
+
+    @FXML
+    public void handleRefreshAction() {
         eventBroker.publish(new InventoryRefreshRequestedEvent());
     }
     
+    @Subscribe
     private void handleProductsUpdated(ProductsUpdatedEvent event) {
         Platform.runLater(() -> {
             inventoryTable.getItems().setAll(event.getProducts());

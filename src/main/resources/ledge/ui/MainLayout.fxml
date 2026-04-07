@@ -10,13 +10,7 @@
             fx:controller="ledge.ui.MainLayout"
             prefHeight="600.0" prefWidth="800.0">
     <left>
-        <VBox spacing="10" prefWidth="200.0" style="-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;">
-            <padding>
-                <Insets top="20" right="10" bottom="20" left="10"/>
-            </padding>
-            <Button text="Inventory Dashboard" onAction="#showInventoryDashboard" maxWidth="Infinity" />
-            <Button text="Add Product" onAction="#showAddProduct" maxWidth="Infinity" />
-        </VBox>
+        <fx:include source="Sidebar.fxml" fx:id="sidebar" />
     </left>
     <center>
         <VBox fx:id="contentArea" alignment="TOP_LEFT">

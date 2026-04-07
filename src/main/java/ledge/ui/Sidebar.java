@@ -1,0 +1,64 @@
+package ledge.ui;
+
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.layout.VBox;
+import ledge.application.InventoryEventBroker;
+import ledge.domain.Role;
+import ledge.security.SecurityContext;
+import ledge.security.event.LogoutRequestedEvent;
+
+import java.util.List;
+
+public class Sidebar {
+
+    @FXML
+    private VBox navArea;
+
+    private final InventoryEventBroker eventBroker;
+
+    public Sidebar(InventoryEventBroker eventBroker) {
+        this.eventBroker = eventBroker;
+    }
+
+    @FXML
+    public void initialize() {
+        // Nav items are provided later via setNavItems() — nothing to do here yet.
+    }
+
+    /**
+     * Builds nav buttons from the provided items, showing only those the current
+     * user's role has permission for. The permission check uses each NavItem's own
+     * REQUIRED constant — no (Resource, Action) pairs hardcoded here.
+     */
+    public void setNavItems(List<NavItem> items) {
+        navArea.getChildren().clear();
+
+        if (!SecurityContext.isAuthenticated()) {
+            return;
+        }
+
+        Role role = SecurityContext.getCurrentUser().getRole();
+        boolean first = true;
+
+        for (NavItem item : items) {
+            if (role.hasPermission(item.required())) {
+                Button btn = new Button(item.label());
+                btn.setMaxWidth(Double.MAX_VALUE);
+                btn.setOnAction(_ -> item.action().run());
+                navArea.getChildren().add(btn);
+
+                // Auto-navigate to the first accessible item
+                if (first) {
+                    item.action().run();
+                    first = false;
+                }
+            }
+        }
+    }
+
+    @FXML
+    public void handleLogout() {
+        eventBroker.publish(new LogoutRequestedEvent());
+    }
+}
