@@ -1,12 +1,12 @@
-package ledge.security.event;
+package ledge.security.command;
 
-import ledge.util.event.Event;
+import ledge.util.cqrs.Command;
 
-public class LoginRequestedEvent implements Event {
+public class LoginCommand implements Command {
     private final String username;
     private final String password;
 
-    public LoginRequestedEvent(String username, String password) {
+    public LoginCommand(String username, String password) {
         this.username = username;
         this.password = password;
     }

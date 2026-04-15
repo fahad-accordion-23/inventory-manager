@@ -7,7 +7,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import ledge.application.InventoryCommandBus;
 import ledge.application.InventoryEventBroker;
+import ledge.application.InventoryQueryBus;
 import ledge.application.ProductController;
 import ledge.domain.ProductService;
 import ledge.infrastructure.ProductRepositoryImpl;
@@ -15,7 +17,7 @@ import ledge.infrastructure.UserJsonRepository;
 import ledge.security.AuthController;
 import ledge.security.AuthService;
 import ledge.security.event.LoginSucceededEvent;
-import ledge.security.event.LogoutRequestedEvent;
+import ledge.security.event.UserLoggedOutEvent;
 import ledge.ui.LoginView;
 import ledge.ui.MainLayout;
 import ledge.ui.Sidebar;
@@ -24,19 +26,19 @@ import ledge.util.event.Subscribe;
 public class App extends Application {
 
     private InventoryEventBroker eventBroker;
-    
-    // Kept to prevent garbage collection of handlers
-    @SuppressWarnings("unused")
+    private InventoryCommandBus commandBus;
+    private InventoryQueryBus queryBus;
+
     private ProductController productController;
-    
-    @SuppressWarnings("unused")
     private AuthController authController;
-    
+
     private Stage primaryStage;
 
     @Override
     public void init() throws Exception {
         eventBroker = new InventoryEventBroker();
+        commandBus = new InventoryCommandBus();
+        queryBus = new InventoryQueryBus();
 
         // Product Setup
         ProductRepositoryImpl productRepository = new ProductRepositoryImpl();
@@ -47,8 +49,11 @@ public class App extends Application {
         UserJsonRepository userRepository = new UserJsonRepository();
         AuthService authService = new AuthService(userRepository);
         authController = new AuthController(authService, eventBroker);
-        
+
         eventBroker.register(this);
+        commandBus.register(authController);
+        commandBus.register(productController);
+        queryBus.register(productController);
     }
 
     @Subscribe
@@ -57,7 +62,7 @@ public class App extends Application {
     }
 
     @Subscribe
-    private void onLogoutRequested(LogoutRequestedEvent event) {
+    private void onUserLoggedOut(UserLoggedOutEvent event) {
         Platform.runLater(this::showLoginScene);
     }
 
@@ -74,7 +79,7 @@ public class App extends Application {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/LoginView.fxml"));
             loader.setControllerFactory(param -> {
                 if (param == LoginView.class) {
-                    return new LoginView(eventBroker);
+                    return new LoginView(eventBroker, commandBus);
                 }
                 try {
                     return param.getDeclaredConstructor().newInstance();
@@ -94,10 +99,10 @@ public class App extends Application {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/MainLayout.fxml"));
             loader.setControllerFactory(param -> {
                 if (param == MainLayout.class) {
-                    return new MainLayout(eventBroker);
+                    return new MainLayout(eventBroker, commandBus, queryBus);
                 }
                 if (param == Sidebar.class) {
-                    return new Sidebar(eventBroker);
+                    return new Sidebar(eventBroker, commandBus);
                 }
                 try {
                     return param.getDeclaredConstructor().newInstance();

@@ -4,10 +4,11 @@ import ledge.application.InventoryEventBroker;
 import ledge.domain.User;
 import ledge.security.event.AuthenticationException;
 import ledge.security.event.LoginFailedEvent;
-import ledge.security.event.LoginRequestedEvent;
 import ledge.security.event.LoginSucceededEvent;
-import ledge.security.event.LogoutRequestedEvent;
-import ledge.util.event.Subscribe;
+import ledge.security.event.UserLoggedOutEvent;
+import ledge.security.command.LoginCommand;
+import ledge.security.command.LogoutCommand;
+import ledge.util.cqrs.CommandHandler;
 
 public class AuthController {
     private final AuthService authService;
@@ -19,8 +20,8 @@ public class AuthController {
         this.eventBroker.register(this);
     }
 
-    @Subscribe
-    private void handleLoginRequested(LoginRequestedEvent event) {
+    @CommandHandler
+    private void handleLogin(LoginCommand event) {
         try {
             User user = authService.login(event.getUsername(), event.getPassword());
             eventBroker.publish(new LoginSucceededEvent(user));
@@ -29,8 +30,9 @@ public class AuthController {
         }
     }
 
-    @Subscribe
-    private void handleLogoutRequested(LogoutRequestedEvent event) {
+    @CommandHandler
+    private void handleLogout(LogoutCommand event) {
         authService.logout();
+        eventBroker.publish(new UserLoggedOutEvent());
     }
 }

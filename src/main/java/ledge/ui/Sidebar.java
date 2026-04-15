@@ -3,10 +3,11 @@ package ledge.ui;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
+import ledge.application.InventoryCommandBus;
 import ledge.application.InventoryEventBroker;
 import ledge.domain.Role;
 import ledge.security.SecurityContext;
-import ledge.security.event.LogoutRequestedEvent;
+import ledge.security.command.LogoutCommand;
 
 import java.util.List;
 
@@ -16,9 +17,11 @@ public class Sidebar {
     private VBox navArea;
 
     private final InventoryEventBroker eventBroker;
+    private final InventoryCommandBus commandBus;
 
-    public Sidebar(InventoryEventBroker eventBroker) {
+    public Sidebar(InventoryEventBroker eventBroker, InventoryCommandBus commandBus) {
         this.eventBroker = eventBroker;
+        this.commandBus = commandBus;
     }
 
     @FXML
@@ -59,6 +62,6 @@ public class Sidebar {
 
     @FXML
     public void handleLogout() {
-        eventBroker.publish(new LogoutRequestedEvent());
+        commandBus.dispatch(new LogoutCommand());
     }
 }

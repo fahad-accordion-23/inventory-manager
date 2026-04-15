@@ -3,8 +3,16 @@ package ledge.application;
 import ledge.domain.Product;
 import ledge.domain.ProductService;
 import ledge.application.dto.ProductDTO;
-import ledge.application.event.*;
-import ledge.util.event.Subscribe;
+import ledge.application.command.AddProductCommand;
+import ledge.application.command.RemoveProductCommand;
+import ledge.application.command.UpdateProductCommand;
+import ledge.application.query.GetAllProductsQuery;
+import ledge.application.event.ProductAddedEvent;
+import ledge.application.event.ProductRemovedEvent;
+import ledge.application.event.ProductUpdatedEvent;
+import ledge.application.event.ProductsUpdatedEvent;
+import ledge.util.cqrs.CommandHandler;
+import ledge.util.cqrs.QueryHandler;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,31 +25,34 @@ public class ProductController {
     public ProductController(ProductService productService, InventoryEventBroker eventBroker) {
         this.productService = productService;
         this.eventBroker = eventBroker;
-        
+
         this.eventBroker.register(this);
     }
 
-    @Subscribe
-    private void handleProductAdded(ProductAddedEvent event) {
+    @CommandHandler
+    private void handleAddProduct(AddProductCommand event) {
         productService.addProduct(fromDTO(event.getProduct()));
-        eventBroker.publish(new ProductsUpdatedEvent(getAllProducts()));
+        eventBroker.publish(new ProductAddedEvent());
+        eventBroker.publish(new ProductsUpdatedEvent());
     }
 
-    @Subscribe
-    private void handleProductRemoved(ProductRemovedEvent event) {
+    @CommandHandler
+    private void handleProductRemoved(RemoveProductCommand event) {
         productService.deleteProduct(event.getProductId());
-        eventBroker.publish(new ProductsUpdatedEvent(getAllProducts()));
+        eventBroker.publish(new ProductRemovedEvent());
+        eventBroker.publish(new ProductsUpdatedEvent());
     }
 
-    @Subscribe
-    private void handleProductUpdated(ProductUpdatedEvent event) {
+    @CommandHandler
+    private void handleProductUpdated(UpdateProductCommand event) {
         productService.updateProduct(fromDTO(event.getProduct()));
-        eventBroker.publish(new ProductsUpdatedEvent(getAllProducts()));
+        eventBroker.publish(new ProductUpdatedEvent(event.getProduct().getId()));
+        eventBroker.publish(new ProductsUpdatedEvent());
     }
 
-    @Subscribe
-    private void handleRefreshRequested(InventoryRefreshRequestedEvent event) {
-        eventBroker.publish(new ProductsUpdatedEvent(getAllProducts()));
+    @QueryHandler
+    private List<ProductDTO> handleGetAllProducts(GetAllProductsQuery event) {
+        return getAllProducts();
     }
 
     public Optional<ProductDTO> getProductById(UUID id) {
@@ -56,23 +67,21 @@ public class ProductController {
 
     private ProductDTO toDTO(Product product) {
         return new ProductDTO(
-            product.getId(),
-            product.getName(),
-            product.getPurchasePrice(),
-            product.getSellingPrice(),
-            product.getStockQuantity(),
-            product.getTaxRate()
-        );
+                product.getId(),
+                product.getName(),
+                product.getPurchasePrice(),
+                product.getSellingPrice(),
+                product.getStockQuantity(),
+                product.getTaxRate());
     }
 
     private Product fromDTO(ProductDTO dto) {
         return new Product(
-            dto.getId(),
-            dto.getName(),
-            dto.getPurchasePrice(),
-            dto.getSellingPrice(),
-            dto.getStockQuantity(),
-            dto.getTaxRate()
-        );
+                dto.getId(),
+                dto.getName(),
+                dto.getPurchasePrice(),
+                dto.getSellingPrice(),
+                dto.getStockQuantity(),
+                dto.getTaxRate());
     }
 }
