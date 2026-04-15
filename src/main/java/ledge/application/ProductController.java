@@ -29,36 +29,33 @@ public class ProductController {
     }
 
     @CommandHandler
-    private void handleAddProduct(AddProductCommand event) {
-        productService.addProduct(fromDTO(event.getProduct()));
+    private void handleAddProduct(AddProductCommand command) {
+        productService.addProduct(fromDTO(command.getProduct()));
         eventBroker.publish(new ProductAddedEvent());
     }
 
     @CommandHandler
-    private void handleProductRemoved(RemoveProductCommand event) {
-        productService.deleteProduct(event.getProductId());
+    private void handleProductRemoved(RemoveProductCommand command) {
+        productService.deleteProduct(command.getProductId());
         eventBroker.publish(new ProductRemovedEvent());
     }
 
     @CommandHandler
-    private void handleProductUpdated(UpdateProductCommand event) {
-        productService.updateProduct(fromDTO(event.getProduct()));
-        eventBroker.publish(new ProductUpdatedEvent(event.getProduct().getId()));
+    private void handleProductUpdated(UpdateProductCommand command) {
+        productService.updateProduct(fromDTO(command.getProduct()));
+        eventBroker.publish(new ProductUpdatedEvent(command.getProduct().getId()));
     }
 
     @QueryHandler
-    private List<ProductDTO> handleGetAllProducts(GetAllProductsQuery event) {
-        return getAllProducts();
+    private List<ProductDTO> handleGetAllProducts(GetAllProductsQuery query) {
+        return productService.getAllProducts()
+                .stream()
+                .map(this::toDTO)
+                .toList();
     }
 
     public Optional<ProductDTO> getProductById(UUID id) {
         return productService.getProductById(id).map(this::toDTO);
-    }
-
-    public List<ProductDTO> getAllProducts() {
-        return productService.getAllProducts().stream()
-                .map(this::toDTO)
-                .toList();
     }
 
     private ProductDTO toDTO(Product product) {

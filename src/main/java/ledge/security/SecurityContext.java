@@ -1,7 +1,5 @@
 package ledge.security;
 
-import ledge.domain.User;
-
 public final class SecurityContext {
     private static final ThreadLocal<User> currentUser = new ThreadLocal<>();
 

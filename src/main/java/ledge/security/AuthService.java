@@ -1,6 +1,5 @@
 package ledge.security;
 
-import ledge.domain.User;
 import ledge.infrastructure.UserRepository;
 import ledge.security.event.AuthenticationException;
 
@@ -15,16 +14,16 @@ public class AuthService {
 
     public User login(String username, String password) throws AuthenticationException {
         Optional<User> userOpt = userRepository.findByUsername(username);
-        
+
         if (userOpt.isEmpty()) {
             throw new AuthenticationException("Invalid username or password");
         }
-        
+
         User user = userOpt.get();
         if (!PasswordHasher.verify(password, user.getPasswordHash())) {
             throw new AuthenticationException("Invalid username or password");
         }
-        
+
         SecurityContext.setCurrentUser(user);
         return user;
     }

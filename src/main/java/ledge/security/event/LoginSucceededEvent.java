@@ -1,6 +1,6 @@
 package ledge.security.event;
 
-import ledge.domain.User;
+import ledge.security.User;
 import ledge.util.event.Event;
 
 public class LoginSucceededEvent implements Event {

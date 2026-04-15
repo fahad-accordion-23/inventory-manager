@@ -23,7 +23,7 @@ import ledge.application.command.UpdateProductCommand;
 import ledge.application.dto.ProductDTO;
 import ledge.application.event.ProductsUpdatedEvent;
 import ledge.application.query.GetAllProductsQuery;
-import ledge.domain.Role;
+import ledge.security.Role;
 import ledge.security.SecurityContext;
 import ledge.util.event.Subscribe;
 

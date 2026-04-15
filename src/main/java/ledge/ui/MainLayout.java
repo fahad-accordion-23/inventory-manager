@@ -25,7 +25,7 @@ public class MainLayout {
     private final InventoryEventBroker eventBroker;
     private final InventoryCommandBus commandBus;
     private final InventoryQueryBus queryBus;
-    
+
     private Parent dashboardViewCache;
     private Parent addProductViewCache;
 
@@ -65,7 +65,8 @@ public class MainLayout {
         if (dashboardViewCache == null) {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/InventoryDashboard.fxml"));
-                loader.setControllerFactory(param -> new InventoryDashboard(eventBroker, commandBus, queryBus, this::showEditProduct));
+                loader.setControllerFactory(
+                        param -> new InventoryDashboard(eventBroker, commandBus, queryBus, this::showEditProduct));
                 dashboardViewCache = loader.load();
             } catch (IOException e) {
                 e.printStackTrace();

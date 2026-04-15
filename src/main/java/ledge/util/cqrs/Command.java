@@ -1,7 +1,8 @@
 package ledge.util.cqrs;
 
-import ledge.domain.Permission;
 import java.util.Optional;
+
+import ledge.security.Permission;
 
 /**
  * Represents an intent to change the state of the system.

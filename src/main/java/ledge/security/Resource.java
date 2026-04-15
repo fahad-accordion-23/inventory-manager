@@ -1,4 +1,4 @@
-package ledge.domain;
+package ledge.security;
 
 public enum Resource {
     PRODUCT,

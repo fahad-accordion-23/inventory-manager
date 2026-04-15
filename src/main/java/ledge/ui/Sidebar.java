@@ -5,7 +5,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import ledge.application.InventoryCommandBus;
 import ledge.application.InventoryEventBroker;
-import ledge.domain.Role;
+import ledge.security.Role;
 import ledge.security.SecurityContext;
 import ledge.security.command.LogoutCommand;
 
@@ -45,7 +45,7 @@ public class Sidebar {
         boolean first = true;
 
         for (NavItem item : items) {
-            if (role.hasPermission(item.required())) {
+            if (role.hasPermission(item.requiredPermissions())) {
                 Button btn = new Button(item.label());
                 btn.setMaxWidth(Double.MAX_VALUE);
                 btn.setOnAction(_ -> item.action().run());

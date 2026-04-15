@@ -1,4 +1,4 @@
-package ledge.domain;
+package ledge.security;
 
 import java.util.Objects;
 import java.util.UUID;

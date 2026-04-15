@@ -1,9 +1,9 @@
 package ledge.application.query;
 
 import ledge.application.dto.ProductDTO;
-import ledge.domain.Action;
-import ledge.domain.Permission;
-import ledge.domain.Resource;
+import ledge.security.Action;
+import ledge.security.Permission;
+import ledge.security.Resource;
 import ledge.util.cqrs.Query;
 import java.util.List;
 import java.util.Optional;

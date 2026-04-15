@@ -1,6 +1,5 @@
 package ledge.application;
 
-import ledge.security.AccessPolicy;
 import ledge.util.event.Event;
 import ledge.util.event.EventBroker;
 
@@ -9,14 +8,5 @@ import ledge.util.event.EventBroker;
  * Acts as the central hub for publishing and subscribing to application events.
  */
 public class InventoryEventBroker extends EventBroker<Event> {
-    
-    public InventoryEventBroker() {
-        super();
-    }
 
-    @Override
-    public <E extends Event> void publish(E event) {
-        event.getRequiredPermission().ifPresent(AccessPolicy::require);
-        super.publish(event);
-    }
 }

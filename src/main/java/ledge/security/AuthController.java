@@ -1,7 +1,6 @@
 package ledge.security;
 
 import ledge.application.InventoryEventBroker;
-import ledge.domain.User;
 import ledge.security.event.AuthenticationException;
 import ledge.security.event.LoginFailedEvent;
 import ledge.security.event.LoginSucceededEvent;

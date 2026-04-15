@@ -1,4 +1,4 @@
-package ledge.domain;
+package ledge.security;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -34,10 +34,9 @@ public final class Roles {
 
     /** Lookup map for deserialisation — keyed by Role.getName(). */
     public static final Map<String, Role> BY_NAME = Map.of(
-        ADMIN.getName(),             ADMIN,
-        INVENTORY_MANAGER.getName(), INVENTORY_MANAGER,
-        SALES_STAFF.getName(),       SALES_STAFF
-    );
+            ADMIN.getName(), ADMIN,
+            INVENTORY_MANAGER.getName(), INVENTORY_MANAGER,
+            SALES_STAFF.getName(), SALES_STAFF);
 
     private Roles() {
         // Utility class
