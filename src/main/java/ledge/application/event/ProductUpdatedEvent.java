@@ -2,12 +2,10 @@ package ledge.application.event;
 
 import java.util.UUID;
 
-import ledge.util.event.Event;
-
 /**
  * Published when an existing product's details are updated.
  */
-public class ProductUpdatedEvent implements Event {
+public class ProductUpdatedEvent extends ProductsUpdatedEvent {
 
     private final UUID productId;
 

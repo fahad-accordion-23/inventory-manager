@@ -10,7 +10,6 @@ import ledge.application.query.GetAllProductsQuery;
 import ledge.application.event.ProductAddedEvent;
 import ledge.application.event.ProductRemovedEvent;
 import ledge.application.event.ProductUpdatedEvent;
-import ledge.application.event.ProductsUpdatedEvent;
 import ledge.util.cqrs.CommandHandler;
 import ledge.util.cqrs.QueryHandler;
 
@@ -33,21 +32,18 @@ public class ProductController {
     private void handleAddProduct(AddProductCommand event) {
         productService.addProduct(fromDTO(event.getProduct()));
         eventBroker.publish(new ProductAddedEvent());
-        eventBroker.publish(new ProductsUpdatedEvent());
     }
 
     @CommandHandler
     private void handleProductRemoved(RemoveProductCommand event) {
         productService.deleteProduct(event.getProductId());
         eventBroker.publish(new ProductRemovedEvent());
-        eventBroker.publish(new ProductsUpdatedEvent());
     }
 
     @CommandHandler
     private void handleProductUpdated(UpdateProductCommand event) {
         productService.updateProduct(fromDTO(event.getProduct()));
         eventBroker.publish(new ProductUpdatedEvent(event.getProduct().getId()));
-        eventBroker.publish(new ProductsUpdatedEvent());
     }
 
     @QueryHandler
