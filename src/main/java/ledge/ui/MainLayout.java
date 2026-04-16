@@ -4,10 +4,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.layout.VBox;
-import ledge.application.InventoryEventBroker;
-import ledge.application.dto.ProductDTO;
-import ledge.application.event.InventoryRefreshRequestedEvent;
-import ledge.application.event.ProductAddedEvent;
+import ledge.inventory.app.InventoryCommandBus;
+import ledge.inventory.app.InventoryEventBroker;
+import ledge.inventory.app.InventoryQueryBus;
+import ledge.inventory.app.command.AddProductCommand;
+import ledge.inventory.app.dto.ProductDTO;
+import ledge.inventory.app.query.GetAllProductsQuery;
 
 import java.io.IOException;
 import java.util.List;
@@ -21,20 +23,24 @@ public class MainLayout {
     private Sidebar sidebarController;
 
     private final InventoryEventBroker eventBroker;
-    
+    private final InventoryCommandBus commandBus;
+    private final InventoryQueryBus queryBus;
+
     private Parent dashboardViewCache;
     private Parent addProductViewCache;
 
-    public MainLayout(InventoryEventBroker eventBroker) {
+    public MainLayout(InventoryEventBroker eventBroker, InventoryCommandBus commandBus, InventoryQueryBus queryBus) {
         this.eventBroker = eventBroker;
+        this.commandBus = commandBus;
+        this.queryBus = queryBus;
     }
 
     @FXML
     public void initialize() {
         List<NavItem> navItems = List.of(
-                new NavItem("Inventory Dashboard", InventoryRefreshRequestedEvent.REQUIRED,
+                new NavItem("Inventory Dashboard", GetAllProductsQuery.REQUIRED,
                         this::showInventoryDashboard),
-                new NavItem("Add Product", ProductAddedEvent.REQUIRED, this::showAddProduct));
+                new NavItem("Add Product", AddProductCommand.REQUIRED, this::showAddProduct));
         sidebarController.setNavItems(navItems);
     }
 
@@ -43,7 +49,7 @@ public class MainLayout {
         if (addProductViewCache == null) {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/AddProductView.fxml"));
-                loader.setControllerFactory(param -> new AddProductView(eventBroker));
+                loader.setControllerFactory(param -> new AddProductView(commandBus));
                 addProductViewCache = loader.load();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -59,7 +65,8 @@ public class MainLayout {
         if (dashboardViewCache == null) {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/InventoryDashboard.fxml"));
-                loader.setControllerFactory(param -> new InventoryDashboard(eventBroker, this::showEditProduct));
+                loader.setControllerFactory(
+                        param -> new InventoryDashboard(eventBroker, commandBus, queryBus, this::showEditProduct));
                 dashboardViewCache = loader.load();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -73,7 +80,7 @@ public class MainLayout {
     public void showEditProduct(ProductDTO product) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/EditProductView.fxml"));
-            loader.setControllerFactory(param -> new EditProductView(eventBroker, this::showInventoryDashboard));
+            loader.setControllerFactory(param -> new EditProductView(commandBus, this::showInventoryDashboard));
             Parent editView = loader.load();
 
             EditProductView controller = loader.getController();

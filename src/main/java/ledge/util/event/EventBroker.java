@@ -61,11 +61,12 @@ public abstract class EventBroker<T extends Event> {
     }
 
     public <E extends T> void publish(E event) {
-        List<SubscriberProxy> proxies = registry.get(event.getClass());
-        if (proxies != null) {
-            // Evaluates invoke() for each subscriber and removes them if they return false
-            // (GC'd)
-            proxies.removeIf(proxy -> !proxy.invoke(event));
+        for (Map.Entry<Class<? extends T>, List<SubscriberProxy>> entry : registry.entrySet()) {
+            if (entry.getKey().isAssignableFrom(event.getClass())) {
+                // Evaluates invoke() for each subscriber and removes them if they return false
+                // (GC'd)
+                entry.getValue().removeIf(proxy -> !proxy.invoke(event));
+            }
         }
     }
 }

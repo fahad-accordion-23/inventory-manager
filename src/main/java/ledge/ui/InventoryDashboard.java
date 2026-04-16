@@ -15,16 +15,19 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
-import ledge.application.InventoryEventBroker;
-import ledge.application.dto.ProductDTO;
-import ledge.application.event.InventoryRefreshRequestedEvent;
-import ledge.application.event.ProductRemovedEvent;
-import ledge.application.event.ProductUpdatedEvent;
-import ledge.application.event.ProductsUpdatedEvent;
-import ledge.domain.Role;
-import ledge.security.SecurityContext;
+import ledge.inventory.app.InventoryCommandBus;
+import ledge.inventory.app.InventoryEventBroker;
+import ledge.inventory.app.InventoryQueryBus;
+import ledge.inventory.app.command.RemoveProductCommand;
+import ledge.inventory.app.command.UpdateProductCommand;
+import ledge.inventory.app.dto.ProductDTO;
+import ledge.inventory.app.event.ProductsUpdatedEvent;
+import ledge.inventory.app.query.GetAllProductsQuery;
+import ledge.security.domain.Role;
+import ledge.security.app.SecurityContext;
 import ledge.util.event.Subscribe;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -42,13 +45,18 @@ public class InventoryDashboard {
     private TextField searchField;
 
     private final InventoryEventBroker eventBroker;
+    private final InventoryCommandBus commandBus;
+    private final InventoryQueryBus queryBus;
     private final Consumer<ProductDTO> onEditRequested;
 
     private final ObservableList<ProductDTO> allProducts = FXCollections.observableArrayList();
     private final FilteredList<ProductDTO> filteredProducts = new FilteredList<>(allProducts, _ -> true);
 
-    public InventoryDashboard(InventoryEventBroker eventBroker, Consumer<ProductDTO> onEditRequested) {
+    public InventoryDashboard(InventoryEventBroker eventBroker, InventoryCommandBus commandBus,
+            InventoryQueryBus queryBus, Consumer<ProductDTO> onEditRequested) {
         this.eventBroker = eventBroker;
+        this.commandBus = commandBus;
+        this.queryBus = queryBus;
         this.onEditRequested = onEditRequested;
         this.eventBroker.register(this);
     }
@@ -60,7 +68,8 @@ public class InventoryDashboard {
         // US-4.3: Search by product name
         searchField.textProperty().addListener((_, _, newValue) -> {
             filteredProducts.setPredicate(product -> {
-                if (newValue == null || newValue.isBlank()) return true;
+                if (newValue == null || newValue.isBlank())
+                    return true;
                 return product.getName().toLowerCase().contains(newValue.toLowerCase());
             });
         });
@@ -81,18 +90,26 @@ public class InventoryDashboard {
         });
 
         setupActionsColumn();
-        eventBroker.publish(new InventoryRefreshRequestedEvent());
+        loadAllProducts();
     }
 
     @FXML
     public void handleRefreshAction() {
-        eventBroker.publish(new InventoryRefreshRequestedEvent());
+        loadAllProducts();
+    }
+
+    private void loadAllProducts() {
+        try {
+            allProducts.setAll(queryBus.dispatch(new GetAllProductsQuery()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void setupActionsColumn() {
         Role role = SecurityContext.getCurrentUser().getRole();
-        boolean canEdit = role.hasPermission(ProductUpdatedEvent.REQUIRED);
-        boolean canDelete = role.hasPermission(ProductRemovedEvent.REQUIRED);
+        boolean canEdit = role.hasPermission(UpdateProductCommand.REQUIRED);
+        boolean canDelete = role.hasPermission(RemoveProductCommand.REQUIRED);
 
         if (!canEdit && !canDelete) {
             actionsColumn.setVisible(false);
@@ -115,8 +132,10 @@ public class InventoryDashboard {
                     confirmAndDelete(product);
                 });
 
-                if (canEdit) buttons.getChildren().add(editBtn);
-                if (canDelete) buttons.getChildren().add(deleteBtn);
+                if (canEdit)
+                    buttons.getChildren().add(editBtn);
+                if (canDelete)
+                    buttons.getChildren().add(deleteBtn);
             }
 
             @Override
@@ -135,14 +154,21 @@ public class InventoryDashboard {
 
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            eventBroker.publish(new ProductRemovedEvent(product.getId()));
+            try {
+                commandBus.dispatch(new RemoveProductCommand(product.getId()));
+            } catch (Exception e) {
+                Alert err = new Alert(Alert.AlertType.ERROR);
+                err.setContentText(e.getMessage());
+                err.showAndWait();
+            }
         }
     }
 
     @Subscribe
     private void handleProductsUpdated(ProductsUpdatedEvent event) {
         Platform.runLater(() -> {
-            allProducts.setAll(event.getProducts());
+            List<ProductDTO> freshInventory = queryBus.dispatch(new GetAllProductsQuery());
+            allProducts.setAll(freshInventory);
         });
     }
 }

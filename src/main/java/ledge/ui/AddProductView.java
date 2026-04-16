@@ -4,18 +4,18 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import ledge.application.InventoryEventBroker;
-import ledge.application.event.ProductAddedEvent;
-import ledge.application.dto.ProductDTO;
+import ledge.inventory.app.InventoryCommandBus;
+import ledge.inventory.app.command.AddProductCommand;
+import ledge.inventory.app.dto.ProductDTO;
 
 import java.math.BigDecimal;
 
 public class AddProductView {
 
-    private final InventoryEventBroker eventBroker;
+    private final InventoryCommandBus commandBus;
 
-    public AddProductView(InventoryEventBroker eventBroker) {
-        this.eventBroker = eventBroker;
+    public AddProductView(InventoryCommandBus commandBus) {
+        this.commandBus = commandBus;
     }
 
     @FXML
@@ -53,7 +53,13 @@ public class AddProductView {
         }
 
         ProductDTO dto = new ProductDTO(null, name, purchasePrice, sellingPrice, stock, taxRate);
-        eventBroker.publish(new ProductAddedEvent(dto));
+        try {
+            commandBus.dispatch(new AddProductCommand(dto));
+        } catch (Exception e) {
+            Alert alert = new Alert(AlertType.ERROR, e.getMessage());
+            alert.showAndWait();
+            return;
+        }
         clearFormFields();
 
         Alert alert = new Alert(AlertType.INFORMATION);

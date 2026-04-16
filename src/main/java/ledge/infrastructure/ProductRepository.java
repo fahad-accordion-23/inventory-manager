@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import ledge.domain.Product;
+import ledge.inventory.domain.Product;
 
 public interface ProductRepository {
     Product save(Product product);

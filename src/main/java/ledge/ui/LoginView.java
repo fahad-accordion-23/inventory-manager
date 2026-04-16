@@ -5,9 +5,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import ledge.application.InventoryEventBroker;
-import ledge.security.event.LoginFailedEvent;
-import ledge.security.event.LoginRequestedEvent;
+import ledge.inventory.app.InventoryCommandBus;
+import ledge.inventory.app.InventoryEventBroker;
+import ledge.security.app.command.LoginCommand;
+import ledge.security.app.event.LoginFailedEvent;
 import ledge.util.event.Subscribe;
 
 public class LoginView {
@@ -22,9 +23,11 @@ public class LoginView {
     private Label errorLabel;
 
     private final InventoryEventBroker eventBroker;
+    private final InventoryCommandBus commandBus;
 
-    public LoginView(InventoryEventBroker eventBroker) {
+    public LoginView(InventoryEventBroker eventBroker, InventoryCommandBus commandBus) {
         this.eventBroker = eventBroker;
+        this.commandBus = commandBus;
         this.eventBroker.register(this);
     }
 
@@ -44,7 +47,7 @@ public class LoginView {
             return;
         }
 
-        eventBroker.publish(new LoginRequestedEvent(username, password));
+        commandBus.dispatch(new LoginCommand(username, password));
     }
 
     @Subscribe

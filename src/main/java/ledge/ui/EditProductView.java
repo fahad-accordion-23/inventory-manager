@@ -4,16 +4,16 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.TextField;
-import ledge.application.InventoryEventBroker;
-import ledge.application.dto.ProductDTO;
-import ledge.application.event.ProductUpdatedEvent;
+import ledge.inventory.app.InventoryCommandBus;
+import ledge.inventory.app.command.UpdateProductCommand;
+import ledge.inventory.app.dto.ProductDTO;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 public class EditProductView {
 
-    private final InventoryEventBroker eventBroker;
+    private final InventoryCommandBus commandBus;
     private final Runnable onCancel;
     private UUID productId;
 
@@ -32,8 +32,8 @@ public class EditProductView {
     @FXML
     private TextField taxField;
 
-    public EditProductView(InventoryEventBroker eventBroker, Runnable onCancel) {
-        this.eventBroker = eventBroker;
+    public EditProductView(InventoryCommandBus commandBus, Runnable onCancel) {
+        this.commandBus = commandBus;
         this.onCancel = onCancel;
     }
 
@@ -68,7 +68,13 @@ public class EditProductView {
         }
 
         ProductDTO dto = new ProductDTO(productId, name, purchasePrice, sellingPrice, stock, taxRate);
-        eventBroker.publish(new ProductUpdatedEvent(dto));
+        try {
+            commandBus.dispatch(new UpdateProductCommand(dto));
+        } catch (Exception e) {
+            Alert alert = new Alert(AlertType.ERROR, e.getMessage());
+            alert.showAndWait();
+            return;
+        }
 
         Alert alert = new Alert(AlertType.INFORMATION);
         alert.setTitle("Success");
