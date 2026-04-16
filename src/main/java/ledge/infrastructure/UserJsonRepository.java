@@ -3,10 +3,10 @@ package ledge.infrastructure;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
-import ledge.security.PasswordHasher;
-import ledge.security.Role;
-import ledge.security.Roles;
-import ledge.security.User;
+import ledge.util.PasswordHasher;
+import ledge.security.domain.Role;
+import ledge.security.domain.Roles;
+import ledge.security.domain.User;
 
 import java.io.File;
 import java.io.FileReader;

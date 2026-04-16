@@ -5,10 +5,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import ledge.application.InventoryCommandBus;
-import ledge.application.InventoryEventBroker;
-import ledge.security.command.LoginCommand;
-import ledge.security.event.LoginFailedEvent;
+import ledge.inventory.app.InventoryCommandBus;
+import ledge.inventory.app.InventoryEventBroker;
+import ledge.security.app.command.LoginCommand;
+import ledge.security.app.event.LoginFailedEvent;
 import ledge.util.event.Subscribe;
 
 public class LoginView {

@@ -3,11 +3,11 @@ package ledge.ui;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
-import ledge.application.InventoryCommandBus;
-import ledge.application.InventoryEventBroker;
-import ledge.security.Role;
-import ledge.security.SecurityContext;
-import ledge.security.command.LogoutCommand;
+import ledge.inventory.app.InventoryCommandBus;
+import ledge.inventory.app.InventoryEventBroker;
+import ledge.security.domain.Role;
+import ledge.security.app.SecurityContext;
+import ledge.security.app.command.LogoutCommand;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package ledge.ui;
 
-import ledge.security.Permission;
+import ledge.security.domain.Permission;
 
 /**
  * Describes a single navigation entry in the sidebar.

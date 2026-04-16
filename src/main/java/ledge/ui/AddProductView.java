@@ -4,9 +4,9 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import ledge.application.InventoryCommandBus;
-import ledge.application.command.AddProductCommand;
-import ledge.application.dto.ProductDTO;
+import ledge.inventory.app.InventoryCommandBus;
+import ledge.inventory.app.command.AddProductCommand;
+import ledge.inventory.app.dto.ProductDTO;
 
 import java.math.BigDecimal;
 

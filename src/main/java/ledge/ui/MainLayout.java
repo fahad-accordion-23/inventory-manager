@@ -4,12 +4,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.layout.VBox;
-import ledge.application.InventoryCommandBus;
-import ledge.application.InventoryEventBroker;
-import ledge.application.InventoryQueryBus;
-import ledge.application.command.AddProductCommand;
-import ledge.application.dto.ProductDTO;
-import ledge.application.query.GetAllProductsQuery;
+import ledge.inventory.app.InventoryCommandBus;
+import ledge.inventory.app.InventoryEventBroker;
+import ledge.inventory.app.InventoryQueryBus;
+import ledge.inventory.app.command.AddProductCommand;
+import ledge.inventory.app.dto.ProductDTO;
+import ledge.inventory.app.query.GetAllProductsQuery;
 
 import java.io.IOException;
 import java.util.List;
