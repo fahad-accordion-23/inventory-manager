@@ -1,5 +1,6 @@
 package ledge.util.cqrs;
 
+import ledge.security.application.AuthorizationService;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -31,6 +32,11 @@ public class QueryBus {
     }
 
     private final Map<Class<? extends Query<?>>, HandlerProxy> handlers = new ConcurrentHashMap<>();
+    private final AuthorizationService authService;
+
+    public QueryBus(AuthorizationService authService) {
+        this.authService = authService;
+    }
 
     public void register(Object handler) {
         for (Method method : handler.getClass().getDeclaredMethods()) {
@@ -48,7 +54,12 @@ public class QueryBus {
         }
     }
 
-    public <R> R dispatch(Query<R> query) {
+    public <R> R dispatch(Query<R> query, String token) {
+        // Authorization check
+        query.getRequiredPermission().ifPresent(permission -> {
+            authService.require(token, permission);
+        });
+
         HandlerProxy proxy = handlers.get(query.getClass());
         if (proxy == null) {
             throw new IllegalStateException("No handler registered for query: " + query.getClass().getName());

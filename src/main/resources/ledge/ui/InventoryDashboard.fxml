@@ -13,7 +13,7 @@
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="ledge.ui.InventoryDashboard"
+      fx:controller="ledge.ui.views.InventoryDashboard"
       spacing="15" VBox.vgrow="ALWAYS">
     <padding>
         <Insets top="20" right="20" bottom="20" left="20"/>
