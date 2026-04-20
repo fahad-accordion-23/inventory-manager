@@ -17,8 +17,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import ledge.ui.core.Capability;
 import ledge.ui.core.SessionManager;
+import ledge.ui.viewmodels.ProductViewModel;
 import ledge.inventory.application.commands.RemoveProductCommand;
-import ledge.inventory.application.commands.UpdateProductCommand;
 import ledge.inventory.application.dtos.ProductDTO;
 import ledge.inventory.application.events.ProductsUpdatedEvent;
 import ledge.inventory.application.query.GetAllProductsQuery;
@@ -42,10 +42,10 @@ public class InventoryDashboard {
     private static final int LOW_STOCK_THRESHOLD = 10;
 
     @FXML
-    private TableView<ProductDTO> inventoryTable;
+    private TableView<ProductViewModel> inventoryTable;
 
     @FXML
-    private TableColumn<ProductDTO, Void> actionsColumn;
+    private TableColumn<ProductViewModel, Void> actionsColumn;
 
     @FXML
     private TextField searchField;
@@ -56,8 +56,8 @@ public class InventoryDashboard {
     private final SessionManager sessionManager;
     private final Consumer<ProductDTO> onEditRequested;
 
-    private final ObservableList<ProductDTO> allProducts = FXCollections.observableArrayList();
-    private final FilteredList<ProductDTO> filteredProducts = new FilteredList<>(allProducts, _ -> true);
+    private final ObservableList<ProductViewModel> allProducts = FXCollections.observableArrayList();
+    private final FilteredList<ProductViewModel> filteredProducts = new FilteredList<>(allProducts, _ -> true);
 
     public InventoryDashboard(InventoryEventBroker eventBroker, InventoryCommandBus commandBus,
             InventoryQueryBus queryBus, SessionManager sessionManager, Consumer<ProductDTO> onEditRequested) {
@@ -77,17 +77,17 @@ public class InventoryDashboard {
             filteredProducts.setPredicate(product -> {
                 if (newValue == null || newValue.isBlank())
                     return true;
-                return product.name().toLowerCase().contains(newValue.toLowerCase());
+                return product.getName().toLowerCase().contains(newValue.toLowerCase());
             });
         });
 
         inventoryTable.setRowFactory(_ -> new TableRow<>() {
             @Override
-            protected void updateItem(ProductDTO item, boolean empty) {
+            protected void updateItem(ProductViewModel item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setStyle("");
-                } else if (item.stockQuantity() < LOW_STOCK_THRESHOLD) {
+                } else if (item.getStockQuantity() < LOW_STOCK_THRESHOLD) {
                     setStyle("-fx-background-color: #ffcccc;");
                 } else {
                     setStyle("");
@@ -107,7 +107,11 @@ public class InventoryDashboard {
     private void loadAllProducts() {
         try {
             String token = sessionManager.getAuthToken().orElse("");
-            allProducts.setAll(queryBus.dispatch(new GetAllProductsQuery(), token));
+            List<ProductViewModel> viewModels = queryBus.dispatch(new GetAllProductsQuery(), token)
+                    .stream()
+                    .map(ProductViewModel::new)
+                    .toList();
+            allProducts.setAll(viewModels);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -136,11 +140,11 @@ public class InventoryDashboard {
             {
                 buttons.setAlignment(Pos.CENTER);
                 editBtn.setOnAction(_ -> {
-                    ProductDTO product = getTableView().getItems().get(getIndex());
-                    onEditRequested.accept(product);
+                    ProductViewModel product = getTableView().getItems().get(getIndex());
+                    onEditRequested.accept(product.toDTO());
                 });
                 deleteBtn.setOnAction(_ -> {
-                    ProductDTO product = getTableView().getItems().get(getIndex());
+                    ProductViewModel product = getTableView().getItems().get(getIndex());
                     confirmAndDelete(product);
                 });
 
@@ -158,17 +162,17 @@ public class InventoryDashboard {
         });
     }
 
-    private void confirmAndDelete(ProductDTO product) {
+    private void confirmAndDelete(ProductViewModel product) {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Confirm Deletion");
-        confirm.setHeaderText("Delete \"" + product.name() + "\"?");
+        confirm.setHeaderText("Delete \"" + product.getName() + "\"?");
         confirm.setContentText("This action cannot be undone.");
 
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
                 String token = sessionManager.getAuthToken().orElse("");
-                commandBus.dispatch(new RemoveProductCommand(product.id()), token);
+                commandBus.dispatch(new RemoveProductCommand(product.getId()), token);
             } catch (Exception e) {
                 Alert err = new Alert(Alert.AlertType.ERROR);
                 err.setContentText(e.getMessage());
@@ -181,7 +185,10 @@ public class InventoryDashboard {
     private void handleProductsUpdated(ProductsUpdatedEvent event) {
         Platform.runLater(() -> {
             String token = sessionManager.getAuthToken().orElse("");
-            List<ProductDTO> freshInventory = queryBus.dispatch(new GetAllProductsQuery(), token);
+            List<ProductViewModel> freshInventory = queryBus.dispatch(new GetAllProductsQuery(), token)
+                    .stream()
+                    .map(ProductViewModel::new)
+                    .toList();
             allProducts.setAll(freshInventory);
         });
     }
