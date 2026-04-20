@@ -8,7 +8,6 @@ import ledge.ui.SessionManager;
 import ledge.ui.events.UserLoggedOutEvent;
 import ledge.ui.messaging.UIEventBroker;
 import ledge.users.application.dtos.UserDTO;
-import ledge.users.domain.User;
 
 import java.util.List;
 

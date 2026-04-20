@@ -27,8 +27,7 @@ class UserServiceTest {
 
     @Test
     void testAddUser() {
-        User user = new User(UUID.randomUUID(), "testUser", "hash", Role.ADMIN);
-        userService.addUser(user);
+        userService.addUser("testUser", "pass", Role.ADMIN);
 
         assertEquals(1, userRepository.database.size());
         assertEquals("testUser", userRepository.database.get(0).getUsername());
@@ -36,12 +35,10 @@ class UserServiceTest {
 
     @Test
     void testUpdateUser() {
-        UUID id = UUID.randomUUID();
-        User user = new User(id, "testUser", "hash", Role.ADMIN);
-        userService.addUser(user);
+        userService.addUser("testUser", "pass", Role.ADMIN);
+        UUID id = userRepository.database.get(0).getId();
 
-        User updatedUser = new User(id, "testUserUpdated", "newHash", Role.INVENTORY_MANAGER);
-        userService.updateUser(updatedUser);
+        userService.updateUser(id, "testUserUpdated", "newPass", Role.INVENTORY_MANAGER);
 
         assertEquals(1, userRepository.database.size());
         assertEquals("testUserUpdated", userRepository.database.get(0).getUsername());
@@ -50,9 +47,8 @@ class UserServiceTest {
 
     @Test
     void testRemoveUser() {
-        UUID id = UUID.randomUUID();
-        User user = new User(id, "testUser", "hash", Role.ADMIN);
-        userService.addUser(user);
+        userService.addUser("testUser", "pass", Role.ADMIN);
+        UUID id = userRepository.database.get(0).getId();
 
         assertEquals(1, userRepository.database.size());
 
@@ -63,8 +59,8 @@ class UserServiceTest {
 
     @Test
     void testGetAllUsers() {
-        userService.addUser(new User(UUID.randomUUID(), "user1", "h1", Role.ADMIN));
-        userService.addUser(new User(UUID.randomUUID(), "user2", "h2", Role.SALES_STAFF));
+        userService.addUser("user1", "pass1", Role.ADMIN);
+        userService.addUser("user2", "pass2", Role.SALES_STAFF);
 
         List<User> users = userService.getAllUsers();
         assertEquals(2, users.size());
@@ -73,6 +69,11 @@ class UserServiceTest {
     // A simple in-memory repository for testing
     static class MockUserRepository implements IUserRepository {
         List<User> database = new ArrayList<>();
+
+        @Override
+        public Optional<User> findById(UUID id) {
+            return database.stream().filter(u -> u.getId().equals(id)).findFirst();
+        }
 
         @Override
         public Optional<User> findByUsername(String username) {
@@ -86,6 +87,11 @@ class UserServiceTest {
 
         @Override
         public void save(User user) {
+            database.add(user);
+        }
+
+        @Override
+        public void update(User user) {
             database.removeIf(u -> u.getId().equals(user.getId()));
             database.add(user);
         }

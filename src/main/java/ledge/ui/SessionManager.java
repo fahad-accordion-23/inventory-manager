@@ -4,8 +4,6 @@ import ledge.security.application.events.AuthenticationException;
 import ledge.security.application.services.AuthenticationService;
 import ledge.users.application.dtos.UserDTO;
 import ledge.users.application.query.GetUserByUsernameQuery;
-import ledge.users.application.services.UserService;
-import ledge.users.domain.User;
 import ledge.util.cqrs.QueryBus;
 
 import java.util.Optional;
