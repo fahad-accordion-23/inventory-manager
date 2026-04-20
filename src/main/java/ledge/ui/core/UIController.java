@@ -9,6 +9,7 @@ import ledge.inventory.infrastructure.messaging.InventoryCommandBus;
 import ledge.inventory.infrastructure.messaging.InventoryEventBroker;
 import ledge.inventory.infrastructure.messaging.InventoryQueryBus;
 import ledge.users.infrastructure.messaging.UserCommandBus;
+import ledge.users.infrastructure.messaging.UserEventBroker;
 import ledge.users.infrastructure.messaging.UserQueryBus;
 import ledge.ui.events.LoginSucceededEvent;
 import ledge.ui.events.NavigateToLoginEvent;
@@ -28,24 +29,27 @@ public class UIController {
     private final Stage primaryStage;
     private final UIEventBroker uiEventBroker;
     private final InventoryEventBroker inventoryEventBroker;
-    private final InventoryCommandBus commandBus;
-    private final InventoryQueryBus queryBus;
+    private final InventoryCommandBus inventoryCommandBus;
+    private final InventoryQueryBus inventoryQueryBus;
+    private final UserEventBroker userEventBroker;
     private final UserCommandBus userCommandBus;
     private final UserQueryBus userQueryBus;
     private final SessionManager sessionManager;
 
     public UIController(Stage primaryStage, UIEventBroker uiEventBroker,
             InventoryEventBroker inventoryEventBroker,
-            InventoryCommandBus commandBus,
-            InventoryQueryBus queryBus,
+            InventoryCommandBus inventoryCommandBus,
+            InventoryQueryBus inventoryQueryBus,
+            UserEventBroker userEventBroker,
             UserCommandBus userCommandBus,
             UserQueryBus userQueryBus,
             SessionManager sessionManager) {
         this.primaryStage = primaryStage;
         this.uiEventBroker = uiEventBroker;
         this.inventoryEventBroker = inventoryEventBroker;
-        this.commandBus = commandBus;
-        this.queryBus = queryBus;
+        this.inventoryCommandBus = inventoryCommandBus;
+        this.inventoryQueryBus = inventoryQueryBus;
+        this.userEventBroker = userEventBroker;
         this.userCommandBus = userCommandBus;
         this.userQueryBus = userQueryBus;
         this.sessionManager = sessionManager;
@@ -104,7 +108,8 @@ public class UIController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/components/MainLayout.fxml"));
             loader.setControllerFactory(param -> {
                 if (param == MainLayout.class) {
-                    return new MainLayout(inventoryEventBroker, commandBus, queryBus, sessionManager, uiEventBroker);
+                    return new MainLayout(inventoryEventBroker, inventoryCommandBus, inventoryQueryBus,
+                            userEventBroker, userCommandBus, userQueryBus, sessionManager, uiEventBroker);
                 }
                 if (param == Sidebar.class) {
                     return new Sidebar(sessionManager, uiEventBroker);

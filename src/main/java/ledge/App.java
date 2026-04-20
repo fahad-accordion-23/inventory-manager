@@ -104,6 +104,7 @@ public class App extends Application {
                 inventoryEventBroker,
                 inventoryCommandBus,
                 inventoryQueryBus,
+                userEventBroker,
                 userCommandBus,
                 userQueryBus,
                 sessionManager);

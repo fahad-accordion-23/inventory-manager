@@ -13,7 +13,16 @@ import ledge.ui.core.SessionManager;
 import ledge.ui.messaging.UIEventBroker;
 import ledge.ui.pages.AddProductView;
 import ledge.ui.pages.EditProductView;
+import ledge.ui.pages.AddProductView;
+import ledge.ui.pages.EditProductView;
 import ledge.ui.pages.InventoryDashboard;
+import ledge.ui.pages.UserDashboardView;
+import ledge.ui.pages.AddUserView;
+import ledge.ui.pages.EditUserView;
+import ledge.users.application.dtos.UserDTO;
+import ledge.users.infrastructure.messaging.UserCommandBus;
+import ledge.users.infrastructure.messaging.UserEventBroker;
+import ledge.users.infrastructure.messaging.UserQueryBus;
 
 import java.io.IOException;
 
@@ -31,22 +40,33 @@ public class MainLayout {
     private Sidebar sidebarController;
 
     private final InventoryEventBroker inventoryEventBroker;
-    private final InventoryCommandBus commandBus;
-    private final InventoryQueryBus queryBus;
+    private final InventoryCommandBus inventoryCommandBus;
+    private final InventoryQueryBus inventoryQueryBus;
+    private final UserEventBroker userEventBroker;
+    private final UserCommandBus userCommandBus;
+    private final UserQueryBus userQueryBus;
     private final SessionManager sessionManager;
     private final UIEventBroker uiEventBroker;
 
     private Parent dashboardViewCache;
     private Parent addProductViewCache;
+    private Parent userDashboardViewCache;
+    private Parent addUserViewCache;
 
     public MainLayout(InventoryEventBroker inventoryEventBroker,
-            InventoryCommandBus commandBus,
-            InventoryQueryBus queryBus,
+            InventoryCommandBus inventoryCommandBus,
+            InventoryQueryBus inventoryQueryBus,
+            UserEventBroker userEventBroker,
+            UserCommandBus userCommandBus,
+            UserQueryBus userQueryBus,
             SessionManager sessionManager,
             UIEventBroker uiEventBroker) {
         this.inventoryEventBroker = inventoryEventBroker;
-        this.commandBus = commandBus;
-        this.queryBus = queryBus;
+        this.inventoryCommandBus = inventoryCommandBus;
+        this.inventoryQueryBus = inventoryQueryBus;
+        this.userEventBroker = userEventBroker;
+        this.userCommandBus = userCommandBus;
+        this.userQueryBus = userQueryBus;
         this.sessionManager = sessionManager;
         this.uiEventBroker = uiEventBroker;
     }
@@ -56,6 +76,7 @@ public class MainLayout {
         sidebarController.clearNavItems();
         sidebarController.addNavItem("Inventory Dashboard", Capability.VIEW_DASHBOARD, this::showInventoryDashboard);
         sidebarController.addNavItem("Add Product", Capability.CREATE_PRODUCT, this::showAddProduct);
+        sidebarController.addNavItem("User Management", Capability.VIEW_USERS, this::showUserManagement);
     }
 
     @FXML
@@ -63,7 +84,7 @@ public class MainLayout {
         if (addProductViewCache == null) {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/pages/AddProductView.fxml"));
-                loader.setControllerFactory(param -> new AddProductView(commandBus, sessionManager));
+                loader.setControllerFactory(param -> new AddProductView(inventoryCommandBus, sessionManager));
                 addProductViewCache = loader.load();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -80,7 +101,7 @@ public class MainLayout {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/pages/InventoryDashboard.fxml"));
                 loader.setControllerFactory(
-                        param -> new InventoryDashboard(inventoryEventBroker, commandBus, queryBus, sessionManager,
+                        param -> new InventoryDashboard(inventoryEventBroker, inventoryCommandBus, inventoryQueryBus, sessionManager,
                                 this::showEditProduct));
                 dashboardViewCache = loader.load();
             } catch (IOException e) {
@@ -92,11 +113,60 @@ public class MainLayout {
         contentArea.getChildren().add(dashboardViewCache);
     }
 
+    @FXML
+    public void showUserManagement() {
+        if (userDashboardViewCache == null) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/pages/UserDashboardView.fxml"));
+                loader.setControllerFactory(param -> new UserDashboardView(userEventBroker, userCommandBus, userQueryBus, sessionManager,
+                        this::showAddUser, this::showEditUser));
+                userDashboardViewCache = loader.load();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+        contentArea.getChildren().clear();
+        contentArea.getChildren().add(userDashboardViewCache);
+    }
+
+    @FXML
+    public void showAddUser() {
+        if (addUserViewCache == null) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/pages/AddUserView.fxml"));
+                loader.setControllerFactory(param -> new AddUserView(userCommandBus, sessionManager, this::showUserManagement));
+                addUserViewCache = loader.load();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+        contentArea.getChildren().clear();
+        contentArea.getChildren().add(addUserViewCache);
+    }
+
+    public void showEditUser(UserDTO user) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/pages/EditUserView.fxml"));
+            loader.setControllerFactory(param -> new EditUserView(userCommandBus, sessionManager, this::showUserManagement));
+            Parent editView = loader.load();
+
+            EditUserView controller = loader.getController();
+            controller.setUser(user);
+
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(editView);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void showEditProduct(ProductDTO product) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/pages/EditProductView.fxml"));
             loader.setControllerFactory(
-                    param -> new EditProductView(commandBus, sessionManager, this::showInventoryDashboard));
+                    param -> new EditProductView(inventoryCommandBus, sessionManager, this::showInventoryDashboard));
             Parent editView = loader.load();
 
             EditProductView controller = loader.getController();
