@@ -1,8 +1,10 @@
-package ledge.security.application;
+package ledge.security.application.services;
 
 import ledge.security.application.events.AuthenticationException;
-import ledge.security.domain.User;
-import ledge.security.infrastructure.IUserRepository;
+import ledge.security.domain.SessionService;
+import ledge.users.application.dtos.UserDTO;
+import ledge.users.application.services.IUserService;
+import ledge.users.domain.User;
 import ledge.util.PasswordHasher;
 
 import java.util.Optional;
@@ -11,13 +13,13 @@ import java.util.Optional;
  * Service for handling user authentication and token-based sessions.
  */
 public class AuthenticationService {
-    private final IUserRepository userRepository;
+    private final IUserService userService;
     private final SessionService sessionService;
 
     public AuthenticationService(
-            IUserRepository userRepository,
+            IUserService userService,
             SessionService sessionService) {
-        this.userRepository = userRepository;
+        this.userService = userService;
         this.sessionService = sessionService;
     }
 
@@ -30,18 +32,19 @@ public class AuthenticationService {
      * @throws AuthenticationException if authentication fails.
      */
     public String login(String username, String password) throws AuthenticationException {
-        Optional<User> userOpt = userRepository.findByUsername(username);
+        Optional<User> userOpt = userService.getUserByUsername(username);
 
         if (userOpt.isEmpty()) {
             throw new AuthenticationException("Invalid username or password");
         }
 
         User user = userOpt.get();
+
         if (!PasswordHasher.verify(password, user.getPasswordHash())) {
             throw new AuthenticationException("Invalid username or password");
         }
 
-        return sessionService.createToken(user);
+        return sessionService.createToken(UserDTO.fromUser(user));
     }
 
     /**
@@ -54,4 +57,5 @@ public class AuthenticationService {
             sessionService.removeToken(token);
         }
     }
+
 }

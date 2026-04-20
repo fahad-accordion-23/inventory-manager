@@ -2,7 +2,7 @@ package ledge.util.cqrs;
 
 import java.util.Optional;
 
-import ledge.security.domain.Permission;
+import ledge.shared.types.Permission;
 
 /**
  * Represents a request to read data from the system without causing side

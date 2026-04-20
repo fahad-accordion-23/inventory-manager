@@ -1,4 +1,4 @@
-package ledge.security.domain;
+package ledge.shared.types;
 
 public enum Action {
     CREATE,

@@ -3,11 +3,12 @@ package ledge.ui.views;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
-import ledge.security.domain.Role;
-import ledge.security.domain.User;
+import ledge.shared.types.Role;
 import ledge.ui.SessionManager;
 import ledge.ui.events.UserLoggedOutEvent;
 import ledge.ui.messaging.UIEventBroker;
+import ledge.users.application.dtos.UserDTO;
+import ledge.users.domain.User;
 
 import java.util.List;
 
@@ -40,12 +41,12 @@ public class Sidebar {
             return;
         }
 
-        User user = sessionManager.getCurrentUser().orElse(null);
+        UserDTO user = sessionManager.getCurrentUser().orElse(null);
         if (user == null) {
             return;
         }
 
-        Role role = user.getRole();
+        Role role = user.role();
         boolean first = true;
 
         for (NavItem item : items) {

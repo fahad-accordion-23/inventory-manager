@@ -15,7 +15,6 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
-import ledge.security.domain.Role;
 import ledge.ui.SessionManager;
 import ledge.inventory.application.commands.RemoveProductCommand;
 import ledge.inventory.application.commands.UpdateProductCommand;
@@ -25,6 +24,7 @@ import ledge.inventory.application.query.GetAllProductsQuery;
 import ledge.inventory.infrastructure.messaging.InventoryCommandBus;
 import ledge.inventory.infrastructure.messaging.InventoryEventBroker;
 import ledge.inventory.infrastructure.messaging.InventoryQueryBus;
+import ledge.shared.types.Role;
 import ledge.util.event.Subscribe;
 
 import java.util.List;
@@ -113,7 +113,7 @@ public class InventoryDashboard {
     }
 
     private void setupActionsColumn() {
-        Role role = sessionManager.getCurrentUser().map(u -> u.getRole()).orElse(null);
+        Role role = sessionManager.getCurrentUser().get().role();
         if (role == null) {
             actionsColumn.setVisible(false);
             return;

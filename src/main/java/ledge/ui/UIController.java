@@ -8,6 +8,8 @@ import javafx.stage.Stage;
 import ledge.inventory.infrastructure.messaging.InventoryCommandBus;
 import ledge.inventory.infrastructure.messaging.InventoryEventBroker;
 import ledge.inventory.infrastructure.messaging.InventoryQueryBus;
+import ledge.users.infrastructure.messaging.UserCommandBus;
+import ledge.users.infrastructure.messaging.UserQueryBus;
 import ledge.ui.events.LoginSucceededEvent;
 import ledge.ui.events.NavigateToLoginEvent;
 import ledge.ui.events.NavigateToMainEvent;
@@ -28,18 +30,24 @@ public class UIController {
     private final InventoryEventBroker inventoryEventBroker;
     private final InventoryCommandBus commandBus;
     private final InventoryQueryBus queryBus;
+    private final UserCommandBus userCommandBus;
+    private final UserQueryBus userQueryBus;
     private final SessionManager sessionManager;
 
     public UIController(Stage primaryStage, UIEventBroker uiEventBroker,
             InventoryEventBroker inventoryEventBroker,
             InventoryCommandBus commandBus,
             InventoryQueryBus queryBus,
+            UserCommandBus userCommandBus,
+            UserQueryBus userQueryBus,
             SessionManager sessionManager) {
         this.primaryStage = primaryStage;
         this.uiEventBroker = uiEventBroker;
         this.inventoryEventBroker = inventoryEventBroker;
         this.commandBus = commandBus;
         this.queryBus = queryBus;
+        this.userCommandBus = userCommandBus;
+        this.userQueryBus = userQueryBus;
         this.sessionManager = sessionManager;
 
         this.uiEventBroker.register(this);

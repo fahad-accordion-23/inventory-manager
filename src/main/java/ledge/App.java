@@ -11,13 +11,19 @@ import ledge.inventory.infrastructure.ProductRepository;
 import ledge.inventory.infrastructure.messaging.InventoryCommandBus;
 import ledge.inventory.infrastructure.messaging.InventoryEventBroker;
 import ledge.inventory.infrastructure.messaging.InventoryQueryBus;
-import ledge.security.application.AuthenticationService;
-import ledge.security.application.AuthorizationService;
-import ledge.security.application.SessionService;
-import ledge.security.infrastructure.UserRepository;
+import ledge.security.application.services.AuthenticationService;
+import ledge.security.application.services.AuthorizationService;
+import ledge.security.domain.SessionService;
 import ledge.ui.SessionManager;
 import ledge.ui.UIController;
 import ledge.ui.messaging.UIEventBroker;
+import ledge.users.application.commands.handlers.*;
+import ledge.users.application.query.handlers.*;
+import ledge.users.application.services.UserService;
+import ledge.users.infrastructure.UserRepository;
+import ledge.users.infrastructure.messaging.UserCommandBus;
+import ledge.users.infrastructure.messaging.UserEventBroker;
+import ledge.users.infrastructure.messaging.UserQueryBus;
 
 /**
  * Main application class.
@@ -27,38 +33,61 @@ import ledge.ui.messaging.UIEventBroker;
 public class App extends Application {
 
     private InventoryEventBroker inventoryEventBroker;
+    private UserEventBroker userEventBroker;
     private UIEventBroker uiEventBroker;
-    private InventoryCommandBus commandBus;
-    private InventoryQueryBus queryBus;
+
+    private InventoryCommandBus inventoryCommandBus;
+    private InventoryQueryBus inventoryQueryBus;
+    private UserCommandBus userCommandBus;
+    private UserQueryBus userQueryBus;
+
     private SessionManager sessionManager;
     private UIController uiController;
 
     @Override
     public void init() throws Exception {
+        // User Domain
+        UserRepository userRepository = new UserRepository();
+        UserService userService = new UserService(userRepository);
+
         // Security Infrastructure
         SessionService sessionService = new SessionService();
-        UserRepository userRepository = new UserRepository();
-        AuthenticationService authService = new AuthenticationService(userRepository, sessionService);
+        AuthenticationService authService = new AuthenticationService(userService, sessionService);
         AuthorizationService authorizationService = new AuthorizationService(sessionService);
 
         // Messaging & CQRS
         inventoryEventBroker = new InventoryEventBroker();
+        userEventBroker = new UserEventBroker();
         uiEventBroker = new UIEventBroker();
-        commandBus = new InventoryCommandBus(authorizationService);
-        queryBus = new InventoryQueryBus(authorizationService);
+
+        inventoryCommandBus = new InventoryCommandBus(authorizationService);
+        inventoryQueryBus = new InventoryQueryBus(authorizationService);
+        userCommandBus = new UserCommandBus(authorizationService);
+        userQueryBus = new UserQueryBus(authorizationService);
 
         // Inventory Domain
         ProductRepository productRepository = new ProductRepository();
         ProductService productService = new ProductService(productRepository);
-        
-        // Register Handlers
-        commandBus.register(new AddProductCommandHandler(productService, inventoryEventBroker));
-        commandBus.register(new RemoveProductCommandHandler(productService, inventoryEventBroker));
-        commandBus.register(new UpdateProductCommandHandler(productService, inventoryEventBroker));
-        queryBus.register(new GetAllProductsQueryHandler(productService));
+
+        // Register Handlers - Inventory
+        inventoryCommandBus.register(new AddProductCommandHandler(productService, inventoryEventBroker));
+        inventoryCommandBus.register(new RemoveProductCommandHandler(productService, inventoryEventBroker));
+        inventoryCommandBus.register(new UpdateProductCommandHandler(productService, inventoryEventBroker));
+        inventoryQueryBus.register(new GetAllProductsQueryHandler(productService));
+
+        // Register Handlers - Users
+        userCommandBus.register(new AddUserCommandHandler(userService, userEventBroker));
+        userCommandBus.register(new RemoveUserCommandHandler(userService, userEventBroker));
+        userCommandBus.register(new ChangeUserPasswordCommandHandler(userService, userEventBroker));
+        userCommandBus.register(new ChangeUserRoleCommandHandler(userService, userEventBroker));
+        userCommandBus.register(new ChangeUsernameCommandHandler(userService, userEventBroker));
+
+        userQueryBus.register(new GetAllUsersQueryHandler(userService));
+        userQueryBus.register(new GetUserQueryHandler(userService));
+        userQueryBus.register(new GetUserByIdQueryHandler(userService));
 
         // Client Session
-        sessionManager = new SessionManager(authService, sessionService);
+        sessionManager = new SessionManager(authService, userQueryBus);
     }
 
     @Override
@@ -70,10 +99,11 @@ public class App extends Application {
                 primaryStage,
                 uiEventBroker,
                 inventoryEventBroker,
-                commandBus,
-                queryBus,
-                sessionManager
-        );
+                inventoryCommandBus,
+                inventoryQueryBus,
+                userCommandBus,
+                userQueryBus,
+                sessionManager);
 
         uiController.showLoginScene();
         primaryStage.show();

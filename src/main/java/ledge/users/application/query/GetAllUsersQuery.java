@@ -1,18 +1,16 @@
-package ledge.inventory.application.query;
+package ledge.users.application.query;
 
-import ledge.inventory.application.dtos.ProductDTO;
 import ledge.shared.types.Action;
 import ledge.shared.types.Permission;
 import ledge.shared.types.Resource;
+import ledge.users.application.dtos.UserDTO;
 import ledge.util.cqrs.Query;
+
 import java.util.List;
 import java.util.Optional;
 
-public class GetAllProductsQuery implements Query<List<ProductDTO>> {
-    public static final Permission REQUIRED = new Permission(Resource.PRODUCT, Action.READ);
-
-    public GetAllProductsQuery() {
-    }
+public record GetAllUsersQuery() implements Query<List<UserDTO>> {
+    private static final Permission REQUIRED = new Permission(Resource.USER, Action.READ);
 
     @Override
     public Optional<Permission> getRequiredPermission() {

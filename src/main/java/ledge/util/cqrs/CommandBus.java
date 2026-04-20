@@ -1,13 +1,14 @@
 package ledge.util.cqrs;
 
-import ledge.security.application.AuthorizationService;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import ledge.security.application.services.AuthorizationService;
+
 public class CommandBus {
-    
+
     private static class HandlerProxy {
         private final Object target;
         private final Method method;
@@ -25,7 +26,8 @@ public class CommandBus {
                 if (e.getCause() instanceof RuntimeException) {
                     throw (RuntimeException) e.getCause();
                 }
-                throw new RuntimeException("Command execution failed for " + command.getClass().getSimpleName(), e.getCause() != null ? e.getCause() : e);
+                throw new RuntimeException("Command execution failed for " + command.getClass().getSimpleName(),
+                        e.getCause() != null ? e.getCause() : e);
             }
         }
     }
@@ -45,7 +47,8 @@ public class CommandBus {
                     @SuppressWarnings("unchecked")
                     Class<? extends Command> commandType = (Class<? extends Command>) paramType;
                     if (handlers.containsKey(commandType)) {
-                        throw new IllegalStateException("Multiple handlers registered for command: " + commandType.getName());
+                        throw new IllegalStateException(
+                                "Multiple handlers registered for command: " + commandType.getName());
                     }
                     handlers.put(commandType, new HandlerProxy(handler, method));
                 }

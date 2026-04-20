@@ -1,8 +1,8 @@
 package ledge.inventory.application.commands;
 
-import ledge.security.domain.Action;
-import ledge.security.domain.Permission;
-import ledge.security.domain.Resource;
+import ledge.shared.types.Action;
+import ledge.shared.types.Permission;
+import ledge.shared.types.Resource;
 import ledge.util.cqrs.Command;
 import java.util.Optional;
 import java.util.UUID;

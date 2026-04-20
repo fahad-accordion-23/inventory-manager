@@ -1,12 +1,11 @@
-package ledge.security.infrastructure;
+package ledge.users.infrastructure;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
 import ledge.util.PasswordHasher;
-import ledge.security.domain.Role;
-import ledge.security.domain.Roles;
-import ledge.security.domain.User;
+import ledge.shared.types.Role;
+import ledge.users.domain.User;
 
 import java.io.File;
 import java.io.FileReader;
@@ -40,7 +39,7 @@ public class UserRepository implements IUserRepository {
     }
 
     private void seedDatabase() {
-        save(new User(UUID.randomUUID(), "admin", PasswordHasher.hash("admin123"), Roles.ADMIN));
+        save(User.register("admin", PasswordHasher.hash("admin123"), Role.ADMIN));
     }
 
     private void loadDatabase() {
@@ -75,10 +74,29 @@ public class UserRepository implements IUserRepository {
     }
 
     @Override
+    public Optional<User> findById(UUID id) {
+        return database.stream()
+                .filter(u -> u.getId().equals(id))
+                .findFirst();
+    }
+
+    @Override
+    public List<User> findAll() {
+        return new ArrayList<>(database);
+    }
+
+    @Override
     public void save(User user) {
         database.removeIf(u -> u.getId().equals(user.getId()) || u.getUsername().equals(user.getUsername()));
         database.add(user);
         saveDatabase();
+    }
+
+    @Override
+    public void delete(UUID id) {
+        if (database.removeIf(u -> u.getId().equals(id))) {
+            saveDatabase();
+        }
     }
 
     // Custom TypeAdapter to serialize Role as string and deserialize back to static
@@ -86,18 +104,22 @@ public class UserRepository implements IUserRepository {
     private static class RoleTypeAdapter implements JsonSerializer<Role>, JsonDeserializer<Role> {
         @Override
         public JsonElement serialize(Role src, Type typeOfSrc, JsonSerializationContext context) {
-            return new JsonPrimitive(src.getName());
+            return new JsonPrimitive(src.name());
         }
 
         @Override
         public Role deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
-            String roleName = json.getAsString();
-            Role role = Roles.BY_NAME.get(roleName);
-            if (role == null) {
-                throw new JsonParseException("Unknown role: " + roleName);
+            try {
+                return Role.valueOf(json.getAsString());
+            } catch (IllegalArgumentException e) {
+                throw new JsonParseException("Unknown role: " + json.getAsString());
             }
-            return role;
         }
+    }
+
+    @Override
+    public void update(User user) {
+        save(user);
     }
 }

@@ -1,9 +1,12 @@
 package ledge.ui;
 
-import ledge.security.application.AuthenticationService;
-import ledge.security.application.SessionService;
 import ledge.security.application.events.AuthenticationException;
-import ledge.security.domain.User;
+import ledge.security.application.services.AuthenticationService;
+import ledge.users.application.dtos.UserDTO;
+import ledge.users.application.query.GetUserByUsernameQuery;
+import ledge.users.application.services.UserService;
+import ledge.users.domain.User;
+import ledge.util.cqrs.QueryBus;
 
 import java.util.Optional;
 
@@ -14,12 +17,14 @@ import java.util.Optional;
  */
 public class SessionManager {
     private final AuthenticationService authService;
-    private final SessionService sessionService;
-    private String authToken;
+    private final QueryBus userQueryBus;
 
-    public SessionManager(AuthenticationService authService, SessionService sessionService) {
+    private String authToken;
+    private UserDTO currentUser;
+
+    public SessionManager(AuthenticationService authService, QueryBus userQueryBus) {
         this.authService = authService;
-        this.sessionService = sessionService;
+        this.userQueryBus = userQueryBus;
     }
 
     /**
@@ -31,6 +36,7 @@ public class SessionManager {
      */
     public void login(String username, String password) throws AuthenticationException {
         this.authToken = authService.login(username, password);
+        this.currentUser = userQueryBus.dispatch(new GetUserByUsernameQuery(username), authToken).get();
     }
 
     /**
@@ -62,7 +68,7 @@ public class SessionManager {
     /**
      * Returns the user associated with the current session.
      */
-    public Optional<User> getCurrentUser() {
-        return getAuthToken().flatMap(sessionService::getUserByToken);
+    public Optional<UserDTO> getCurrentUser() {
+        return Optional.ofNullable(currentUser);
     }
 }
