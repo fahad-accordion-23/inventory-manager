@@ -1,4 +1,4 @@
-package ledge.ui;
+package ledge.ui.core;
 
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -15,9 +15,9 @@ import ledge.ui.events.NavigateToLoginEvent;
 import ledge.ui.events.NavigateToMainEvent;
 import ledge.ui.events.UserLoggedOutEvent;
 import ledge.ui.messaging.UIEventBroker;
-import ledge.ui.views.LoginView;
-import ledge.ui.views.MainLayout;
-import ledge.ui.views.Sidebar;
+import ledge.ui.pages.LoginView;
+import ledge.ui.components.MainLayout;
+import ledge.ui.components.Sidebar;
 import ledge.util.event.Subscribe;
 
 /**
@@ -78,7 +78,7 @@ public class UIController {
      */
     public void showLoginScene() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/LoginView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/pages/LoginView.fxml"));
             loader.setControllerFactory(param -> {
                 if (param == LoginView.class) {
                     return new LoginView(sessionManager, uiEventBroker);
@@ -101,7 +101,7 @@ public class UIController {
      */
     public void showMainScene() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/MainLayout.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/components/MainLayout.fxml"));
             loader.setControllerFactory(param -> {
                 if (param == MainLayout.class) {
                     return new MainLayout(inventoryEventBroker, commandBus, queryBus, sessionManager, uiEventBroker);

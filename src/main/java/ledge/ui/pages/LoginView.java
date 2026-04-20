@@ -1,12 +1,13 @@
-package ledge.ui.views;
+package ledge.ui.pages;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+
 import ledge.security.application.events.AuthenticationException;
-import ledge.ui.SessionManager;
+import ledge.ui.core.SessionManager;
 import ledge.ui.events.LoginFailedEvent;
 import ledge.ui.events.LoginSucceededEvent;
 import ledge.ui.messaging.UIEventBroker;

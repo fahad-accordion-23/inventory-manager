@@ -1,12 +1,14 @@
-package ledge.ui.views;
+package ledge.ui.pages;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+
 import ledge.inventory.application.commands.UpdateProductCommand;
 import ledge.inventory.application.dtos.ProductDTO;
 import ledge.inventory.infrastructure.messaging.InventoryCommandBus;
-import ledge.ui.SessionManager;
+import ledge.ui.core.SessionManager;
+import ledge.ui.util.FormValidator;
 import javafx.scene.control.TextField;
 
 import java.math.BigDecimal;

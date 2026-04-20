@@ -1,4 +1,4 @@
-package ledge.ui.views;
+package ledge.ui.pages;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -15,7 +15,8 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
-import ledge.ui.SessionManager;
+import ledge.ui.core.Capability;
+import ledge.ui.core.SessionManager;
 import ledge.inventory.application.commands.RemoveProductCommand;
 import ledge.inventory.application.commands.UpdateProductCommand;
 import ledge.inventory.application.dtos.ProductDTO;
@@ -119,8 +120,8 @@ public class InventoryDashboard {
             return;
         }
 
-        boolean canEdit = role.hasPermission(UpdateProductCommand.REQUIRED);
-        boolean canDelete = role.hasPermission(RemoveProductCommand.REQUIRED);
+        boolean canEdit = sessionManager.isAllowed(Capability.EDIT_PRODUCT);
+        boolean canDelete = sessionManager.isAllowed(Capability.DELETE_PRODUCT);
 
         if (!canEdit && !canDelete) {
             actionsColumn.setVisible(false);

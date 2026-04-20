@@ -1,4 +1,4 @@
-package ledge.ui.views;
+package ledge.ui.util;
 
 import javafx.scene.control.TextField;
 

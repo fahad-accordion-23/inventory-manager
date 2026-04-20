@@ -1,4 +1,4 @@
-package ledge.ui;
+package ledge.ui.core;
 
 import ledge.security.application.events.AuthenticationException;
 import ledge.security.application.services.IAuthenticationService;
@@ -68,5 +68,12 @@ public class SessionManager {
      */
     public Optional<UserDTO> getCurrentUser() {
         return Optional.ofNullable(currentUser);
+    }
+
+    /**
+     * Checks if the current user has the given capability.
+     */
+    public boolean isAllowed(Capability capability) {
+        return currentUser.role().hasPermission(capability.permission());
     }
 }
