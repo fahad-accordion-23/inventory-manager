@@ -1,5 +1,6 @@
 package ledge.util.cqrs;
 
+import ledge.security.application.AuthorizationService;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -30,6 +31,11 @@ public class CommandBus {
     }
 
     private final Map<Class<? extends Command>, HandlerProxy> handlers = new ConcurrentHashMap<>();
+    private final AuthorizationService authService;
+
+    public CommandBus(AuthorizationService authService) {
+        this.authService = authService;
+    }
 
     public void register(Object handler) {
         for (Method method : handler.getClass().getDeclaredMethods()) {
@@ -47,7 +53,12 @@ public class CommandBus {
         }
     }
 
-    public void dispatch(Command command) {
+    public void dispatch(Command command, String token) {
+        // Authorization check
+        command.getRequiredPermission().ifPresent(permission -> {
+            authService.require(token, permission);
+        });
+
         HandlerProxy proxy = handlers.get(command.getClass());
         if (proxy == null) {
             throw new IllegalStateException("No handler registered for command: " + command.getClass().getName());
