@@ -1,21 +1,28 @@
-package ledge.ui;
+package ledge.ui.views;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import ledge.inventory.app.InventoryCommandBus;
-import ledge.inventory.app.command.AddProductCommand;
-import ledge.inventory.app.dto.ProductDTO;
+import ledge.inventory.application.commands.AddProductCommand;
+import ledge.inventory.application.dtos.ProductDTO;
+import ledge.inventory.infrastructure.messaging.InventoryCommandBus;
+import ledge.ui.SessionManager;
 
 import java.math.BigDecimal;
 
+/**
+ * Controller for the Add Product view.
+ * Handles form validation and dispatches the AddProductCommand.
+ */
 public class AddProductView {
 
     private final InventoryCommandBus commandBus;
+    private final SessionManager sessionManager;
 
-    public AddProductView(InventoryCommandBus commandBus) {
+    public AddProductView(InventoryCommandBus commandBus, SessionManager sessionManager) {
         this.commandBus = commandBus;
+        this.sessionManager = sessionManager;
     }
 
     @FXML
@@ -54,7 +61,8 @@ public class AddProductView {
 
         ProductDTO dto = new ProductDTO(null, name, purchasePrice, sellingPrice, stock, taxRate);
         try {
-            commandBus.dispatch(new AddProductCommand(dto));
+            String token = sessionManager.getAuthToken().orElse("");
+            commandBus.dispatch(new AddProductCommand(dto), token);
         } catch (Exception e) {
             Alert alert = new Alert(AlertType.ERROR, e.getMessage());
             alert.showAndWait();

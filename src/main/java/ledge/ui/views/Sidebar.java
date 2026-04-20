@@ -1,13 +1,13 @@
-package ledge.ui;
+package ledge.ui.views;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
-import ledge.inventory.app.InventoryCommandBus;
-import ledge.inventory.app.InventoryEventBroker;
 import ledge.security.domain.Role;
-import ledge.security.app.SecurityContext;
-import ledge.security.app.command.LogoutCommand;
+import ledge.security.domain.User;
+import ledge.ui.SessionManager;
+import ledge.ui.events.UserLoggedOutEvent;
+import ledge.ui.messaging.UIEventBroker;
 
 import java.util.List;
 
@@ -16,32 +16,36 @@ public class Sidebar {
     @FXML
     private VBox navArea;
 
-    private final InventoryEventBroker eventBroker;
-    private final InventoryCommandBus commandBus;
+    private final SessionManager sessionManager;
+    private final UIEventBroker uiEventBroker;
 
-    public Sidebar(InventoryEventBroker eventBroker, InventoryCommandBus commandBus) {
-        this.eventBroker = eventBroker;
-        this.commandBus = commandBus;
+    public Sidebar(SessionManager sessionManager, UIEventBroker uiEventBroker) {
+        this.sessionManager = sessionManager;
+        this.uiEventBroker = uiEventBroker;
     }
 
     @FXML
     public void initialize() {
-        // Nav items are provided later via setNavItems() — nothing to do here yet.
+        // Nav items are provided later via setNavItems()
     }
 
     /**
      * Builds nav buttons from the provided items, showing only those the current
-     * user's role has permission for. The permission check uses each NavItem's own
-     * REQUIRED constant — no (Resource, Action) pairs hardcoded here.
+     * user's role has permission for.
      */
     public void setNavItems(List<NavItem> items) {
         navArea.getChildren().clear();
 
-        if (!SecurityContext.isAuthenticated()) {
+        if (!sessionManager.isAuthenticated()) {
             return;
         }
 
-        Role role = SecurityContext.getCurrentUser().getRole();
+        User user = sessionManager.getCurrentUser().orElse(null);
+        if (user == null) {
+            return;
+        }
+
+        Role role = user.getRole();
         boolean first = true;
 
         for (NavItem item : items) {
@@ -62,6 +66,7 @@ public class Sidebar {
 
     @FXML
     public void handleLogout() {
-        commandBus.dispatch(new LogoutCommand());
+        sessionManager.logout();
+        uiEventBroker.publish(new UserLoggedOutEvent());
     }
 }

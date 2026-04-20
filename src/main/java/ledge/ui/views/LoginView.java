@@ -1,14 +1,15 @@
-package ledge.ui;
+package ledge.ui.views;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import ledge.inventory.app.InventoryCommandBus;
-import ledge.inventory.app.InventoryEventBroker;
-import ledge.security.app.command.LoginCommand;
-import ledge.security.app.event.LoginFailedEvent;
+import ledge.security.application.events.AuthenticationException;
+import ledge.ui.SessionManager;
+import ledge.ui.events.LoginFailedEvent;
+import ledge.ui.events.LoginSucceededEvent;
+import ledge.ui.messaging.UIEventBroker;
 import ledge.util.event.Subscribe;
 
 public class LoginView {
@@ -22,13 +23,13 @@ public class LoginView {
     @FXML
     private Label errorLabel;
 
-    private final InventoryEventBroker eventBroker;
-    private final InventoryCommandBus commandBus;
+    private final SessionManager sessionManager;
+    private final UIEventBroker uiEventBroker;
 
-    public LoginView(InventoryEventBroker eventBroker, InventoryCommandBus commandBus) {
-        this.eventBroker = eventBroker;
-        this.commandBus = commandBus;
-        this.eventBroker.register(this);
+    public LoginView(SessionManager sessionManager, UIEventBroker uiEventBroker) {
+        this.sessionManager = sessionManager;
+        this.uiEventBroker = uiEventBroker;
+        this.uiEventBroker.register(this);
     }
 
     @FXML
@@ -47,7 +48,12 @@ public class LoginView {
             return;
         }
 
-        commandBus.dispatch(new LoginCommand(username, password));
+        try {
+            sessionManager.login(username, password);
+            uiEventBroker.publish(new LoginSucceededEvent());
+        } catch (AuthenticationException e) {
+            uiEventBroker.publish(new LoginFailedEvent(e.getMessage()));
+        }
     }
 
     @Subscribe

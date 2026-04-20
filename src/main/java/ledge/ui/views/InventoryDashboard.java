@@ -1,4 +1,4 @@
-package ledge.ui;
+package ledge.ui.views;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -15,22 +15,27 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
-import ledge.inventory.app.InventoryCommandBus;
-import ledge.inventory.app.InventoryEventBroker;
-import ledge.inventory.app.InventoryQueryBus;
-import ledge.inventory.app.command.RemoveProductCommand;
-import ledge.inventory.app.command.UpdateProductCommand;
-import ledge.inventory.app.dto.ProductDTO;
-import ledge.inventory.app.event.ProductsUpdatedEvent;
-import ledge.inventory.app.query.GetAllProductsQuery;
 import ledge.security.domain.Role;
-import ledge.security.app.SecurityContext;
+import ledge.ui.SessionManager;
+import ledge.inventory.application.commands.RemoveProductCommand;
+import ledge.inventory.application.commands.UpdateProductCommand;
+import ledge.inventory.application.dtos.ProductDTO;
+import ledge.inventory.application.events.ProductsUpdatedEvent;
+import ledge.inventory.application.query.GetAllProductsQuery;
+import ledge.inventory.infrastructure.messaging.InventoryCommandBus;
+import ledge.inventory.infrastructure.messaging.InventoryEventBroker;
+import ledge.inventory.infrastructure.messaging.InventoryQueryBus;
 import ledge.util.event.Subscribe;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+/**
+ * Controller for the inventory table view.
+ * Displays products with search, low-stock highlighting, and authorized
+ * actions.
+ */
 public class InventoryDashboard {
 
     private static final int LOW_STOCK_THRESHOLD = 10;
@@ -47,16 +52,18 @@ public class InventoryDashboard {
     private final InventoryEventBroker eventBroker;
     private final InventoryCommandBus commandBus;
     private final InventoryQueryBus queryBus;
+    private final SessionManager sessionManager;
     private final Consumer<ProductDTO> onEditRequested;
 
     private final ObservableList<ProductDTO> allProducts = FXCollections.observableArrayList();
     private final FilteredList<ProductDTO> filteredProducts = new FilteredList<>(allProducts, _ -> true);
 
     public InventoryDashboard(InventoryEventBroker eventBroker, InventoryCommandBus commandBus,
-            InventoryQueryBus queryBus, Consumer<ProductDTO> onEditRequested) {
+            InventoryQueryBus queryBus, SessionManager sessionManager, Consumer<ProductDTO> onEditRequested) {
         this.eventBroker = eventBroker;
         this.commandBus = commandBus;
         this.queryBus = queryBus;
+        this.sessionManager = sessionManager;
         this.onEditRequested = onEditRequested;
         this.eventBroker.register(this);
     }
@@ -65,7 +72,6 @@ public class InventoryDashboard {
     public void initialize() {
         inventoryTable.setItems(filteredProducts);
 
-        // US-4.3: Search by product name
         searchField.textProperty().addListener((_, _, newValue) -> {
             filteredProducts.setPredicate(product -> {
                 if (newValue == null || newValue.isBlank())
@@ -74,7 +80,6 @@ public class InventoryDashboard {
             });
         });
 
-        // US-4.4: Low-stock highlighting
         inventoryTable.setRowFactory(_ -> new TableRow<>() {
             @Override
             protected void updateItem(ProductDTO item, boolean empty) {
@@ -100,14 +105,20 @@ public class InventoryDashboard {
 
     private void loadAllProducts() {
         try {
-            allProducts.setAll(queryBus.dispatch(new GetAllProductsQuery()));
+            String token = sessionManager.getAuthToken().orElse("");
+            allProducts.setAll(queryBus.dispatch(new GetAllProductsQuery(), token));
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     private void setupActionsColumn() {
-        Role role = SecurityContext.getCurrentUser().getRole();
+        Role role = sessionManager.getCurrentUser().map(u -> u.getRole()).orElse(null);
+        if (role == null) {
+            actionsColumn.setVisible(false);
+            return;
+        }
+
         boolean canEdit = role.hasPermission(UpdateProductCommand.REQUIRED);
         boolean canDelete = role.hasPermission(RemoveProductCommand.REQUIRED);
 
@@ -155,7 +166,8 @@ public class InventoryDashboard {
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
-                commandBus.dispatch(new RemoveProductCommand(product.getId()));
+                String token = sessionManager.getAuthToken().orElse("");
+                commandBus.dispatch(new RemoveProductCommand(product.getId()), token);
             } catch (Exception e) {
                 Alert err = new Alert(Alert.AlertType.ERROR);
                 err.setContentText(e.getMessage());
@@ -167,7 +179,8 @@ public class InventoryDashboard {
     @Subscribe
     private void handleProductsUpdated(ProductsUpdatedEvent event) {
         Platform.runLater(() -> {
-            List<ProductDTO> freshInventory = queryBus.dispatch(new GetAllProductsQuery());
+            String token = sessionManager.getAuthToken().orElse("");
+            List<ProductDTO> freshInventory = queryBus.dispatch(new GetAllProductsQuery(), token);
             allProducts.setAll(freshInventory);
         });
     }

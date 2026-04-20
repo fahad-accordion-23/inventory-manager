@@ -1,4 +1,4 @@
-package ledge.ui;
+package ledge.ui.views;
 
 import ledge.security.domain.Permission;
 

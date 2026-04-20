@@ -1,120 +1,82 @@
 package ledge;
 
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
+import ledge.inventory.application.commands.handlers.AddProductCommandHandler;
+import ledge.inventory.application.commands.handlers.RemoveProductCommandHandler;
+import ledge.inventory.application.commands.handlers.UpdateProductCommandHandler;
+import ledge.inventory.application.query.handlers.GetAllProductsQueryHandler;
+import ledge.inventory.application.services.ProductService;
+import ledge.inventory.infrastructure.ProductRepository;
+import ledge.inventory.infrastructure.messaging.InventoryCommandBus;
+import ledge.inventory.infrastructure.messaging.InventoryEventBroker;
+import ledge.inventory.infrastructure.messaging.InventoryQueryBus;
+import ledge.security.application.AuthenticationService;
+import ledge.security.application.AuthorizationService;
+import ledge.security.application.SessionService;
+import ledge.security.infrastructure.UserRepository;
+import ledge.ui.SessionManager;
+import ledge.ui.UIController;
+import ledge.ui.messaging.UIEventBroker;
 
-import ledge.inventory.app.InventoryCommandBus;
-import ledge.inventory.app.InventoryEventBroker;
-import ledge.inventory.app.InventoryQueryBus;
-import ledge.inventory.app.ProductController;
-import ledge.inventory.domain.ProductService;
-import ledge.infrastructure.ProductRepositoryImpl;
-import ledge.infrastructure.UserJsonRepository;
-import ledge.security.app.AuthController;
-import ledge.security.app.AuthService;
-import ledge.security.app.event.LoginSucceededEvent;
-import ledge.security.app.event.UserLoggedOutEvent;
-import ledge.ui.LoginView;
-import ledge.ui.MainLayout;
-import ledge.ui.Sidebar;
-import ledge.util.event.Subscribe;
-
+/**
+ * Main application class.
+ * Initializes the core components (CQRS buses, security services, messaging)
+ * and hands off UI control to the UIController.
+ */
 public class App extends Application {
 
-    private InventoryEventBroker eventBroker;
+    private InventoryEventBroker inventoryEventBroker;
+    private UIEventBroker uiEventBroker;
     private InventoryCommandBus commandBus;
     private InventoryQueryBus queryBus;
-
-    private ProductController productController;
-    private AuthController authController;
-
-    private Stage primaryStage;
+    private SessionManager sessionManager;
+    private UIController uiController;
 
     @Override
     public void init() throws Exception {
-        eventBroker = new InventoryEventBroker();
-        commandBus = new InventoryCommandBus();
-        queryBus = new InventoryQueryBus();
+        // Security Infrastructure
+        SessionService sessionService = new SessionService();
+        UserRepository userRepository = new UserRepository();
+        AuthenticationService authService = new AuthenticationService(userRepository, sessionService);
+        AuthorizationService authorizationService = new AuthorizationService(sessionService);
 
-        // Product Setup
-        ProductRepositoryImpl productRepository = new ProductRepositoryImpl();
+        // Messaging & CQRS
+        inventoryEventBroker = new InventoryEventBroker();
+        uiEventBroker = new UIEventBroker();
+        commandBus = new InventoryCommandBus(authorizationService);
+        queryBus = new InventoryQueryBus(authorizationService);
+
+        // Inventory Domain
+        ProductRepository productRepository = new ProductRepository();
         ProductService productService = new ProductService(productRepository);
-        productController = new ProductController(productService, eventBroker);
+        
+        // Register Handlers
+        commandBus.register(new AddProductCommandHandler(productService, inventoryEventBroker));
+        commandBus.register(new RemoveProductCommandHandler(productService, inventoryEventBroker));
+        commandBus.register(new UpdateProductCommandHandler(productService, inventoryEventBroker));
+        queryBus.register(new GetAllProductsQueryHandler(productService));
 
-        // Security Setup
-        UserJsonRepository userRepository = new UserJsonRepository();
-        AuthService authService = new AuthService(userRepository);
-        authController = new AuthController(authService, eventBroker);
-
-        eventBroker.register(this);
-        commandBus.register(authController);
-        commandBus.register(productController);
-        queryBus.register(productController);
-    }
-
-    @Subscribe
-    private void onLoginSucceeded(LoginSucceededEvent event) {
-        Platform.runLater(this::showMainScene);
-    }
-
-    @Subscribe
-    private void onUserLoggedOut(UserLoggedOutEvent event) {
-        Platform.runLater(this::showLoginScene);
+        // Client Session
+        sessionManager = new SessionManager(authService, sessionService);
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        this.primaryStage = primaryStage;
         primaryStage.setTitle("Ledge Inventory Manager");
-        showLoginScene();
+
+        // Initialize and start UI coordination
+        uiController = new UIController(
+                primaryStage,
+                uiEventBroker,
+                inventoryEventBroker,
+                commandBus,
+                queryBus,
+                sessionManager
+        );
+
+        uiController.showLoginScene();
         primaryStage.show();
-    }
-
-    private void showLoginScene() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/LoginView.fxml"));
-            loader.setControllerFactory(param -> {
-                if (param == LoginView.class) {
-                    return new LoginView(eventBroker, commandBus);
-                }
-                try {
-                    return param.getDeclaredConstructor().newInstance();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            Parent root = loader.load();
-            primaryStage.setScene(new Scene(root, 800, 600));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void showMainScene() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/MainLayout.fxml"));
-            loader.setControllerFactory(param -> {
-                if (param == MainLayout.class) {
-                    return new MainLayout(eventBroker, commandBus, queryBus);
-                }
-                if (param == Sidebar.class) {
-                    return new Sidebar(eventBroker, commandBus);
-                }
-                try {
-                    return param.getDeclaredConstructor().newInstance();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            });
-            Parent root = loader.load();
-            primaryStage.setScene(new Scene(root, 800, 600));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public static void main(String[] args) {

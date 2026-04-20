@@ -7,7 +7,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="ledge.ui.MainLayout"
+            fx:controller="ledge.ui.views.MainLayout"
             prefHeight="600.0" prefWidth="800.0">
     <left>
         <fx:include source="Sidebar.fxml" fx:id="sidebar" />

@@ -1,19 +1,26 @@
-package ledge.ui;
+package ledge.ui.views;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import ledge.inventory.application.commands.UpdateProductCommand;
+import ledge.inventory.application.dtos.ProductDTO;
+import ledge.inventory.infrastructure.messaging.InventoryCommandBus;
+import ledge.ui.SessionManager;
 import javafx.scene.control.TextField;
-import ledge.inventory.app.InventoryCommandBus;
-import ledge.inventory.app.command.UpdateProductCommand;
-import ledge.inventory.app.dto.ProductDTO;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
+/**
+ * Controller for the Edit Product view.
+ * Handles existing product data loading, validation, and update command
+ * dispatch.
+ */
 public class EditProductView {
 
     private final InventoryCommandBus commandBus;
+    private final SessionManager sessionManager;
     private final Runnable onCancel;
     private UUID productId;
 
@@ -32,12 +39,15 @@ public class EditProductView {
     @FXML
     private TextField taxField;
 
-    public EditProductView(InventoryCommandBus commandBus, Runnable onCancel) {
+    public EditProductView(InventoryCommandBus commandBus, SessionManager sessionManager, Runnable onCancel) {
         this.commandBus = commandBus;
+        this.sessionManager = sessionManager;
         this.onCancel = onCancel;
     }
 
-    /** Pre-populate the form with an existing product's data. Call after FXML load. */
+    /**
+     * Pre-populate the form with an existing product's data. Call after FXML load.
+     */
     public void setProduct(ProductDTO product) {
         this.productId = product.getId();
         nameField.setText(product.getName());
@@ -69,7 +79,8 @@ public class EditProductView {
 
         ProductDTO dto = new ProductDTO(productId, name, purchasePrice, sellingPrice, stock, taxRate);
         try {
-            commandBus.dispatch(new UpdateProductCommand(dto));
+            String token = sessionManager.getAuthToken().orElse("");
+            commandBus.dispatch(new UpdateProductCommand(dto), token);
         } catch (Exception e) {
             Alert alert = new Alert(AlertType.ERROR, e.getMessage());
             alert.showAndWait();

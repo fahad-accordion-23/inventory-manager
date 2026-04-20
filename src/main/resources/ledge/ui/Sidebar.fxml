@@ -6,7 +6,7 @@
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="ledge.ui.Sidebar"
+      fx:controller="ledge.ui.views.Sidebar"
       spacing="10" prefWidth="200.0" style="-fx-border-color: #cccccc; -fx-border-width: 0 1 0 0;">
     <padding>
         <Insets top="20" right="10" bottom="20" left="10"/>
