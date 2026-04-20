@@ -7,18 +7,8 @@ import ledge.shared.types.Resource;
 import ledge.util.cqrs.Command;
 import java.util.Optional;
 
-public class AddProductCommand implements Command {
+public record AddProductCommand(ProductDTO product) implements Command {
     public static final Permission REQUIRED = new Permission(Resource.PRODUCT, Action.CREATE);
-
-    private final ProductDTO product;
-
-    public AddProductCommand(ProductDTO product) {
-        this.product = product;
-    }
-
-    public ProductDTO getProduct() {
-        return product;
-    }
 
     @Override
     public Optional<Permission> getRequiredPermission() {

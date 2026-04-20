@@ -1,6 +1,7 @@
 package ledge.security.application.services;
 
 import ledge.security.application.events.AuthenticationException;
+import ledge.security.domain.ISessionService;
 import ledge.security.domain.SessionService;
 import ledge.shared.types.Role;
 import ledge.users.application.services.IUserService;
@@ -18,8 +19,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AuthenticationServiceTest {
 
-    private AuthenticationService authService;
-    private SessionService sessionService;
+    private IAuthenticationService authService;
+    private ISessionService sessionService;
     private MockUserService userService;
 
     @BeforeEach
@@ -84,28 +85,38 @@ class AuthenticationServiceTest {
         List<User> users = new ArrayList<>();
 
         @Override
-        public void addUser(String username, String password, Role role) {}
+        public void addUser(String username, String password, Role role) {
+        }
 
         @Override
-        public void updateUser(UUID id, String username, String password, Role role) {}
+        public void updateUser(UUID id, String username, String password, Role role) {
+        }
 
         @Override
-        public void changeUserPassword(UUID id, String newPassword) {}
+        public void changeUserPassword(UUID id, String newPassword) {
+        }
 
         @Override
-        public void changeUserRole(UUID id, Role newRole) {}
+        public void changeUserRole(UUID id, Role newRole) {
+        }
 
         @Override
-        public void changeUsername(UUID id, String newUsername) {}
+        public void changeUsername(UUID id, String newUsername) {
+        }
 
         @Override
-        public void removeUser(UUID userId) {}
+        public void removeUser(UUID userId) {
+        }
 
         @Override
-        public List<User> getAllUsers() { return users; }
+        public List<User> getAllUsers() {
+            return users;
+        }
 
         @Override
-        public Optional<User> getUserById(UUID id) { return Optional.empty(); }
+        public Optional<User> getUserById(UUID id) {
+            return Optional.empty();
+        }
 
         @Override
         public Optional<User> getUserByUsername(String username) {

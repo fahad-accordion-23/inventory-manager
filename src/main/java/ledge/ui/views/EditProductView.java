@@ -49,12 +49,12 @@ public class EditProductView {
      * Pre-populate the form with an existing product's data. Call after FXML load.
      */
     public void setProduct(ProductDTO product) {
-        this.productId = product.getId();
-        nameField.setText(product.getName());
-        purchasePriceField.setText(product.getPurchasePrice().toPlainString());
-        sellingPriceField.setText(product.getSellingPrice().toPlainString());
-        stockField.setText(String.valueOf(product.getStockQuantity()));
-        BigDecimal tax = product.getTaxRate();
+        this.productId = product.id();
+        nameField.setText(product.name());
+        purchasePriceField.setText(product.purchasePrice().toPlainString());
+        sellingPriceField.setText(product.sellingPrice().toPlainString());
+        stockField.setText(String.valueOf(product.stockQuantity()));
+        BigDecimal tax = product.taxRate();
         taxField.setText(tax != null ? tax.toPlainString() : "");
     }
 

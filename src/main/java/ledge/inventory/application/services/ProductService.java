@@ -7,7 +7,7 @@ import java.util.UUID;
 import ledge.inventory.domain.Product;
 import ledge.inventory.infrastructure.IProductRepository;
 
-public class ProductService {
+public class ProductService implements IProductService {
     private final IProductRepository repository;
 
     public ProductService(IProductRepository repository) {

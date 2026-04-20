@@ -1,7 +1,7 @@
 package ledge.ui;
 
 import ledge.security.application.events.AuthenticationException;
-import ledge.security.application.services.AuthenticationService;
+import ledge.security.application.services.IAuthenticationService;
 import ledge.users.application.dtos.UserDTO;
 import ledge.users.application.query.GetUserByUsernameQuery;
 import ledge.util.cqrs.QueryBus;
@@ -14,13 +14,13 @@ import java.util.Optional;
  * auth token.
  */
 public class SessionManager {
-    private final AuthenticationService authService;
+    private final IAuthenticationService authService;
     private final QueryBus userQueryBus;
 
     private String authToken;
     private UserDTO currentUser;
 
-    public SessionManager(AuthenticationService authService, QueryBus userQueryBus) {
+    public SessionManager(IAuthenticationService authService, QueryBus userQueryBus) {
         this.authService = authService;
         this.userQueryBus = userQueryBus;
     }

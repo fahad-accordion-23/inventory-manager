@@ -1,6 +1,7 @@
 package ledge.security.application.services;
 
 import ledge.security.application.events.AuthorizationException;
+import ledge.security.domain.ISessionService;
 import ledge.security.domain.SessionService;
 import ledge.shared.types.Action;
 import ledge.shared.types.Permission;
@@ -16,8 +17,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AuthorizationServiceTest {
 
-    private AuthorizationService authorizationService;
-    private SessionService sessionService;
+    private IAuthorizationService authorizationService;
+    private ISessionService sessionService;
 
     @BeforeEach
     void setUp() {
@@ -54,9 +55,9 @@ class AuthorizationServiceTest {
         // ADMIN has all permissions
         UserDTO user = new UserDTO(UUID.randomUUID(), "testUser", Role.ADMIN);
         String token = sessionService.createToken(user);
-        
+
         Permission perm = new Permission(Resource.PRODUCT, Action.CREATE);
-        
+
         assertDoesNotThrow(() -> {
             authorizationService.require(token, perm);
         });
@@ -67,9 +68,9 @@ class AuthorizationServiceTest {
         // SALES_STAFF does not have USER CREATE permission
         UserDTO user = new UserDTO(UUID.randomUUID(), "sales", Role.SALES_STAFF);
         String token = sessionService.createToken(user);
-        
+
         Permission perm = new Permission(Resource.USER, Action.CREATE);
-        
+
         assertThrows(AuthorizationException.class, () -> {
             authorizationService.require(token, perm);
         });

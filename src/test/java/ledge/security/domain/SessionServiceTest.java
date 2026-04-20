@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SessionServiceTest {
 
-    private SessionService sessionService;
+    private ISessionService sessionService;
 
     @BeforeEach
     void setUp() {
@@ -23,7 +23,7 @@ class SessionServiceTest {
     void testCreateToken() {
         UserDTO user = new UserDTO(UUID.randomUUID(), "testUser", Role.ADMIN);
         String token = sessionService.createToken(user);
-        
+
         assertNotNull(token);
         assertFalse(token.isBlank());
     }
@@ -39,7 +39,7 @@ class SessionServiceTest {
     void testGetUserByToken_ValidToken() {
         UserDTO user = new UserDTO(UUID.randomUUID(), "testUser", Role.ADMIN);
         String token = sessionService.createToken(user);
-        
+
         Optional<UserDTO> fetched = sessionService.getUserByToken(token);
         assertTrue(fetched.isPresent());
         assertEquals("testUser", fetched.get().username());
@@ -62,11 +62,11 @@ class SessionServiceTest {
     void testRemoveToken() {
         UserDTO user = new UserDTO(UUID.randomUUID(), "testUser", Role.ADMIN);
         String token = sessionService.createToken(user);
-        
+
         assertTrue(sessionService.getUserByToken(token).isPresent());
-        
+
         sessionService.removeToken(token);
-        
+
         assertFalse(sessionService.getUserByToken(token).isPresent());
     }
 

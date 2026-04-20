@@ -13,6 +13,9 @@ import ledge.inventory.infrastructure.messaging.InventoryEventBroker;
 import ledge.inventory.infrastructure.messaging.InventoryQueryBus;
 import ledge.security.application.services.AuthenticationService;
 import ledge.security.application.services.AuthorizationService;
+import ledge.security.application.services.IAuthenticationService;
+import ledge.security.application.services.IAuthorizationService;
+import ledge.security.domain.ISessionService;
 import ledge.security.domain.SessionService;
 import ledge.ui.SessionManager;
 import ledge.ui.UIController;
@@ -51,9 +54,9 @@ public class App extends Application {
         UserService userService = new UserService(userRepository);
 
         // Security Infrastructure
-        SessionService sessionService = new SessionService();
-        AuthenticationService authService = new AuthenticationService(userService, sessionService);
-        AuthorizationService authorizationService = new AuthorizationService(sessionService);
+        ISessionService sessionService = new SessionService();
+        IAuthenticationService authService = new AuthenticationService(userService, sessionService);
+        IAuthorizationService authorizationService = new AuthorizationService(sessionService);
 
         // Messaging & CQRS
         inventoryEventBroker = new InventoryEventBroker();

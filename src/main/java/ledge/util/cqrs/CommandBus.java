@@ -5,10 +5,9 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import ledge.security.application.services.AuthorizationService;
+import ledge.security.application.services.IAuthorizationService;
 
 public class CommandBus {
-
     private static class HandlerProxy {
         private final Object target;
         private final Method method;
@@ -33,9 +32,9 @@ public class CommandBus {
     }
 
     private final Map<Class<? extends Command>, HandlerProxy> handlers = new ConcurrentHashMap<>();
-    private final AuthorizationService authService;
+    private final IAuthorizationService authService;
 
-    public CommandBus(AuthorizationService authService) {
+    public CommandBus(IAuthorizationService authService) {
         this.authService = authService;
     }
 

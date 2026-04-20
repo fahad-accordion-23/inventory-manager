@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import ledge.security.application.services.AuthorizationService;
+import ledge.security.application.services.IAuthorizationService;
 
 public class QueryBus {
 
@@ -34,9 +34,9 @@ public class QueryBus {
     }
 
     private final Map<Class<? extends Query<?>>, HandlerProxy> handlers = new ConcurrentHashMap<>();
-    private final AuthorizationService authService;
+    private final IAuthorizationService authService;
 
-    public QueryBus(AuthorizationService authService) {
+    public QueryBus(IAuthorizationService authService) {
         this.authService = authService;
     }
 

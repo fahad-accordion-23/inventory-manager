@@ -76,7 +76,7 @@ public class InventoryDashboard {
             filteredProducts.setPredicate(product -> {
                 if (newValue == null || newValue.isBlank())
                     return true;
-                return product.getName().toLowerCase().contains(newValue.toLowerCase());
+                return product.name().toLowerCase().contains(newValue.toLowerCase());
             });
         });
 
@@ -86,7 +86,7 @@ public class InventoryDashboard {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setStyle("");
-                } else if (item.getStockQuantity() < LOW_STOCK_THRESHOLD) {
+                } else if (item.stockQuantity() < LOW_STOCK_THRESHOLD) {
                     setStyle("-fx-background-color: #ffcccc;");
                 } else {
                     setStyle("");
@@ -160,14 +160,14 @@ public class InventoryDashboard {
     private void confirmAndDelete(ProductDTO product) {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Confirm Deletion");
-        confirm.setHeaderText("Delete \"" + product.getName() + "\"?");
+        confirm.setHeaderText("Delete \"" + product.name() + "\"?");
         confirm.setContentText("This action cannot be undone.");
 
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
                 String token = sessionManager.getAuthToken().orElse("");
-                commandBus.dispatch(new RemoveProductCommand(product.getId()), token);
+                commandBus.dispatch(new RemoveProductCommand(product.id()), token);
             } catch (Exception e) {
                 Alert err = new Alert(Alert.AlertType.ERROR);
                 err.setContentText(e.getMessage());

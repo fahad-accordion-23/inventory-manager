@@ -2,15 +2,15 @@ package ledge.inventory.application.query.handlers;
 
 import ledge.inventory.application.dtos.ProductDTO;
 import ledge.inventory.application.query.GetAllProductsQuery;
-import ledge.inventory.application.services.ProductService;
+import ledge.inventory.application.services.IProductService;
 import ledge.util.cqrs.QueryHandler;
 
 import java.util.List;
 
 public class GetAllProductsQueryHandler {
-    private final ProductService productService;
+    private final IProductService productService;
 
-    public GetAllProductsQueryHandler(ProductService productService) {
+    public GetAllProductsQueryHandler(IProductService productService) {
         this.productService = productService;
     }
 

@@ -1,7 +1,7 @@
 package ledge.security.application.services;
 
 import ledge.security.application.events.AuthenticationException;
-import ledge.security.domain.SessionService;
+import ledge.security.domain.ISessionService;
 import ledge.users.application.dtos.UserDTO;
 import ledge.users.application.services.IUserService;
 import ledge.users.domain.User;
@@ -12,13 +12,13 @@ import java.util.Optional;
 /**
  * Service for handling user authentication and token-based sessions.
  */
-public class AuthenticationService {
+public class AuthenticationService implements IAuthenticationService {
     private final IUserService userService;
-    private final SessionService sessionService;
+    private final ISessionService sessionService;
 
     public AuthenticationService(
             IUserService userService,
-            SessionService sessionService) {
+            ISessionService sessionService) {
         this.userService = userService;
         this.sessionService = sessionService;
     }

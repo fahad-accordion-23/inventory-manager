@@ -1,7 +1,7 @@
 package ledge.security.application.services;
 
 import ledge.security.application.events.AuthorizationException;
-import ledge.security.domain.SessionService;
+import ledge.security.domain.ISessionService;
 import ledge.shared.types.Permission;
 import ledge.users.application.dtos.UserDTO;
 
@@ -10,10 +10,10 @@ import java.util.Optional;
 /**
  * Service for enforcing authorization rules based on session tokens.
  */
-public class AuthorizationService {
-    private final SessionService sessionService;
+public class AuthorizationService implements IAuthorizationService {
+    private final ISessionService sessionService;
 
-    public AuthorizationService(SessionService sessionService) {
+    public AuthorizationService(ISessionService sessionService) {
         this.sessionService = sessionService;
     }
 

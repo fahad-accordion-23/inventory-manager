@@ -11,7 +11,7 @@ import ledge.users.application.dtos.UserDTO;
  * Service for managing security tokens and sessions.
  * Provides functionality to create, delete, and look up tokens.
  */
-public class SessionService {
+public class SessionService implements ISessionService {
     private final Map<String, UserDTO> sessions = new ConcurrentHashMap<>();
 
     /**

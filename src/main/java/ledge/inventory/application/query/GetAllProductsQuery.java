@@ -8,11 +8,8 @@ import ledge.util.cqrs.Query;
 import java.util.List;
 import java.util.Optional;
 
-public class GetAllProductsQuery implements Query<List<ProductDTO>> {
+public record GetAllProductsQuery() implements Query<List<ProductDTO>> {
     public static final Permission REQUIRED = new Permission(Resource.PRODUCT, Action.READ);
-
-    public GetAllProductsQuery() {
-    }
 
     @Override
     public Optional<Permission> getRequiredPermission() {

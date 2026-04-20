@@ -11,9 +11,8 @@ public class Product {
     private int stockQuantity;
     private BigDecimal taxRate;
 
-    public Product(UUID id, String name, BigDecimal purchasePrice, BigDecimal sellingPrice, int stockQuantity, BigDecimal taxRate) {
-        // US-2.1: Automatic generation of ID if not provided
-        this.id = (id == null) ? UUID.randomUUID() : id;
+    private Product(UUID id, String name, BigDecimal purchasePrice, BigDecimal sellingPrice, int stockQuantity, BigDecimal taxRate) {
+        this.id = id;
         
         // Using setters to ensure consistent validation during initialization
         setName(name);
@@ -21,6 +20,17 @@ public class Product {
         setSellingPrice(sellingPrice);
         setStockQuantity(stockQuantity);
         setTaxRate(taxRate);
+    }
+
+    public static Product register(String name, BigDecimal purchasePrice, BigDecimal sellingPrice, int stockQuantity, BigDecimal taxRate) {
+        return new Product(UUID.randomUUID(), name, purchasePrice, sellingPrice, stockQuantity, taxRate);
+    }
+
+    public static Product rehydrate(UUID id, String name, BigDecimal purchasePrice, BigDecimal sellingPrice, int stockQuantity, BigDecimal taxRate) {
+        if (id == null) {
+            throw new IllegalArgumentException("ID cannot be null when rehydrating a product");
+        }
+        return new Product(id, name, purchasePrice, sellingPrice, stockQuantity, taxRate);
     }
 
     // ID is immutable; only a getter is provided
