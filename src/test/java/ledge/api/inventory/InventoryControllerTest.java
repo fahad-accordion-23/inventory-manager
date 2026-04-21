@@ -8,7 +8,6 @@ import ledge.inventory.readmodel.dtos.ProductDTO;
 import ledge.inventory.readmodel.infrastructure.messaging.InventoryQueryBus;
 import ledge.inventory.writemodel.contracts.AddProductCommand;
 import ledge.inventory.writemodel.infrastructure.messaging.InventoryCommandBus;
-import ledge.shared.types.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -36,7 +35,8 @@ class InventoryControllerTest {
 
     @Test
     void testGetAllProducts() {
-        ProductDTO product = new ProductDTO(UUID.randomUUID(), "Laptop", new BigDecimal("800"), new BigDecimal("1200"), 10, new BigDecimal("0.1"));
+        ProductDTO product = new ProductDTO(UUID.randomUUID(), "Laptop", new BigDecimal("800"), new BigDecimal("1200"),
+                10, new BigDecimal("0.1"));
         when(queryBus.dispatch(any(), eq("valid-token"))).thenReturn(List.of(product));
 
         ApiResponse<List<ProductResponseDTO>> response = controller.getAllProducts(authContext);

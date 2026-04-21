@@ -37,7 +37,7 @@ public class MainLayout {
     private final InventoryController inventoryController;
     private final UserController userController;
     private final SessionManager sessionManager;
-    private final UIEventBroker uiEventBroker;
+    // private final UIEventBroker uiEventBroker;
 
     private Parent dashboardViewCache;
     private Parent addProductViewCache;
@@ -51,7 +51,7 @@ public class MainLayout {
         this.inventoryController = inventoryController;
         this.userController = userController;
         this.sessionManager = sessionManager;
-        this.uiEventBroker = uiEventBroker;
+        // this.uiEventBroker = uiEventBroker;
     }
 
     @FXML
