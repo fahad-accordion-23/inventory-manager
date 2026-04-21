@@ -3,7 +3,7 @@ package ledge.security.application.services;
 import ledge.security.application.events.AuthorizationException;
 import ledge.security.domain.ISessionService;
 import ledge.shared.types.Permission;
-import ledge.users.application.dtos.UserDTO;
+import ledge.users.readmodel.dtos.UserDTO;
 
 import java.util.Optional;
 

@@ -2,9 +2,8 @@ package ledge.security.application.services;
 
 import ledge.security.application.events.AuthenticationException;
 import ledge.security.domain.ISessionService;
-import ledge.users.application.dtos.UserDTO;
-import ledge.users.application.services.IUserService;
-import ledge.users.domain.User;
+import ledge.users.readmodel.dtos.UserDTO;
+import ledge.users.readmodel.infrastructure.IUserReadRepository;
 import ledge.util.PasswordHasher;
 
 import java.util.Optional;
@@ -13,14 +12,12 @@ import java.util.Optional;
  * Service for handling user authentication and token-based sessions.
  */
 public class AuthenticationService implements IAuthenticationService {
-    private final IUserService userService;
     private final ISessionService sessionService;
+    private final IUserReadRepository userReadRepository;
 
-    public AuthenticationService(
-            IUserService userService,
-            ISessionService sessionService) {
-        this.userService = userService;
+    public AuthenticationService(ISessionService sessionService, IUserReadRepository userReadRepository) {
         this.sessionService = sessionService;
+        this.userReadRepository = userReadRepository;
     }
 
     /**
@@ -32,19 +29,19 @@ public class AuthenticationService implements IAuthenticationService {
      * @throws AuthenticationException if authentication fails.
      */
     public String login(String username, String password) throws AuthenticationException {
-        Optional<User> userOpt = userService.getUserByUsername(username);
+        Optional<UserDTO> userOpt = userReadRepository.findByUsername(username);
 
         if (userOpt.isEmpty()) {
             throw new AuthenticationException("Invalid username or password");
         }
 
-        User user = userOpt.get();
+        UserDTO user = userOpt.get();
 
-        if (!PasswordHasher.verify(password, user.getPasswordHash())) {
+        if (!PasswordHasher.verify(password, user.hashedPassword())) {
             throw new AuthenticationException("Invalid username or password");
         }
 
-        return sessionService.createToken(UserDTO.fromUser(user));
+        return sessionService.createToken(user);
     }
 
     /**

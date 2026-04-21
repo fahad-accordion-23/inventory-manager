@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import ledge.users.application.dtos.UserDTO;
+import ledge.users.readmodel.dtos.UserDTO;
 
 /**
  * Service for managing security tokens and sessions.

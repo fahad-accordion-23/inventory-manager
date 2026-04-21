@@ -1,7 +1,8 @@
 package ledge.security.domain;
 
-import ledge.users.application.dtos.UserDTO;
 import java.util.Optional;
+
+import ledge.users.readmodel.dtos.UserDTO;
 
 public interface ISessionService {
     String createToken(UserDTO user);
