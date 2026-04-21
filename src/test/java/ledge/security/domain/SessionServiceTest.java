@@ -1,7 +1,8 @@
 package ledge.security.domain;
 
 import ledge.shared.types.Role;
-import ledge.users.application.dtos.UserDTO;
+import ledge.users.readmodel.dtos.UserDTO;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +22,7 @@ class SessionServiceTest {
 
     @Test
     void testCreateToken() {
-        UserDTO user = new UserDTO(UUID.randomUUID(), "testUser", Role.ADMIN);
+        UserDTO user = new UserDTO(UUID.randomUUID(), "testUser", "hash", Role.ADMIN);
         String token = sessionService.createToken(user);
 
         assertNotNull(token);
@@ -37,7 +38,7 @@ class SessionServiceTest {
 
     @Test
     void testGetUserByToken_ValidToken() {
-        UserDTO user = new UserDTO(UUID.randomUUID(), "testUser", Role.ADMIN);
+        UserDTO user = new UserDTO(UUID.randomUUID(), "testUser", "hash", Role.ADMIN);
         String token = sessionService.createToken(user);
 
         Optional<UserDTO> fetched = sessionService.getUserByToken(token);
@@ -60,7 +61,7 @@ class SessionServiceTest {
 
     @Test
     void testRemoveToken() {
-        UserDTO user = new UserDTO(UUID.randomUUID(), "testUser", Role.ADMIN);
+        UserDTO user = new UserDTO(UUID.randomUUID(), "testUser", "hash", Role.ADMIN);
         String token = sessionService.createToken(user);
 
         assertTrue(sessionService.getUserByToken(token).isPresent());

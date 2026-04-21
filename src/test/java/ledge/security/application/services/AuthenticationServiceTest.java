@@ -2,125 +2,70 @@ package ledge.security.application.services;
 
 import ledge.security.application.events.AuthenticationException;
 import ledge.security.domain.ISessionService;
-import ledge.security.domain.SessionService;
 import ledge.shared.types.Role;
-import ledge.users.application.services.IUserService;
-import ledge.users.domain.User;
+import ledge.users.readmodel.dtos.UserDTO;
+import ledge.users.readmodel.infrastructure.IUserReadRepository;
 import ledge.util.PasswordHasher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 class AuthenticationServiceTest {
 
-    private IAuthenticationService authService;
+    private AuthenticationService authService;
     private ISessionService sessionService;
-    private MockUserService userService;
+    private IUserReadRepository userReadRepository;
 
     @BeforeEach
     void setUp() {
-        sessionService = new SessionService();
-        userService = new MockUserService();
-        authService = new AuthenticationService(userService, sessionService);
+        sessionService = mock(ISessionService.class);
+        userReadRepository = mock(IUserReadRepository.class);
+        authService = new AuthenticationService(sessionService, userReadRepository);
     }
 
     @Test
     void testSuccessfulLogin() throws AuthenticationException {
-        // Setup user with hashed password
-        String plainPassword = "mySecretPassword";
-        String hash = PasswordHasher.hash(plainPassword);
-        User user = User.rehydrate(UUID.randomUUID(), "testUser", hash, Role.ADMIN);
-        userService.users.add(user);
+        String username = "testuser";
+        String password = "password123";
+        String hashedPassword = PasswordHasher.hash(password);
+        
+        UserDTO user = new UserDTO(UUID.randomUUID(), username, hashedPassword, Role.ADMIN);
+        
+        when(userReadRepository.findByUsername(username)).thenReturn(Optional.of(user));
+        when(sessionService.createToken(user)).thenReturn("mock-token");
 
-        // Perform login
-        String token = authService.login("testUser", plainPassword);
+        String token = authService.login(username, password);
 
-        assertNotNull(token);
-        assertTrue(sessionService.getUserByToken(token).isPresent());
-        assertEquals("testUser", sessionService.getUserByToken(token).get().username());
+        assertEquals("mock-token", token);
+        verify(sessionService).createToken(user);
     }
 
     @Test
-    void testFailedLogin_WrongUsername() {
-        String hash = PasswordHasher.hash("password");
-        User user = User.rehydrate(UUID.randomUUID(), "testUser", hash, Role.ADMIN);
-        userService.users.add(user);
+    void testFailedLogin_InvalidUser() {
+        when(userReadRepository.findByUsername(anyString())).thenReturn(Optional.empty());
 
-        assertThrows(AuthenticationException.class, () -> {
-            authService.login("wrongUser", "password");
-        });
+        assertThrows(AuthenticationException.class, () -> authService.login("none", "pass"));
     }
 
     @Test
     void testFailedLogin_WrongPassword() {
-        String hash = PasswordHasher.hash("password");
-        User user = User.rehydrate(UUID.randomUUID(), "testUser", hash, Role.ADMIN);
-        userService.users.add(user);
+        String username = "testuser";
+        String hashedPassword = PasswordHasher.hash("correct-pass");
+        UserDTO user = new UserDTO(UUID.randomUUID(), username, hashedPassword, Role.ADMIN);
 
-        assertThrows(AuthenticationException.class, () -> {
-            authService.login("testUser", "wrongPassword");
-        });
+        when(userReadRepository.findByUsername(username)).thenReturn(Optional.of(user));
+
+        assertThrows(AuthenticationException.class, () -> authService.login(username, "wrong-pass"));
     }
 
     @Test
-    void testLogout() throws AuthenticationException {
-        String hash = PasswordHasher.hash("pass");
-        User user = User.rehydrate(UUID.randomUUID(), "user", hash, Role.ADMIN);
-        userService.users.add(user);
-
-        String token = authService.login("user", "pass");
-        assertTrue(sessionService.getUserByToken(token).isPresent());
-
-        authService.logout(token);
-        assertFalse(sessionService.getUserByToken(token).isPresent());
-    }
-
-    static class MockUserService implements IUserService {
-        List<User> users = new ArrayList<>();
-
-        @Override
-        public void addUser(String username, String password, Role role) {
-        }
-
-        @Override
-        public void updateUser(UUID id, String username, String password, Role role) {
-        }
-
-        @Override
-        public void changeUserPassword(UUID id, String newPassword) {
-        }
-
-        @Override
-        public void changeUserRole(UUID id, Role newRole) {
-        }
-
-        @Override
-        public void changeUsername(UUID id, String newUsername) {
-        }
-
-        @Override
-        public void removeUser(UUID userId) {
-        }
-
-        @Override
-        public List<User> getAllUsers() {
-            return users;
-        }
-
-        @Override
-        public Optional<User> getUserById(UUID id) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<User> getUserByUsername(String username) {
-            return users.stream().filter(u -> u.getUsername().equals(username)).findFirst();
-        }
+    void testLogout() {
+        authService.logout("valid-token");
+        verify(sessionService).removeToken("valid-token");
     }
 }

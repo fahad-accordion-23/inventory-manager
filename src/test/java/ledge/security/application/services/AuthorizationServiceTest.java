@@ -7,7 +7,8 @@ import ledge.shared.types.Action;
 import ledge.shared.types.Permission;
 import ledge.shared.types.Resource;
 import ledge.shared.types.Role;
-import ledge.users.application.dtos.UserDTO;
+import ledge.users.readmodel.dtos.UserDTO;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -53,7 +54,7 @@ class AuthorizationServiceTest {
     @Test
     void testRequire_ValidTokenWithPermission() {
         // ADMIN has all permissions
-        UserDTO user = new UserDTO(UUID.randomUUID(), "testUser", Role.ADMIN);
+        UserDTO user = new UserDTO(UUID.randomUUID(), "testUser", "hash", Role.ADMIN);
         String token = sessionService.createToken(user);
 
         Permission perm = new Permission(Resource.PRODUCT, Action.CREATE);
@@ -66,7 +67,7 @@ class AuthorizationServiceTest {
     @Test
     void testRequire_ValidTokenWithoutPermission() {
         // SALES_STAFF does not have USER CREATE permission
-        UserDTO user = new UserDTO(UUID.randomUUID(), "sales", Role.SALES_STAFF);
+        UserDTO user = new UserDTO(UUID.randomUUID(), "sales", "hash", Role.SALES_STAFF);
         String token = sessionService.createToken(user);
 
         Permission perm = new Permission(Resource.USER, Action.CREATE);
