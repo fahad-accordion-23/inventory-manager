@@ -1,12 +1,13 @@
 package ledge.ui.core;
 
-import ledge.security.application.events.AuthenticationException;
-import ledge.security.application.services.IAuthenticationService;
-import ledge.users.application.dtos.UserDTO;
-import ledge.users.application.query.GetUserByUsernameQuery;
-import ledge.util.cqrs.QueryBus;
-
 import java.util.Optional;
+
+import ledge.api.shared.ApiResponse;
+import ledge.api.shared.AuthContext;
+import ledge.api.auth.AuthController;
+import ledge.api.auth.dto.LoginRequestDTO;
+import ledge.api.auth.dto.LoginResponseDTO;
+import ledge.api.users.dto.response.UserResponseDTO;
 
 /**
  * Client-side session manager for the UI.
@@ -14,15 +15,13 @@ import java.util.Optional;
  * auth token.
  */
 public class SessionManager {
-    private final IAuthenticationService authService;
-    private final QueryBus userQueryBus;
+    private final AuthController authController;
 
-    private String authToken;
-    private UserDTO currentUser;
+    private AuthContext authContext;
+    private UserResponseDTO currentUser;
 
-    public SessionManager(IAuthenticationService authService, QueryBus userQueryBus) {
-        this.authService = authService;
-        this.userQueryBus = userQueryBus;
+    public SessionManager(AuthController authController) {
+        this.authController = authController;
     }
 
     /**
@@ -30,20 +29,28 @@ public class SessionManager {
      * 
      * @param username The name to login with
      * @param password The password to login with
-     * @throws AuthenticationException if login fails
+     * @throws Exception if login fails
      */
-    public void login(String username, String password) throws AuthenticationException {
-        this.authToken = authService.login(username, password);
-        this.currentUser = userQueryBus.dispatch(new GetUserByUsernameQuery(username), authToken).get();
+    public void login(String username, String password) throws Exception {
+        LoginRequestDTO request = new LoginRequestDTO(username, password);
+        ApiResponse<LoginResponseDTO> response = authController.login(request);
+
+        if (response.success()) {
+            this.authContext = new AuthContext(response.data().token());
+            this.currentUser = response.data().user();
+        } else {
+            throw new Exception(response.error().message());
+        }
     }
 
     /**
      * Clears the current session and invalidates the token on the server.
      */
     public void logout() {
-        if (authToken != null) {
-            authService.logout(authToken);
-            authToken = null;
+        if (authContext != null) {
+            authController.logout(authContext);
+            authContext = null;
+            currentUser = null;
         }
     }
 
@@ -52,21 +59,21 @@ public class SessionManager {
      * 
      * @return Optional containing the token, or empty if not logged in.
      */
-    public Optional<String> getAuthToken() {
-        return Optional.ofNullable(authToken);
+    public Optional<AuthContext> getAuthContext() {
+        return Optional.ofNullable(authContext);
     }
 
     /**
      * Helper to check if a session is currently active.
      */
     public boolean isAuthenticated() {
-        return authToken != null;
+        return authContext != null;
     }
 
     /**
      * Returns the user associated with the current session.
      */
-    public Optional<UserDTO> getCurrentUser() {
+    public Optional<UserResponseDTO> getCurrentUser() {
         return Optional.ofNullable(currentUser);
     }
 

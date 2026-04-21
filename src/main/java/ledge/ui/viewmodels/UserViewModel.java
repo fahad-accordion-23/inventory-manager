@@ -1,8 +1,8 @@
 package ledge.ui.viewmodels;
 
 import javafx.beans.property.*;
+import ledge.api.users.dto.response.UserResponseDTO;
 import ledge.shared.types.Role;
-import ledge.users.application.dtos.UserDTO;
 
 import java.util.UUID;
 
@@ -17,22 +17,22 @@ public class UserViewModel {
     public UserViewModel() {
     }
 
-    public UserViewModel(UserDTO dto) {
+    public UserViewModel(UserResponseDTO dto) {
         updateFrom(dto);
     }
 
-    public static UserViewModel fromDTO(UserDTO dto) {
+    public static UserViewModel fromDTO(UserResponseDTO dto) {
         return new UserViewModel(dto);
     }
 
-    public void updateFrom(UserDTO dto) {
+    public void updateFrom(UserResponseDTO dto) {
         this.id.set(dto.id());
         this.username.set(dto.username());
         this.role.set(dto.role());
     }
 
-    public UserDTO toDTO() {
-        return new UserDTO(id.get(), username.get(), role.get());
+    public UserResponseDTO toDTO() {
+        return new UserResponseDTO(id.get(), username.get(), role.get());
     }
 
     // --- Properties ---

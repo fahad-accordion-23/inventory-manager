@@ -5,12 +5,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import ledge.inventory.infrastructure.messaging.InventoryCommandBus;
-import ledge.inventory.infrastructure.messaging.InventoryEventBroker;
-import ledge.inventory.infrastructure.messaging.InventoryQueryBus;
-import ledge.users.infrastructure.messaging.UserCommandBus;
-import ledge.users.infrastructure.messaging.UserEventBroker;
-import ledge.users.infrastructure.messaging.UserQueryBus;
+
+import ledge.api.inventory.InventoryController;
+import ledge.api.users.UserController;
 import ledge.ui.events.LoginSucceededEvent;
 import ledge.ui.events.NavigateToLoginEvent;
 import ledge.ui.events.NavigateToMainEvent;
@@ -19,7 +16,7 @@ import ledge.ui.messaging.UIEventBroker;
 import ledge.ui.pages.LoginView;
 import ledge.ui.components.MainLayout;
 import ledge.ui.components.Sidebar;
-import ledge.util.event.Subscribe;
+import ledge.shared.infrastructure.events.Subscribe;
 
 /**
  * Event-driven controller for coordinating UI states and transitions.
@@ -28,31 +25,17 @@ import ledge.util.event.Subscribe;
 public class UIController {
     private final Stage primaryStage;
     private final UIEventBroker uiEventBroker;
-    private final InventoryEventBroker inventoryEventBroker;
-    private final InventoryCommandBus inventoryCommandBus;
-    private final InventoryQueryBus inventoryQueryBus;
-    private final UserEventBroker userEventBroker;
-    private final UserCommandBus userCommandBus;
-    private final UserQueryBus userQueryBus;
     private final SessionManager sessionManager;
+    private final InventoryController inventoryController;
+    private final UserController userController;
 
-    public UIController(Stage primaryStage, UIEventBroker uiEventBroker,
-            InventoryEventBroker inventoryEventBroker,
-            InventoryCommandBus inventoryCommandBus,
-            InventoryQueryBus inventoryQueryBus,
-            UserEventBroker userEventBroker,
-            UserCommandBus userCommandBus,
-            UserQueryBus userQueryBus,
-            SessionManager sessionManager) {
+    public UIController(Stage primaryStage, UIEventBroker uiEventBroker, SessionManager sessionManager,
+            InventoryController inventoryController, UserController userController) {
         this.primaryStage = primaryStage;
         this.uiEventBroker = uiEventBroker;
-        this.inventoryEventBroker = inventoryEventBroker;
-        this.inventoryCommandBus = inventoryCommandBus;
-        this.inventoryQueryBus = inventoryQueryBus;
-        this.userEventBroker = userEventBroker;
-        this.userCommandBus = userCommandBus;
-        this.userQueryBus = userQueryBus;
         this.sessionManager = sessionManager;
+        this.inventoryController = inventoryController;
+        this.userController = userController;
 
         this.uiEventBroker.register(this);
     }
@@ -108,8 +91,7 @@ public class UIController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/components/MainLayout.fxml"));
             loader.setControllerFactory(param -> {
                 if (param == MainLayout.class) {
-                    return new MainLayout(inventoryEventBroker, inventoryCommandBus, inventoryQueryBus,
-                            userEventBroker, userCommandBus, userQueryBus, sessionManager, uiEventBroker);
+                    return new MainLayout(inventoryController, userController, sessionManager, uiEventBroker);
                 }
                 if (param == Sidebar.class) {
                     return new Sidebar(sessionManager, uiEventBroker);

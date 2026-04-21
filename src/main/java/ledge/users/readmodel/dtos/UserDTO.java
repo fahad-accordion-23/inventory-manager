@@ -1,5 +1,6 @@
 package ledge.users.readmodel.dtos;
 
+import com.google.gson.annotations.SerializedName;
 import ledge.shared.types.Role;
 import ledge.users.writemodel.domain.User;
 
@@ -8,7 +9,7 @@ import java.util.UUID;
 public record UserDTO(
         UUID id,
         String username,
-        String hashedPassword,
+        @SerializedName("passwordHash") String hashedPassword,
         Role role) {
 
     public static UserDTO fromUser(User user) {

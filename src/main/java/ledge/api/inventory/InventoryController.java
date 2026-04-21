@@ -1,7 +1,7 @@
-package ledge.api.products;
+package ledge.api.inventory;
 
-import ledge.api.products.dto.request.*;
-import ledge.api.products.dto.response.ProductResponseDTO;
+import ledge.api.inventory.dto.request.*;
+import ledge.api.inventory.dto.response.ProductResponseDTO;
 import ledge.api.shared.ApiResponse;
 import ledge.api.shared.AuthContext;
 import ledge.inventory.readmodel.contracts.GetAllProductsQuery;
@@ -18,11 +18,11 @@ import java.util.stream.Collectors;
 /**
  * Controller for managing inventory/product-related API requests.
  */
-public class ProductController {
+public class InventoryController {
     private final InventoryCommandBus commandBus;
     private final InventoryQueryBus queryBus;
 
-    public ProductController(InventoryCommandBus commandBus, InventoryQueryBus queryBus) {
+    public InventoryController(InventoryCommandBus commandBus, InventoryQueryBus queryBus) {
         this.commandBus = commandBus;
         this.queryBus = queryBus;
     }

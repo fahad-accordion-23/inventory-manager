@@ -1,39 +1,28 @@
 package ledge.ui.pages;
 
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import ledge.api.inventory.InventoryController;
+import ledge.api.inventory.dto.request.DeleteProductRequestDTO;
+import ledge.api.inventory.dto.response.ProductResponseDTO;
+import ledge.api.shared.ApiResponse;
+import ledge.api.shared.AuthContext;
+import ledge.shared.types.Role;
 import ledge.ui.core.Capability;
 import ledge.ui.core.SessionManager;
 import ledge.ui.viewmodels.ProductViewModel;
-import ledge.inventory.application.commands.RemoveProductCommand;
-import ledge.inventory.application.dtos.ProductDTO;
-import ledge.inventory.application.events.ProductsUpdatedEvent;
-import ledge.inventory.application.query.GetAllProductsQuery;
-import ledge.inventory.infrastructure.messaging.InventoryCommandBus;
-import ledge.inventory.infrastructure.messaging.InventoryEventBroker;
-import ledge.inventory.infrastructure.messaging.InventoryQueryBus;
-import ledge.shared.types.Role;
-import ledge.util.event.Subscribe;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
- * Controller for the inventory table view.
+ * Controller for the inventory table view via the API layer.
  * Displays products with search, low-stock highlighting, and authorized
  * actions.
  */
@@ -50,23 +39,18 @@ public class InventoryDashboard {
     @FXML
     private TextField searchField;
 
-    private final InventoryEventBroker eventBroker;
-    private final InventoryCommandBus commandBus;
-    private final InventoryQueryBus queryBus;
+    private final InventoryController inventoryController;
     private final SessionManager sessionManager;
-    private final Consumer<ProductDTO> onEditRequested;
+    private final Consumer<ProductResponseDTO> onEditRequested;
 
     private final ObservableList<ProductViewModel> allProducts = FXCollections.observableArrayList();
     private final FilteredList<ProductViewModel> filteredProducts = new FilteredList<>(allProducts, _ -> true);
 
-    public InventoryDashboard(InventoryEventBroker eventBroker, InventoryCommandBus commandBus,
-            InventoryQueryBus queryBus, SessionManager sessionManager, Consumer<ProductDTO> onEditRequested) {
-        this.eventBroker = eventBroker;
-        this.commandBus = commandBus;
-        this.queryBus = queryBus;
+    public InventoryDashboard(InventoryController inventoryController, SessionManager sessionManager,
+            Consumer<ProductResponseDTO> onEditRequested) {
+        this.inventoryController = inventoryController;
         this.sessionManager = sessionManager;
         this.onEditRequested = onEditRequested;
-        this.eventBroker.register(this);
     }
 
     @FXML
@@ -105,19 +89,24 @@ public class InventoryDashboard {
     }
 
     private void loadAllProducts() {
-        try {
-            String token = sessionManager.getAuthToken().orElse("");
-            List<ProductViewModel> viewModels = queryBus.dispatch(new GetAllProductsQuery(), token)
+        Optional<AuthContext> authContext = sessionManager.getAuthContext();
+        if (authContext.isEmpty())
+            return;
+
+        ApiResponse<List<ProductResponseDTO>> response = inventoryController.getAllProducts(authContext.get());
+        if (response.success()) {
+            List<ProductViewModel> viewModels = response.data()
                     .stream()
                     .map(ProductViewModel::new)
                     .toList();
             allProducts.setAll(viewModels);
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
     private void setupActionsColumn() {
+        if (sessionManager.getCurrentUser().isEmpty())
+            return;
+
         Role role = sessionManager.getCurrentUser().get().role();
         if (role == null) {
             actionsColumn.setVisible(false);
@@ -170,26 +159,17 @@ public class InventoryDashboard {
 
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            try {
-                String token = sessionManager.getAuthToken().orElse("");
-                commandBus.dispatch(new RemoveProductCommand(product.getId()), token);
-            } catch (Exception e) {
-                Alert err = new Alert(Alert.AlertType.ERROR);
-                err.setContentText(e.getMessage());
-                err.showAndWait();
+            Optional<AuthContext> authContext = sessionManager.getAuthContext();
+            if (authContext.isEmpty())
+                return;
+
+            ApiResponse<Void> response = inventoryController.deleteProduct(authContext.get(),
+                    new DeleteProductRequestDTO(product.getId()));
+            if (response.success()) {
+                loadAllProducts();
+            } else {
+                new Alert(Alert.AlertType.ERROR, response.error().message()).showAndWait();
             }
         }
-    }
-
-    @Subscribe
-    private void handleProductsUpdated(ProductsUpdatedEvent event) {
-        Platform.runLater(() -> {
-            String token = sessionManager.getAuthToken().orElse("");
-            List<ProductViewModel> freshInventory = queryBus.dispatch(new GetAllProductsQuery(), token)
-                    .stream()
-                    .map(ProductViewModel::new)
-                    .toList();
-            allProducts.setAll(freshInventory);
-        });
     }
 }

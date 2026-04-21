@@ -1,6 +1,6 @@
 package ledge.ui.events;
 
-import ledge.util.event.Event;
+import ledge.shared.infrastructure.events.Event;
 
 public class UserLoggedOutEvent implements Event {
 }

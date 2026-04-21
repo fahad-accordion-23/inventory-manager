@@ -6,13 +6,16 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
-import ledge.security.application.events.AuthenticationException;
+import ledge.shared.infrastructure.events.Subscribe;
 import ledge.ui.core.SessionManager;
 import ledge.ui.events.LoginFailedEvent;
 import ledge.ui.events.LoginSucceededEvent;
 import ledge.ui.messaging.UIEventBroker;
-import ledge.util.event.Subscribe;
 
+/**
+ * Controller for the Login view.
+ * Coordinates with SessionManager to authenticate users.
+ */
 public class LoginView {
 
     @FXML
@@ -52,7 +55,7 @@ public class LoginView {
         try {
             sessionManager.login(username, password);
             uiEventBroker.publish(new LoginSucceededEvent());
-        } catch (AuthenticationException e) {
+        } catch (Exception e) {
             uiEventBroker.publish(new LoginFailedEvent(e.getMessage()));
         }
     }

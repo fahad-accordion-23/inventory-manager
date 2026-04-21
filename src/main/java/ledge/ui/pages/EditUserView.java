@@ -2,18 +2,21 @@ package ledge.ui.pages;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import ledge.api.shared.ApiResponse;
+import ledge.api.shared.AuthContext;
+import ledge.api.users.UserController;
+import ledge.api.users.dto.request.ChangeUserRoleRequestDTO;
+import ledge.api.users.dto.request.ChangeUsernameRequestDTO;
+import ledge.api.users.dto.response.UserResponseDTO;
 import ledge.shared.types.Role;
 import ledge.ui.core.SessionManager;
 import ledge.ui.util.FormValidator;
-import ledge.users.application.commands.ChangeUserRoleCommand;
-import ledge.users.application.commands.ChangeUsernameCommand;
-import ledge.users.application.dtos.UserDTO;
-import ledge.users.infrastructure.messaging.UserCommandBus;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Controller for editing an existing user's details.
+ * Controller for editing an existing user's details via the API layer.
  */
 public class EditUserView {
 
@@ -23,15 +26,15 @@ public class EditUserView {
     @FXML
     private ComboBox<Role> roleComboBox;
 
-    private final UserCommandBus commandBus;
+    private final UserController userController;
     private final SessionManager sessionManager;
     private final Runnable onCancel;
     private UUID userId;
     private String originalUsername;
     private Role originalRole;
 
-    public EditUserView(UserCommandBus commandBus, SessionManager sessionManager, Runnable onCancel) {
-        this.commandBus = commandBus;
+    public EditUserView(UserController userController, SessionManager sessionManager, Runnable onCancel) {
+        this.userController = userController;
         this.sessionManager = sessionManager;
         this.onCancel = onCancel;
     }
@@ -41,11 +44,14 @@ public class EditUserView {
         roleComboBox.getItems().setAll(Role.values());
     }
 
-    public void setUser(UserDTO user) {
+    /**
+     * Pre-populate the form with an existing user's data.
+     */
+    public void setUser(UserResponseDTO user) {
         this.userId = user.id();
         this.originalUsername = user.username();
         this.originalRole = user.role();
-        
+
         usernameField.setText(originalUsername);
         roleComboBox.setValue(originalRole);
     }
@@ -61,15 +67,31 @@ public class EditUserView {
             return;
         }
 
+        Optional<AuthContext> authContext = sessionManager.getAuthContext();
+        if (authContext.isEmpty()) {
+            new Alert(Alert.AlertType.ERROR, "You are not logged in.").showAndWait();
+            return;
+        }
+
+        AuthContext context = authContext.get();
+
         try {
-            String token = sessionManager.getAuthToken().orElse("");
-            
-            // Dispatch commands only if values changed
+            // Dispatch updates only if values changed
             if (!newUsername.equals(originalUsername)) {
-                commandBus.dispatch(new ChangeUsernameCommand(userId, newUsername), token);
+                ApiResponse<Void> response = userController.changeUsername(context,
+                        new ChangeUsernameRequestDTO(userId, newUsername));
+
+                if (!response.success()) {
+                    throw new Exception(response.error().message());
+                }
             }
             if (!newRole.equals(originalRole)) {
-                commandBus.dispatch(new ChangeUserRoleCommand(userId, newRole), token);
+                ApiResponse<Void> response = userController.changeRole(context,
+                        new ChangeUserRoleRequestDTO(userId, newRole));
+
+                if (!response.success()) {
+                    throw new Exception(response.error().message());
+                }
             }
 
             new Alert(Alert.AlertType.INFORMATION, "User updated successfully!").showAndWait();

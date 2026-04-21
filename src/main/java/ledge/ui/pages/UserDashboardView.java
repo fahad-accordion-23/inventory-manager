@@ -1,30 +1,27 @@
 package ledge.ui.pages;
 
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
-import ledge.shared.types.Role;
+import ledge.api.shared.ApiResponse;
+import ledge.api.shared.AuthContext;
+import ledge.api.users.UserController;
+import ledge.api.users.dto.request.DeleteUserRequestDTO;
+import ledge.api.users.dto.response.UserListResponseDTO;
+import ledge.api.users.dto.response.UserResponseDTO;
 import ledge.ui.core.Capability;
 import ledge.ui.core.SessionManager;
 import ledge.ui.viewmodels.UserViewModel;
-import ledge.users.application.commands.RemoveUserCommand;
-import ledge.users.application.dtos.UserDTO;
-import ledge.users.application.events.UsersUpdatedEvent;
-import ledge.users.application.query.GetAllUsersQuery;
-import ledge.users.infrastructure.messaging.UserCommandBus;
-import ledge.users.infrastructure.messaging.UserEventBroker;
-import ledge.users.infrastructure.messaging.UserQueryBus;
-import ledge.util.event.Subscribe;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+/**
+ * Controller for the user management table view via the API layer.
+ */
 public class UserDashboardView {
 
     @FXML
@@ -36,38 +33,28 @@ public class UserDashboardView {
     @FXML
     private Button addUserBtn;
 
-    private final UserEventBroker eventBroker;
-    private final UserCommandBus commandBus;
-    private final UserQueryBus queryBus;
+    private final UserController userController;
     private final SessionManager sessionManager;
     private final Runnable onAddRequested;
-    private final Consumer<UserDTO> onEditRequested;
+    private final Consumer<UserResponseDTO> onEditRequested;
 
     private final ObservableList<UserViewModel> allUsers = FXCollections.observableArrayList();
 
-    public UserDashboardView(UserEventBroker eventBroker, UserCommandBus commandBus,
-            UserQueryBus queryBus, SessionManager sessionManager,
-            Runnable onAddRequested, Consumer<UserDTO> onEditRequested) {
-        this.eventBroker = eventBroker;
-        this.commandBus = commandBus;
-        this.queryBus = queryBus;
+    public UserDashboardView(UserController userController, SessionManager sessionManager,
+            Runnable onAddRequested, Consumer<UserResponseDTO> onEditRequested) {
+        this.userController = userController;
         this.sessionManager = sessionManager;
         this.onAddRequested = onAddRequested;
         this.onEditRequested = onEditRequested;
-        this.eventBroker.register(this);
     }
 
     @FXML
     public void initialize() {
         usersTable.setItems(allUsers);
-        
-        // Setup table columns (Username, Role)
-        // ... handled in FXML mostly but actions column needs code
-        
+
         setupActionsColumn();
         loadAllUsers();
-        
-        // Only admins or those with CREATE_USER capability can see Add User
+
         addUserBtn.setVisible(sessionManager.isAllowed(Capability.CREATE_USER));
     }
 
@@ -82,15 +69,13 @@ public class UserDashboardView {
     }
 
     private void loadAllUsers() {
-        try {
-            String token = sessionManager.getAuthToken().orElse("");
-            List<UserViewModel> viewModels = queryBus.dispatch(new GetAllUsersQuery(), token)
-                    .stream()
-                    .map(UserViewModel::new)
-                    .toList();
-            allUsers.setAll(viewModels);
-        } catch (Exception e) {
-            e.printStackTrace();
+        Optional<AuthContext> authContext = sessionManager.getAuthContext();
+        if (authContext.isEmpty())
+            return;
+
+        ApiResponse<UserListResponseDTO> response = userController.getAllUsers(authContext.get());
+        if (response.success()) {
+            allUsers.setAll(response.data().users().stream().map(UserViewModel::new).toList());
         }
     }
 
@@ -119,8 +104,10 @@ public class UserDashboardView {
                     confirmAndDelete(user);
                 });
 
-                if (canEdit) buttons.getChildren().add(editBtn);
-                if (canDelete) buttons.getChildren().add(deleteBtn);
+                if (canEdit)
+                    buttons.getChildren().add(editBtn);
+                if (canDelete)
+                    buttons.getChildren().add(deleteBtn);
             }
 
             @Override
@@ -132,9 +119,8 @@ public class UserDashboardView {
     }
 
     private void confirmAndDelete(UserViewModel user) {
-        // Don't allow deleting self? (Good practice)
-        if (sessionManager.getCurrentUser().isPresent() && 
-            sessionManager.getCurrentUser().get().id().equals(user.getId())) {
+        if (sessionManager.getCurrentUser().isPresent() &&
+                sessionManager.getCurrentUser().get().id().equals(user.getId())) {
             new Alert(Alert.AlertType.WARNING, "You cannot delete your own account.").showAndWait();
             return;
         }
@@ -146,17 +132,18 @@ public class UserDashboardView {
 
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            try {
-                String token = sessionManager.getAuthToken().orElse("");
-                commandBus.dispatch(new RemoveUserCommand(user.getId()), token);
-            } catch (Exception e) {
-                new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+            Optional<AuthContext> authContext = sessionManager.getAuthContext();
+            if (authContext.isEmpty())
+                return;
+
+            ApiResponse<Void> response = userController.deleteUser(authContext.get(),
+                    new DeleteUserRequestDTO(user.getId()));
+
+            if (response.success()) {
+                loadAllUsers();
+            } else {
+                new Alert(Alert.AlertType.ERROR, response.error().message()).showAndWait();
             }
         }
-    }
-
-    @Subscribe
-    private void handleUsersUpdated(UsersUpdatedEvent event) {
-        Platform.runLater(this::loadAllUsers);
     }
 }

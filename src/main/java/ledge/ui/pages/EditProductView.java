@@ -2,26 +2,28 @@ package ledge.ui.pages;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.TextField;
 import javafx.scene.control.Alert.AlertType;
-
-import ledge.inventory.application.commands.UpdateProductCommand;
-import ledge.inventory.application.dtos.ProductDTO;
-import ledge.inventory.infrastructure.messaging.InventoryCommandBus;
+import ledge.api.inventory.InventoryController;
+import ledge.api.inventory.dto.request.UpdateProductRequestDTO;
+import ledge.api.inventory.dto.response.ProductResponseDTO;
+import ledge.api.shared.ApiResponse;
+import ledge.api.shared.AuthContext;
 import ledge.ui.core.SessionManager;
 import ledge.ui.util.FormValidator;
-import javafx.scene.control.TextField;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
  * Controller for the Edit Product view.
  * Handles existing product data loading, validation, and update command
- * dispatch.
+ * dispatch via the API layer.
  */
 public class EditProductView {
 
-    private final InventoryCommandBus commandBus;
+    private final InventoryController inventoryController;
     private final SessionManager sessionManager;
     private final Runnable onCancel;
     private UUID productId;
@@ -41,8 +43,8 @@ public class EditProductView {
     @FXML
     private TextField taxField;
 
-    public EditProductView(InventoryCommandBus commandBus, SessionManager sessionManager, Runnable onCancel) {
-        this.commandBus = commandBus;
+    public EditProductView(InventoryController inventoryController, SessionManager sessionManager, Runnable onCancel) {
+        this.inventoryController = inventoryController;
         this.sessionManager = sessionManager;
         this.onCancel = onCancel;
     }
@@ -50,7 +52,7 @@ public class EditProductView {
     /**
      * Pre-populate the form with an existing product's data. Call after FXML load.
      */
-    public void setProduct(ProductDTO product) {
+    public void setProduct(ProductResponseDTO product) {
         this.productId = product.id();
         nameField.setText(product.name());
         purchasePriceField.setText(product.purchasePrice().toPlainString());
@@ -79,23 +81,35 @@ public class EditProductView {
             return;
         }
 
-        ProductDTO dto = new ProductDTO(productId, name, purchasePrice, sellingPrice, stock, taxRate);
-        try {
-            String token = sessionManager.getAuthToken().orElse("");
-            commandBus.dispatch(new UpdateProductCommand(dto), token);
-        } catch (Exception e) {
-            Alert alert = new Alert(AlertType.ERROR, e.getMessage());
+        UpdateProductRequestDTO request = new UpdateProductRequestDTO(
+                productId,
+                name,
+                purchasePrice,
+                sellingPrice,
+                stock,
+                taxRate);
+
+        Optional<AuthContext> authContext = sessionManager.getAuthContext();
+        if (authContext.isEmpty()) {
+            Alert alert = new Alert(AlertType.ERROR, "You are not logged in.");
             alert.showAndWait();
             return;
         }
 
-        Alert alert = new Alert(AlertType.INFORMATION);
-        alert.setTitle("Success");
-        alert.setHeaderText(null);
-        alert.setContentText("Product successfully updated!");
-        alert.showAndWait();
+        ApiResponse<Void> response = inventoryController.updateProduct(authContext.get(), request);
 
-        onCancel.run(); // Navigate back to dashboard
+        if (response.success()) {
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle("Success");
+            alert.setHeaderText(null);
+            alert.setContentText("Product successfully updated!");
+            alert.showAndWait();
+
+            onCancel.run(); // Navigate back to dashboard
+        } else {
+            Alert alert = new Alert(AlertType.ERROR, response.error().message());
+            alert.showAndWait();
+        }
     }
 
     @FXML

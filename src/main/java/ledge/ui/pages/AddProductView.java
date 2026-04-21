@@ -4,14 +4,16 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-
-import ledge.inventory.application.commands.AddProductCommand;
-import ledge.inventory.application.dtos.ProductDTO;
-import ledge.inventory.infrastructure.messaging.InventoryCommandBus;
+import ledge.api.inventory.InventoryController;
+import ledge.api.inventory.dto.request.CreateProductRequestDTO;
+import ledge.api.inventory.dto.response.ProductResponseDTO;
+import ledge.api.shared.ApiResponse;
+import ledge.api.shared.AuthContext;
 import ledge.ui.core.SessionManager;
 import ledge.ui.util.FormValidator;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 /**
  * Controller for the Add Product view.
@@ -19,11 +21,11 @@ import java.math.BigDecimal;
  */
 public class AddProductView {
 
-    private final InventoryCommandBus commandBus;
+    private final InventoryController inventoryController;
     private final SessionManager sessionManager;
 
-    public AddProductView(InventoryCommandBus commandBus, SessionManager sessionManager) {
-        this.commandBus = commandBus;
+    public AddProductView(InventoryController inventoryController, SessionManager sessionManager) {
+        this.inventoryController = inventoryController;
         this.sessionManager = sessionManager;
     }
 
@@ -61,16 +63,25 @@ public class AddProductView {
             return;
         }
 
-        ProductDTO dto = new ProductDTO(null, name, purchasePrice, sellingPrice, stock, taxRate);
-        try {
-            String token = sessionManager.getAuthToken().orElse("");
-            commandBus.dispatch(new AddProductCommand(dto), token);
-        } catch (Exception e) {
-            Alert alert = new Alert(AlertType.ERROR, e.getMessage());
+        CreateProductRequestDTO request = new CreateProductRequestDTO(name, purchasePrice, sellingPrice,
+                stock, taxRate);
+
+        Optional<AuthContext> authContext = sessionManager.getAuthContext();
+        if (authContext.isEmpty()) {
+            Alert alert = new Alert(AlertType.ERROR, "You are not logged in.");
             alert.showAndWait();
             return;
         }
-        clearFormFields();
+        ApiResponse<ProductResponseDTO> response = inventoryController.createProduct(
+                authContext.get(), request);
+
+        if (response.success()) {
+            clearFormFields();
+        } else {
+            Alert alert = new Alert(AlertType.ERROR, response.error().message());
+            alert.showAndWait();
+            return;
+        }
 
         Alert alert = new Alert(AlertType.INFORMATION);
         alert.setTitle("Success");
