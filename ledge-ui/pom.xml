@@ -11,7 +11,7 @@
     <dependencies>
         <dependency>
             <groupId>ledge</groupId>
-            <artifactId>ledge-server</artifactId>
+            <artifactId>ledge-contracts</artifactId>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
@@ -20,6 +20,11 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.10.1</version>
         </dependency>
     </dependencies>
 

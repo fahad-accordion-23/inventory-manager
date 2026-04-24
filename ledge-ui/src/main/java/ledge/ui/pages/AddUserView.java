@@ -6,7 +6,7 @@ import javafx.scene.control.Alert.AlertType;
 
 import ledge.api.shared.AuthContext;
 import ledge.api.shared.ApiResponse;
-import ledge.api.users.UserController;
+import ledge.ui.clients.HttpUserClient;
 import ledge.api.users.dto.response.UserResponseDTO;
 import ledge.api.users.dto.request.CreateUserRequestDTO;
 import ledge.shared.types.Role;
@@ -24,11 +24,11 @@ public class AddUserView {
     @FXML
     private ComboBox<Role> roleComboBox;
 
-    private final UserController userController;
+    private final HttpUserClient userController;
     private final SessionManager sessionManager;
     private final Runnable onCancel;
 
-    public AddUserView(UserController userController, SessionManager sessionManager, Runnable onCancel) {
+    public AddUserView(HttpUserClient userController, SessionManager sessionManager, Runnable onCancel) {
         this.userController = userController;
         this.sessionManager = sessionManager;
         this.onCancel = onCancel;

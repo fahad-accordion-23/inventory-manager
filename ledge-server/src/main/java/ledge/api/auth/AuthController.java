@@ -3,7 +3,6 @@ package ledge.api.auth;
 import ledge.api.auth.dto.LoginRequestDTO;
 import ledge.api.auth.dto.LoginResponseDTO;
 import ledge.api.shared.ApiResponse;
-import ledge.api.shared.AuthContext;
 import ledge.api.users.dto.response.UserResponseDTO;
 import ledge.security.application.events.AuthenticationException;
 import ledge.security.application.services.IAuthenticationService;
@@ -12,9 +11,13 @@ import ledge.users.readmodel.dtos.UserDTO;
 
 import java.util.Optional;
 
+import org.springframework.web.bind.annotation.*;
+
 /**
  * Controller for handling authentication-related API requests.
  */
+@RestController
+@RequestMapping("/api/auth")
 public class AuthController {
     private final IAuthenticationService authService;
     private final ISessionService sessionService;
@@ -27,7 +30,8 @@ public class AuthController {
     /**
      * Authenticates a user and returns a token and user details.
      */
-    public ApiResponse<LoginResponseDTO> login(LoginRequestDTO request) {
+    @PostMapping("/login")
+    public ApiResponse<LoginResponseDTO> login(@RequestBody LoginRequestDTO request) {
         try {
             String token = authService.login(request.username(), request.password());
             Optional<UserDTO> userOpt = sessionService.getUserByToken(token);
@@ -47,9 +51,11 @@ public class AuthController {
     /**
      * Invalidates the provided authentication token.
      */
-    public ApiResponse<Void> logout(AuthContext context) {
-        if (context != null && context.token() != null) {
-            authService.logout(context.token());
+    @PostMapping("/logout")
+    public ApiResponse<Void> logout(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            authService.logout(token);
         }
         return ApiResponse.success(null);
     }

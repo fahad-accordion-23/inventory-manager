@@ -4,7 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert.AlertType;
-import ledge.api.inventory.InventoryController;
+import ledge.ui.clients.HttpInventoryClient;
 import ledge.api.inventory.dto.request.UpdateProductRequestDTO;
 import ledge.api.inventory.dto.response.ProductResponseDTO;
 import ledge.api.shared.ApiResponse;
@@ -23,7 +23,7 @@ import java.util.UUID;
  */
 public class EditProductView {
 
-    private final InventoryController inventoryController;
+    private final HttpInventoryClient inventoryController;
     private final SessionManager sessionManager;
     private final Runnable onCancel;
     private UUID productId;
@@ -43,7 +43,7 @@ public class EditProductView {
     @FXML
     private TextField taxField;
 
-    public EditProductView(InventoryController inventoryController, SessionManager sessionManager, Runnable onCancel) {
+    public EditProductView(HttpInventoryClient inventoryController, SessionManager sessionManager, Runnable onCancel) {
         this.inventoryController = inventoryController;
         this.sessionManager = sessionManager;
         this.onCancel = onCancel;

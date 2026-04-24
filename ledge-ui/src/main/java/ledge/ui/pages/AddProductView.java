@@ -4,7 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import ledge.api.inventory.InventoryController;
+import ledge.ui.clients.HttpInventoryClient;
 import ledge.api.inventory.dto.request.CreateProductRequestDTO;
 import ledge.api.inventory.dto.response.ProductResponseDTO;
 import ledge.api.shared.ApiResponse;
@@ -21,10 +21,10 @@ import java.util.Optional;
  */
 public class AddProductView {
 
-    private final InventoryController inventoryController;
+    private final HttpInventoryClient inventoryController;
     private final SessionManager sessionManager;
 
-    public AddProductView(InventoryController inventoryController, SessionManager sessionManager) {
+    public AddProductView(HttpInventoryClient inventoryController, SessionManager sessionManager) {
         this.inventoryController = inventoryController;
         this.sessionManager = sessionManager;
     }

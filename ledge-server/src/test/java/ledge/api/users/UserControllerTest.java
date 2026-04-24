@@ -38,7 +38,7 @@ class UserControllerTest {
         UserDTO user = new UserDTO(id, "targetUser", "hash", Role.SALES_STAFF);
         when(queryBus.dispatch(any(), eq("token"))).thenReturn(List.of(user));
 
-        ApiResponse<?> response = controller.getAllUsers(authContext);
+        ApiResponse<?> response = controller.getAllUsers("Bearer " + authContext.token());
 
         assertTrue(response.success());
     }
@@ -47,7 +47,7 @@ class UserControllerTest {
     void testCreateUser() {
         CreateUserRequestDTO request = new CreateUserRequestDTO("newuser", "password", Role.SALES_STAFF);
 
-        ApiResponse<UserResponseDTO> response = controller.createUser(authContext, request);
+        ApiResponse<UserResponseDTO> response = controller.createUser("Bearer " + authContext.token(), request);
 
         assertTrue(response.success());
         verify(commandBus).dispatch(any(), eq("token"));

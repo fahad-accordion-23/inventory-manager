@@ -39,7 +39,7 @@ class InventoryControllerTest {
                 10, new BigDecimal("0.1"));
         when(queryBus.dispatch(any(), eq("valid-token"))).thenReturn(List.of(product));
 
-        ApiResponse<List<ProductResponseDTO>> response = controller.getAllProducts(authContext);
+        ApiResponse<List<ProductResponseDTO>> response = controller.getAllProducts("Bearer " + authContext.token());
 
         assertTrue(response.success());
         assertEquals(1, response.data().size());
@@ -51,7 +51,7 @@ class InventoryControllerTest {
         CreateProductRequestDTO request = new CreateProductRequestDTO(
                 "Phone", new BigDecimal("500"), new BigDecimal("700"), 5, new BigDecimal("0.05"));
 
-        ApiResponse<ProductResponseDTO> response = controller.createProduct(authContext, request);
+        ApiResponse<ProductResponseDTO> response = controller.createProduct("Bearer " + authContext.token(), request);
 
         assertTrue(response.success());
         verify(commandBus).dispatch(any(AddProductCommand.class), eq("valid-token"));

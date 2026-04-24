@@ -6,8 +6,8 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import ledge.api.inventory.InventoryController;
-import ledge.api.users.UserController;
+import ledge.ui.clients.HttpInventoryClient;
+import ledge.ui.clients.HttpUserClient;
 import ledge.ui.events.LoginSucceededEvent;
 import ledge.ui.events.NavigateToLoginEvent;
 import ledge.ui.events.NavigateToMainEvent;
@@ -26,11 +26,11 @@ public class UIController {
     private final Stage primaryStage;
     private final UIEventBroker uiEventBroker;
     private final SessionManager sessionManager;
-    private final InventoryController inventoryController;
-    private final UserController userController;
+    private final HttpInventoryClient inventoryController;
+    private final HttpUserClient userController;
 
     public UIController(Stage primaryStage, UIEventBroker uiEventBroker, SessionManager sessionManager,
-            InventoryController inventoryController, UserController userController) {
+            HttpInventoryClient inventoryController, HttpUserClient userController) {
         this.primaryStage = primaryStage;
         this.uiEventBroker = uiEventBroker;
         this.sessionManager = sessionManager;

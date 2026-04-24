@@ -4,7 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import ledge.api.shared.ApiResponse;
 import ledge.api.shared.AuthContext;
-import ledge.api.users.UserController;
+import ledge.ui.clients.HttpUserClient;
 import ledge.api.users.dto.request.ChangeUserRoleRequestDTO;
 import ledge.api.users.dto.request.ChangeUsernameRequestDTO;
 import ledge.api.users.dto.response.UserResponseDTO;
@@ -26,14 +26,14 @@ public class EditUserView {
     @FXML
     private ComboBox<Role> roleComboBox;
 
-    private final UserController userController;
+    private final HttpUserClient userController;
     private final SessionManager sessionManager;
     private final Runnable onCancel;
     private UUID userId;
     private String originalUsername;
     private Role originalRole;
 
-    public EditUserView(UserController userController, SessionManager sessionManager, Runnable onCancel) {
+    public EditUserView(HttpUserClient userController, SessionManager sessionManager, Runnable onCancel) {
         this.userController = userController;
         this.sessionManager = sessionManager;
         this.onCancel = onCancel;

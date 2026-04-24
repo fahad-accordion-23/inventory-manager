@@ -8,7 +8,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import ledge.api.shared.ApiResponse;
 import ledge.api.shared.AuthContext;
-import ledge.api.users.UserController;
+import ledge.ui.clients.HttpUserClient;
 import ledge.api.users.dto.request.DeleteUserRequestDTO;
 import ledge.api.users.dto.response.UserListResponseDTO;
 import ledge.api.users.dto.response.UserResponseDTO;
@@ -33,14 +33,14 @@ public class UserDashboardView {
     @FXML
     private Button addUserBtn;
 
-    private final UserController userController;
+    private final HttpUserClient userController;
     private final SessionManager sessionManager;
     private final Runnable onAddRequested;
     private final Consumer<UserResponseDTO> onEditRequested;
 
     private final ObservableList<UserViewModel> allUsers = FXCollections.observableArrayList();
 
-    public UserDashboardView(UserController userController, SessionManager sessionManager,
+    public UserDashboardView(HttpUserClient userController, SessionManager sessionManager,
             Runnable onAddRequested, Consumer<UserResponseDTO> onEditRequested) {
         this.userController = userController;
         this.sessionManager = sessionManager;

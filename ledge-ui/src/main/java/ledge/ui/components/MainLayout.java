@@ -5,9 +5,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.layout.VBox;
 
-import ledge.api.inventory.InventoryController;
+import ledge.ui.clients.HttpInventoryClient;
 import ledge.api.inventory.dto.response.ProductResponseDTO;
-import ledge.api.users.UserController;
+import ledge.ui.clients.HttpUserClient;
 import ledge.api.users.dto.response.UserResponseDTO;
 import ledge.ui.core.Capability;
 import ledge.ui.core.SessionManager;
@@ -34,8 +34,8 @@ public class MainLayout {
     @FXML
     private Sidebar sidebarController;
 
-    private final InventoryController inventoryController;
-    private final UserController userController;
+    private final HttpInventoryClient inventoryController;
+    private final HttpUserClient userController;
     private final SessionManager sessionManager;
     // private final UIEventBroker uiEventBroker;
 
@@ -44,8 +44,8 @@ public class MainLayout {
     private Parent userDashboardViewCache;
     private Parent addUserViewCache;
 
-    public MainLayout(InventoryController inventoryController,
-            UserController userController,
+    public MainLayout(HttpInventoryClient inventoryController,
+            HttpUserClient userController,
             SessionManager sessionManager,
             UIEventBroker uiEventBroker) {
         this.inventoryController = inventoryController;

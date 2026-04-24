@@ -7,7 +7,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
-import ledge.api.inventory.InventoryController;
+import ledge.ui.clients.HttpInventoryClient;
 import ledge.api.inventory.dto.request.DeleteProductRequestDTO;
 import ledge.api.inventory.dto.response.ProductResponseDTO;
 import ledge.api.shared.ApiResponse;
@@ -39,14 +39,14 @@ public class InventoryDashboard {
     @FXML
     private TextField searchField;
 
-    private final InventoryController inventoryController;
+    private final HttpInventoryClient inventoryController;
     private final SessionManager sessionManager;
     private final Consumer<ProductResponseDTO> onEditRequested;
 
     private final ObservableList<ProductViewModel> allProducts = FXCollections.observableArrayList();
     private final FilteredList<ProductViewModel> filteredProducts = new FilteredList<>(allProducts, _ -> true);
 
-    public InventoryDashboard(InventoryController inventoryController, SessionManager sessionManager,
+    public InventoryDashboard(HttpInventoryClient inventoryController, SessionManager sessionManager,
             Consumer<ProductResponseDTO> onEditRequested) {
         this.inventoryController = inventoryController;
         this.sessionManager = sessionManager;

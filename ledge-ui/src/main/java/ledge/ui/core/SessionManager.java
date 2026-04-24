@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import ledge.api.shared.ApiResponse;
 import ledge.api.shared.AuthContext;
-import ledge.api.auth.AuthController;
+import ledge.ui.clients.HttpAuthClient;
 import ledge.api.auth.dto.LoginRequestDTO;
 import ledge.api.auth.dto.LoginResponseDTO;
 import ledge.api.users.dto.response.UserResponseDTO;
@@ -15,12 +15,12 @@ import ledge.api.users.dto.response.UserResponseDTO;
  * auth token.
  */
 public class SessionManager {
-    private final AuthController authController;
+    private final HttpAuthClient authController;
 
     private AuthContext authContext;
     private UserResponseDTO currentUser;
 
-    public SessionManager(AuthController authController) {
+    public SessionManager(HttpAuthClient authController) {
         this.authController = authController;
     }
 
