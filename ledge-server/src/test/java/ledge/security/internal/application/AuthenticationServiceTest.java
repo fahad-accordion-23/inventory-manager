@@ -1,8 +1,7 @@
-package ledge.security.application.services;
+package ledge.security.internal.application;
 
-import ledge.security.application.events.AuthenticationException;
-import ledge.security.domain.ISessionService;
-import ledge.shared.types.Role;
+import ledge.security.api.exceptions.AuthenticationException;
+import ledge.security.internal.domain.services.ISessionService;
 import ledge.users.readmodel.dtos.UserDTO;
 import ledge.users.readmodel.infrastructure.IUserReadRepository;
 import ledge.util.PasswordHasher;
@@ -33,16 +32,17 @@ class AuthenticationServiceTest {
         String username = "testuser";
         String password = "password123";
         String hashedPassword = PasswordHasher.hash(password);
+        UUID userId = UUID.randomUUID();
         
-        UserDTO user = new UserDTO(UUID.randomUUID(), username, hashedPassword, Role.ADMIN);
+        UserDTO user = new UserDTO(userId, username, hashedPassword);
         
         when(userReadRepository.findByUsername(username)).thenReturn(Optional.of(user));
-        when(sessionService.createToken(user)).thenReturn("mock-token");
+        when(sessionService.createToken(userId)).thenReturn("mock-token");
 
         String token = authService.login(username, password);
 
         assertEquals("mock-token", token);
-        verify(sessionService).createToken(user);
+        verify(sessionService).createToken(userId);
     }
 
     @Test
@@ -56,7 +56,7 @@ class AuthenticationServiceTest {
     void testFailedLogin_WrongPassword() {
         String username = "testuser";
         String hashedPassword = PasswordHasher.hash("correct-pass");
-        UserDTO user = new UserDTO(UUID.randomUUID(), username, hashedPassword, Role.ADMIN);
+        UserDTO user = new UserDTO(UUID.randomUUID(), username, hashedPassword);
 
         when(userReadRepository.findByUsername(username)).thenReturn(Optional.of(user));
 

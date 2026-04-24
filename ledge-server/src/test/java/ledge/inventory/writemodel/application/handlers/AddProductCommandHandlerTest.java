@@ -29,7 +29,7 @@ class AddProductCommandHandlerTest {
     @Test
     void testHandleAddProduct() {
         AddProductCommand command = new AddProductCommand(
-                "Phone", new BigDecimal("500"), new BigDecimal("700"), 5, new BigDecimal("0.05"));
+                "Phone", "Description", new BigDecimal("500"), new BigDecimal("700"), 5, new BigDecimal("0.05"));
         
         handler.handle(command);
 

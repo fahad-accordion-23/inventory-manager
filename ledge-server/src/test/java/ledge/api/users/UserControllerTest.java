@@ -1,10 +1,9 @@
 package ledge.api.users;
 
 import ledge.api.shared.ApiResponse;
-import ledge.api.shared.AuthContext;
 import ledge.api.users.dto.request.CreateUserRequestDTO;
-import ledge.api.users.dto.response.UserResponseDTO;
-import ledge.shared.types.Role;
+import ledge.api.users.dto.response.UserListResponseDTO;
+import ledge.security.api.IUserRoleService;
 import ledge.users.readmodel.dtos.UserDTO;
 import ledge.shared.infrastructure.queries.QueryBus;
 import ledge.shared.infrastructure.commands.CommandBus;
@@ -22,32 +21,33 @@ class UserControllerTest {
     private UserController controller;
     private CommandBus commandBus;
     private QueryBus queryBus;
-    private AuthContext authContext;
+    private IUserRoleService userRoleService;
 
     @BeforeEach
     void setUp() {
         commandBus = mock(CommandBus.class);
         queryBus = mock(QueryBus.class);
-        controller = new UserController(commandBus, queryBus);
-        authContext = new AuthContext("token");
+        userRoleService = mock(IUserRoleService.class);
+        controller = new UserController(commandBus, queryBus, userRoleService);
     }
 
     @Test
     void testGetAllUsers() {
         UUID id = UUID.randomUUID();
-        UserDTO user = new UserDTO(id, "targetUser", "hash", Role.SALES_STAFF);
+        UserDTO user = new UserDTO(id, "targetUser", "hash");
         when(queryBus.dispatch(any(), eq("token"))).thenReturn(List.of(user));
 
-        ApiResponse<?> response = controller.getAllUsers("Bearer " + authContext.token());
+        ApiResponse<UserListResponseDTO> response = controller.getAllUsers("Bearer token");
 
         assertTrue(response.success());
+        assertEquals(1, response.data().users().size());
     }
 
     @Test
     void testCreateUser() {
-        CreateUserRequestDTO request = new CreateUserRequestDTO("newuser", "password", Role.SALES_STAFF);
+        CreateUserRequestDTO request = new CreateUserRequestDTO("newuser", "password");
 
-        ApiResponse<UserResponseDTO> response = controller.createUser("Bearer " + authContext.token(), request);
+        ApiResponse<Void> response = controller.createUser("Bearer token", request);
 
         assertTrue(response.success());
         verify(commandBus).dispatch(any(), eq("token"));

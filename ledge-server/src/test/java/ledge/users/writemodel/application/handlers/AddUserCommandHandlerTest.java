@@ -1,6 +1,5 @@
 package ledge.users.writemodel.application.handlers;
 
-import ledge.shared.types.Role;
 import ledge.users.readmodel.infrastructure.IUserReadRepository;
 import ledge.users.writemodel.commands.AddUserCommand;
 import ledge.users.writemodel.domain.User;
@@ -27,7 +26,7 @@ class AddUserCommandHandlerTest {
 
     @Test
     void testHandleAddUser() {
-        AddUserCommand command = new AddUserCommand("newuser", "password123", Role.SALES_STAFF);
+        AddUserCommand command = new AddUserCommand("newuser", "password123");
         
         handler.handle(command);
 
@@ -37,8 +36,7 @@ class AddUserCommandHandlerTest {
         
         User savedUser = userCaptor.getValue();
         assertEquals("newuser", savedUser.getUsername());
-        assertEquals(Role.SALES_STAFF, savedUser.getRole());
-        assertNotEquals("password123", savedUser.getPasswordHash()); // Should be hashed
+        assertNotEquals("password123", savedUser.getPasswordHash()); // Should be hashed (fake hash in memory)
 
         // Verify read repository synchronization
         verify(readRepository).save(any());
