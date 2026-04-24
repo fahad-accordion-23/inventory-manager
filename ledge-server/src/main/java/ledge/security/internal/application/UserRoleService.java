@@ -37,7 +37,7 @@ public class UserRoleService implements IUserRoleService {
             }
         }
 
-        Role newRole = new Role(name, permissions);
+        Role newRole = Role.register(name, permissions);
         roleRepository.save(newRole);
         return newRole.getId();
     }

@@ -16,14 +16,28 @@ public class Role {
     private final String name;
     private final Set<Permission> permissions;
 
-    public Role(String name, Set<Permission> permissions) {
-        this.id = UUID.randomUUID();
+    private Role(UUID id, String name, Set<Permission> permissions) {
+        this.id = id;
         this.name = name;
         this.permissions = Collections.unmodifiableSet(new HashSet<>(permissions));
     }
 
-    // TOOD: rehydrate
-    // TODO: register
+    /**
+     * Creates a new role with a random UUID.
+     */
+    public static Role register(String name, Set<Permission> permissions) {
+        return new Role(UUID.randomUUID(), name, permissions);
+    }
+
+    /**
+     * Reconstitutes an existing role with a specific UUID.
+     */
+    public static Role rehydrate(UUID id, String name, Set<Permission> permissions) {
+        if (id == null) {
+            throw new IllegalArgumentException("ID cannot be null when rehydrating a role");
+        }
+        return new Role(id, name, permissions);
+    }
 
     public UUID getId() {
         return id;

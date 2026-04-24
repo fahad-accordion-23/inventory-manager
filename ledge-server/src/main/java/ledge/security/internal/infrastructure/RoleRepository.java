@@ -28,17 +28,17 @@ public class RoleRepository implements IRoleRepository {
                 adminPerms.add(new Permission(r, a));
             }
         }
-        save(new Role("ADMIN", adminPerms));
+        save(Role.register("ADMIN", adminPerms));
 
         // INVENTORY_MANAGER
-        save(new Role("INVENTORY_MANAGER", Set.of(
+        save(Role.register("INVENTORY_MANAGER", Set.of(
                 new Permission(Resource.PRODUCT, Action.CREATE),
                 new Permission(Resource.PRODUCT, Action.READ),
                 new Permission(Resource.PRODUCT, Action.UPDATE),
                 new Permission(Resource.PRODUCT, Action.DELETE))));
 
         // SALES_STAFF
-        save(new Role("SALES_STAFF", Set.of(
+        save(Role.register("SALES_STAFF", Set.of(
                 new Permission(Resource.PRODUCT, Action.READ),
                 new Permission(Resource.INVOICE, Action.CREATE))));
     }
