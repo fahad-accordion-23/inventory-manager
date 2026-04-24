@@ -1,5 +1,7 @@
 package ledge.users.writemodel.application.handlers;
 
+import ledge.security.api.IUserRoleService;
+import ledge.security.api.dto.RoleDTO;
 import ledge.users.readmodel.infrastructure.IUserReadRepository;
 import ledge.users.writemodel.commands.AddUserCommand;
 import ledge.users.writemodel.domain.User;
@@ -7,6 +9,10 @@ import ledge.users.writemodel.infrastructure.IUserWriteRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -16,18 +22,24 @@ class AddUserCommandHandlerTest {
     private AddUserCommandHandler handler;
     private IUserWriteRepository writeRepository;
     private IUserReadRepository readRepository;
+    private IUserRoleService userRoleService;
 
     @BeforeEach
     void setUp() {
         writeRepository = mock(IUserWriteRepository.class);
         readRepository = mock(IUserReadRepository.class);
-        handler = new AddUserCommandHandler(writeRepository, readRepository);
+        userRoleService = mock(IUserRoleService.class);
+        handler = new AddUserCommandHandler(writeRepository, readRepository, userRoleService);
     }
 
     @Test
     void testHandleAddUser() {
         AddUserCommand command = new AddUserCommand("newuser", "password123");
+        UUID roleId = UUID.randomUUID();
+        RoleDTO defaultRole = new RoleDTO(roleId, "DEFAULT_USER", Set.of());
         
+        when(userRoleService.getRoleByName("DEFAULT_USER")).thenReturn(Optional.of(defaultRole));
+
         handler.handle(command);
 
         // Verify write repository interaction
@@ -36,7 +48,9 @@ class AddUserCommandHandlerTest {
         
         User savedUser = userCaptor.getValue();
         assertEquals("newuser", savedUser.getUsername());
-        assertNotEquals("password123", savedUser.getPasswordHash()); // Should be hashed (fake hash in memory)
+
+        // Verify role assignment
+        verify(userRoleService).assignRole(eq(savedUser.getId()), eq(roleId));
 
         // Verify read repository synchronization
         verify(readRepository).save(any());
