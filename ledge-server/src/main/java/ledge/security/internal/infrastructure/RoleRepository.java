@@ -1,26 +1,45 @@
 package ledge.security.internal.infrastructure;
 
-import org.springframework.stereotype.Repository;
-
+import com.google.gson.*;
+import com.google.gson.reflect.TypeToken;
 import ledge.security.api.models.Action;
 import ledge.security.api.models.Resource;
-import ledge.security.internal.domain.models.*;
+import ledge.security.internal.domain.models.Permission;
+import ledge.security.internal.domain.models.Role;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Repository;
 
+import java.io.*;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * In-memory repository for user roles.
+ * JSON-based persistent repository for roles.
  */
 @Repository
+@Primary
 public class RoleRepository implements IRoleRepository {
-    private final Map<UUID, Role> rolesById = new ConcurrentHashMap<>();
+    private static final String DATA_DIR = "data";
+    private static final String FILE_PATH = DATA_DIR + "/roles.json";
+    private final Map<UUID, Role> database = new ConcurrentHashMap<>();
+    private final Gson gson;
 
     public RoleRepository() {
-        seedRoles();
+        this.gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .create();
+        
+        File dir = new File(DATA_DIR);
+        if (!dir.exists()) dir.mkdirs();
+
+        load();
+        if (database.isEmpty()) {
+            seed();
+        }
     }
 
-    private void seedRoles() {
+    private void seed() {
         // ADMIN
         Set<Permission> adminPerms = new HashSet<>();
         for (Resource r : Resource.values()) {
@@ -47,25 +66,51 @@ public class RoleRepository implements IRoleRepository {
                 new Permission(Resource.PRODUCT, Action.READ))));
     }
 
+    private void load() {
+        File file = new File(FILE_PATH);
+        if (file.exists()) {
+            try (Reader reader = new FileReader(file)) {
+                Type type = new TypeToken<List<Role>>() {}.getType();
+                List<Role> roles = gson.fromJson(reader, type);
+                if (roles != null) {
+                    for (Role role : roles) {
+                        database.put(role.getId(), role);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void persist() {
+        try (Writer writer = new FileWriter(FILE_PATH)) {
+            gson.toJson(new ArrayList<>(database.values()), writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public Optional<Role> findById(UUID id) {
-        return Optional.ofNullable(rolesById.get(id));
+        return Optional.ofNullable(database.get(id));
     }
 
     @Override
     public Optional<Role> findByName(String name) {
-        return rolesById.values().stream()
-                .filter(role -> role.getName().equalsIgnoreCase(name))
+        return database.values().stream()
+                .filter(r -> r.getName().equalsIgnoreCase(name))
                 .findFirst();
     }
 
     @Override
     public List<Role> findAll() {
-        return new ArrayList<>(rolesById.values());
+        return new ArrayList<>(database.values());
     }
 
     @Override
     public void save(Role role) {
-        rolesById.put(role.getId(), role);
+        database.put(role.getId(), role);
+        persist();
     }
 }

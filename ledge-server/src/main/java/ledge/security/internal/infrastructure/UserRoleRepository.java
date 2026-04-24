@@ -1,37 +1,76 @@
 package ledge.security.internal.infrastructure;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
+import java.io.*;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * In-memory implementation of IUserRoleRepository restricted to a single role
- * per user.
+ * JSON-based persistent repository for user-role assignments.
  */
 @Repository
+@Primary
 public class UserRoleRepository implements IUserRoleRepository {
-    private final Map<UUID, UUID> userRoles = new ConcurrentHashMap<>();
+    private static final String DATA_DIR = "data";
+    private static final String FILE_PATH = DATA_DIR + "/user_roles.json";
+    private final Map<UUID, UUID> database = new ConcurrentHashMap<>();
+    private final Gson gson;
+
+    public UserRoleRepository() {
+        this.gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .create();
+        
+        File dir = new File(DATA_DIR);
+        if (!dir.exists()) dir.mkdirs();
+        
+        load();
+    }
+
+    private void load() {
+        File file = new File(FILE_PATH);
+        if (file.exists()) {
+            try (Reader reader = new FileReader(file)) {
+                Type type = new TypeToken<Map<UUID, UUID>>() {}.getType();
+                Map<UUID, UUID> loaded = gson.fromJson(reader, type);
+                if (loaded != null) {
+                    database.putAll(loaded);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void persist() {
+        try (Writer writer = new FileWriter(FILE_PATH)) {
+            gson.toJson(database, writer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void saveRole(UUID userId, UUID roleId) {
-        if (userId == null || roleId == null) {
-            throw new IllegalArgumentException("User ID and role ID cannot be null");
-        }
-        userRoles.put(userId, roleId);
+        database.put(userId, roleId);
+        persist();
     }
 
     @Override
     public Optional<UUID> findRoleByUserId(UUID userId) {
-        if (userId == null)
-            return Optional.empty();
-        return Optional.ofNullable(userRoles.get(userId));
+        return Optional.ofNullable(database.get(userId));
     }
 
     @Override
     public void deleteRole(UUID userId) {
-        if (userId != null) {
-            userRoles.remove(userId);
+        if (database.remove(userId) != null) {
+            persist();
         }
     }
 }
