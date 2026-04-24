@@ -6,9 +6,9 @@ import ledge.api.users.dto.response.UserListResponseDTO;
 import ledge.api.users.dto.response.UserResponseDTO;
 import ledge.users.readmodel.contracts.GetAllUsersQuery;
 import ledge.users.readmodel.dtos.UserDTO;
-import ledge.users.readmodel.infrastructure.messaging.UserQueryBus;
+import ledge.shared.infrastructure.queries.QueryBus;
+import ledge.shared.infrastructure.commands.CommandBus;
 import ledge.users.writemodel.commands.*;
-import ledge.users.writemodel.infrastructure.messaging.UserCommandBus;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,10 +21,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    private final UserCommandBus commandBus;
-    private final UserQueryBus queryBus;
+    private final CommandBus commandBus;
+    private final QueryBus queryBus;
 
-    public UserController(UserCommandBus commandBus, UserQueryBus queryBus) {
+    public UserController(CommandBus commandBus, QueryBus queryBus) {
         this.commandBus = commandBus;
         this.queryBus = queryBus;
     }

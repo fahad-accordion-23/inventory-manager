@@ -7,7 +7,10 @@ import ledge.inventory.writemodel.domain.Product;
 import ledge.inventory.writemodel.infrastructure.IProductWriteRepository;
 import ledge.shared.infrastructure.commands.CommandHandler;
 
-public class AddProductCommandHandler {
+import org.springframework.stereotype.Service;
+
+@Service
+public class AddProductCommandHandler implements CommandHandler<AddProductCommand> {
     private final IProductWriteRepository writeProductRepository;
     private final IProductReadRepository readProductRepository;
 
@@ -17,8 +20,8 @@ public class AddProductCommandHandler {
         this.readProductRepository = readProductRepository;
     }
 
-    @CommandHandler
-    public void handleAddProduct(AddProductCommand command) {
+    @Override
+    public void handle(AddProductCommand command) {
         Product product = Product.register(
                 command.name(),
                 command.purchasePrice(),

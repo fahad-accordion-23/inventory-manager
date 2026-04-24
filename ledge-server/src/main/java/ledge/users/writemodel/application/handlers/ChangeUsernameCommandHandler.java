@@ -1,5 +1,7 @@
 package ledge.users.writemodel.application.handlers;
 
+import org.springframework.stereotype.Service;
+
 import ledge.shared.infrastructure.commands.CommandHandler;
 import ledge.users.readmodel.dtos.UserDTO;
 import ledge.users.readmodel.infrastructure.IUserReadRepository;
@@ -7,7 +9,8 @@ import ledge.users.writemodel.commands.ChangeUsernameCommand;
 import ledge.users.writemodel.domain.User;
 import ledge.users.writemodel.infrastructure.IUserWriteRepository;
 
-public class ChangeUsernameCommandHandler {
+@Service
+public class ChangeUsernameCommandHandler implements CommandHandler<ChangeUsernameCommand> {
     private final IUserWriteRepository userWriteRepository;
     private final IUserReadRepository userReadRepository;
 
@@ -17,8 +20,8 @@ public class ChangeUsernameCommandHandler {
         this.userReadRepository = userReadRepository;
     }
 
-    @CommandHandler
-    public void handle(ChangeUsernameCommand command) throws IllegalArgumentException {
+    @Override
+    public void handle(ChangeUsernameCommand command) {
         User user = userWriteRepository.findById(command.id()).get();
 
         if (user == null) {

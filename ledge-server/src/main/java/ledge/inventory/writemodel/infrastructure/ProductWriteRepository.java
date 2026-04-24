@@ -16,7 +16,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class ProductWriteRepository implements IProductWriteRepository {
     private static final String DATA_DIR = System.getProperty("user.dir") + "/data";
     private static final String FILE_PATH = DATA_DIR + "/inventory.json";

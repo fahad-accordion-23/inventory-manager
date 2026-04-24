@@ -1,5 +1,7 @@
 package ledge.users.writemodel.application.handlers;
 
+import org.springframework.stereotype.Service;
+
 import ledge.shared.infrastructure.commands.CommandHandler;
 import ledge.users.readmodel.dtos.UserDTO;
 import ledge.users.readmodel.infrastructure.IUserReadRepository;
@@ -7,7 +9,8 @@ import ledge.users.writemodel.commands.ChangeUserPasswordCommand;
 import ledge.users.writemodel.domain.User;
 import ledge.users.writemodel.infrastructure.IUserWriteRepository;
 
-public class ChangeUserPasswordCommandHandler {
+@Service
+public class ChangeUserPasswordCommandHandler implements CommandHandler<ChangeUserPasswordCommand> {
     private final IUserWriteRepository userWriteRepository;
     private final IUserReadRepository userReadRepository;
 
@@ -17,7 +20,7 @@ public class ChangeUserPasswordCommandHandler {
         this.userReadRepository = userReadRepository;
     }
 
-    @CommandHandler
+    @Override
     public void handle(ChangeUserPasswordCommand command) {
         User user = userWriteRepository.findById(command.id()).get();
 

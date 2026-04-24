@@ -6,11 +6,13 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import ledge.users.readmodel.dtos.UserDTO;
+import org.springframework.stereotype.Service;
 
 /**
  * Service for managing security tokens and sessions.
  * Provides functionality to create, delete, and look up tokens.
  */
+@Service
 public class SessionService implements ISessionService {
     private final Map<String, UserDTO> sessions = new ConcurrentHashMap<>();
 

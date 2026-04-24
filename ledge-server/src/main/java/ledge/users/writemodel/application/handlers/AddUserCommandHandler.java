@@ -1,5 +1,7 @@
 package ledge.users.writemodel.application.handlers;
 
+import org.springframework.stereotype.Service;
+
 import ledge.shared.infrastructure.commands.CommandHandler;
 import ledge.users.readmodel.dtos.UserDTO;
 import ledge.users.readmodel.infrastructure.IUserReadRepository;
@@ -8,7 +10,8 @@ import ledge.users.writemodel.domain.User;
 import ledge.users.writemodel.infrastructure.IUserWriteRepository;
 import ledge.util.PasswordHasher;
 
-public class AddUserCommandHandler {
+@Service
+public class AddUserCommandHandler implements CommandHandler<AddUserCommand> {
     private final IUserWriteRepository userWriteRepository;
     private final IUserReadRepository userReadRepository;
 
@@ -17,7 +20,7 @@ public class AddUserCommandHandler {
         this.userReadRepository = userReadRepository;
     }
 
-    @CommandHandler
+    @Override
     public void handle(AddUserCommand command) {
         String passwordHash = PasswordHasher.hash(command.password());
         User user = User.register(command.username(), passwordHash, command.role());

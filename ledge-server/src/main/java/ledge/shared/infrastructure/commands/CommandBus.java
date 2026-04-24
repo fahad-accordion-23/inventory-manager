@@ -1,70 +1,54 @@
 package ledge.shared.infrastructure.commands;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
+import org.springframework.core.GenericTypeResolver;
+import org.springframework.stereotype.Component;
 import ledge.security.application.services.IAuthorizationService;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Component
 public class CommandBus {
-    private static class HandlerProxy {
-        private final Object target;
-        private final Method method;
 
-        HandlerProxy(Object target, Method method) {
-            this.target = target;
-            this.method = method;
-            this.method.setAccessible(true);
-        }
-
-        void invoke(Command command) {
-            try {
-                method.invoke(target, command);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                if (e.getCause() instanceof RuntimeException) {
-                    throw (RuntimeException) e.getCause();
-                }
-                throw new RuntimeException("Command execution failed for " + command.getClass().getSimpleName(),
-                        e.getCause() != null ? e.getCause() : e);
-            }
-        }
-    }
-
-    private final Map<Class<? extends Command>, HandlerProxy> handlers = new ConcurrentHashMap<>();
+    private final Map<Class<?>, CommandHandler<?>> handlers = new HashMap<>();
     private final IAuthorizationService authService;
 
-    public CommandBus(IAuthorizationService authService) {
+    /**
+     * Spring automatically injects every bean that implements CommandHandler.
+     */
+    public CommandBus(List<CommandHandler<?>> registeredHandlers, IAuthorizationService authService) {
         this.authService = authService;
-    }
 
-    public void register(Object handler) {
-        for (Method method : handler.getClass().getDeclaredMethods()) {
-            if (method.isAnnotationPresent(CommandHandler.class) && method.getParameterCount() == 1) {
-                Class<?> paramType = method.getParameterTypes()[0];
-                if (Command.class.isAssignableFrom(paramType)) {
-                    @SuppressWarnings("unchecked")
-                    Class<? extends Command> commandType = (Class<? extends Command>) paramType;
-                    if (handlers.containsKey(commandType)) {
-                        throw new IllegalStateException(
-                                "Multiple handlers registered for command: " + commandType.getName());
-                    }
-                    handlers.put(commandType, new HandlerProxy(handler, method));
+        for (CommandHandler<?> handler : registeredHandlers) {
+            // Spring utility to safely extract the <C> type from the handler
+            Class<?>[] typeArgs = GenericTypeResolver.resolveTypeArguments(handler.getClass(), CommandHandler.class);
+
+            if (typeArgs != null && typeArgs.length > 0) {
+                Class<?> commandType = typeArgs[0];
+
+                if (handlers.containsKey(commandType)) {
+                    throw new IllegalStateException(
+                            "Multiple handlers registered for command: " + commandType.getName());
                 }
+                handlers.put(commandType, handler);
             }
         }
     }
 
-    public void dispatch(Command command, String token) {
+    @SuppressWarnings("unchecked")
+    public <C extends Command> void dispatch(C command, String token) {
         // Authorization check
         command.getRequiredPermission().ifPresent(permission -> {
             authService.require(token, permission);
         });
 
-        HandlerProxy proxy = handlers.get(command.getClass());
-        if (proxy == null) {
+        // Fetch and execute handler
+        CommandHandler<C> handler = (CommandHandler<C>) handlers.get(command.getClass());
+        if (handler == null) {
             throw new IllegalStateException("No handler registered for command: " + command.getClass().getName());
         }
-        proxy.invoke(command);
+
+        handler.handle(command);
     }
 }

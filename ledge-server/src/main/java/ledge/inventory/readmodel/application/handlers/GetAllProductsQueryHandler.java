@@ -7,15 +7,18 @@ import ledge.shared.infrastructure.queries.QueryHandler;
 
 import java.util.List;
 
-public class GetAllProductsQueryHandler {
+import org.springframework.stereotype.Service;
+
+@Service
+public class GetAllProductsQueryHandler implements QueryHandler<GetAllProductsQuery, List<ProductDTO>> {
     private final IProductReadRepository readProductRepository;
 
     public GetAllProductsQueryHandler(IProductReadRepository readProductRepository) {
         this.readProductRepository = readProductRepository;
     }
 
-    @QueryHandler
-    public List<ProductDTO> handleGetAllProducts(GetAllProductsQuery query) {
+    @Override
+    public List<ProductDTO> handle(GetAllProductsQuery query) {
         return readProductRepository.findAll();
     }
 }

@@ -5,9 +5,9 @@ import ledge.api.inventory.dto.response.ProductResponseDTO;
 import ledge.api.shared.ApiResponse;
 import ledge.api.shared.AuthContext;
 import ledge.inventory.readmodel.dtos.ProductDTO;
-import ledge.inventory.readmodel.infrastructure.messaging.InventoryQueryBus;
 import ledge.inventory.writemodel.contracts.AddProductCommand;
-import ledge.inventory.writemodel.infrastructure.messaging.InventoryCommandBus;
+import ledge.shared.infrastructure.queries.QueryBus;
+import ledge.shared.infrastructure.commands.CommandBus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -21,14 +21,14 @@ import static org.mockito.Mockito.*;
 class InventoryControllerTest {
 
     private InventoryController controller;
-    private InventoryCommandBus commandBus;
-    private InventoryQueryBus queryBus;
+    private CommandBus commandBus;
+    private QueryBus queryBus;
     private AuthContext authContext;
 
     @BeforeEach
     void setUp() {
-        commandBus = mock(InventoryCommandBus.class);
-        queryBus = mock(InventoryQueryBus.class);
+        commandBus = mock(CommandBus.class);
+        queryBus = mock(QueryBus.class);
         controller = new InventoryController(commandBus, queryBus);
         authContext = new AuthContext("valid-token");
     }

@@ -7,14 +7,17 @@ import ledge.shared.infrastructure.queries.QueryHandler;
 
 import java.util.Optional;
 
-public class GetUserByIdQueryHandler {
+import org.springframework.stereotype.Service;
+
+@Service
+public class GetUserByIdQueryHandler implements QueryHandler<GetUserByIdQuery, Optional<UserDTO>> {
     private final IUserReadRepository userReadRepository;
 
     public GetUserByIdQueryHandler(IUserReadRepository userReadRepository) {
         this.userReadRepository = userReadRepository;
     }
 
-    @QueryHandler
+    @Override
     public Optional<UserDTO> handle(GetUserByIdQuery query) {
         return userReadRepository.findById(query.id());
     }
