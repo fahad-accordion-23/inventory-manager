@@ -4,7 +4,6 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
 import ledge.util.PasswordHasher;
-import ledge.security.internal.domain.models.Role;
 import ledge.users.writemodel.domain.User;
 
 import java.io.File;
@@ -27,9 +26,7 @@ public class UserWriteRepository implements IUserWriteRepository {
     private final Gson gson;
 
     public UserWriteRepository() {
-        // Register custom TypeAdapter for Role to save/load just the role name
         this.gson = new GsonBuilder()
-                .registerTypeAdapter(Role.class, new RoleTypeAdapter())
                 .setPrettyPrinting()
                 .create();
 
@@ -42,7 +39,7 @@ public class UserWriteRepository implements IUserWriteRepository {
     }
 
     private void seedDatabase() {
-        save(User.register("admin", PasswordHasher.hash("admin123"), Role.ADMIN));
+        save(User.register("admin", PasswordHasher.hash("admin123")));
     }
 
     private void loadDatabase() {
@@ -94,25 +91,6 @@ public class UserWriteRepository implements IUserWriteRepository {
     public void delete(UUID id) {
         if (database.removeIf(u -> u.getId().equals(id))) {
             saveDatabase();
-        }
-    }
-
-    // Custom TypeAdapter to serialize Role as string and deserialize back to static
-    // instances
-    private static class RoleTypeAdapter implements JsonSerializer<Role>, JsonDeserializer<Role> {
-        @Override
-        public JsonElement serialize(Role src, Type typeOfSrc, JsonSerializationContext context) {
-            return new JsonPrimitive(src.name());
-        }
-
-        @Override
-        public Role deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-                throws JsonParseException {
-            try {
-                return Role.valueOf(json.getAsString());
-            } catch (IllegalArgumentException e) {
-                throw new JsonParseException("Unknown role: " + json.getAsString());
-            }
         }
     }
 }

@@ -22,17 +22,13 @@ public class ChangeUsernameCommandHandler implements CommandHandler<ChangeUserna
 
     @Override
     public void handle(ChangeUsernameCommand command) {
-        User user = userWriteRepository.findById(command.id()).get();
-
-        if (user == null) {
-            throw new IllegalArgumentException("User does not exist");
-        }
+        User user = userWriteRepository.findById(command.id())
+                .orElseThrow(() -> new IllegalArgumentException("User does not exist"));
 
         User updatedUser = User.rehydrate(
                 command.id(),
                 command.newUsername(),
-                user.getPasswordHash(),
-                user.getRole());
+                user.getPasswordHash());
         userWriteRepository.save(updatedUser);
 
         userReadRepository.save(UserDTO.fromUser(updatedUser));

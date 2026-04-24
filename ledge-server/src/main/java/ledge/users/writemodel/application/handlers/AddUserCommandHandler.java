@@ -23,7 +23,7 @@ public class AddUserCommandHandler implements CommandHandler<AddUserCommand> {
     @Override
     public void handle(AddUserCommand command) {
         String passwordHash = PasswordHasher.hash(command.password());
-        User user = User.register(command.username(), passwordHash, command.role());
+        User user = User.register(command.username(), passwordHash);
         userWriteRepository.save(user);
 
         userReadRepository.save(UserDTO.fromUser(user));
