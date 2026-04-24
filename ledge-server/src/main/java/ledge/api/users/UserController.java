@@ -4,6 +4,8 @@ import ledge.api.shared.ApiResponse;
 import ledge.api.users.dto.request.*;
 import ledge.api.users.dto.response.UserListResponseDTO;
 import ledge.api.users.dto.response.UserResponseDTO;
+import ledge.security.api.IUserRoleService;
+import ledge.security.api.dto.RoleDTO;
 import ledge.users.readmodel.contracts.GetAllUsersQuery;
 import ledge.users.readmodel.dtos.UserDTO;
 import ledge.shared.infrastructure.queries.QueryBus;
@@ -11,6 +13,7 @@ import ledge.shared.infrastructure.commands.CommandBus;
 import ledge.users.writemodel.commands.*;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.web.bind.annotation.*;
@@ -23,10 +26,12 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final CommandBus commandBus;
     private final QueryBus queryBus;
+    private final IUserRoleService userRoleService;
 
-    public UserController(CommandBus commandBus, QueryBus queryBus) {
+    public UserController(CommandBus commandBus, QueryBus queryBus, IUserRoleService userRoleService) {
         this.commandBus = commandBus;
         this.queryBus = queryBus;
+        this.userRoleService = userRoleService;
     }
 
     private String extractToken(String authHeader) {
@@ -41,7 +46,7 @@ public class UserController {
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
         List<UserDTO> users = queryBus.dispatch(new GetAllUsersQuery(), extractToken(authHeader));
         List<UserResponseDTO> responseList = users.stream()
-                .map(u -> new UserResponseDTO(u.id(), u.username(), u.role()))
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
         return ApiResponse.success(new UserListResponseDTO(responseList));
     }
@@ -49,64 +54,59 @@ public class UserController {
     /**
      * Registers a new user.
      */
-    @PostMapping("register")
-    public ApiResponse<UserResponseDTO> createUser(
+    @PostMapping("/register")
+    public ApiResponse<Void> createUser(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @RequestBody CreateUserRequestDTO request) {
         commandBus.dispatch(new AddUserCommand(
                 request.username(),
-                request.password(),
-                request.role()), extractToken(authHeader));
+                request.password()), extractToken(authHeader));
         return ApiResponse.success(null);
     }
 
     /**
      * Changes a user's username.
      */
-    @PutMapping("username")
+    @PutMapping("/{id}/username")
     public ApiResponse<Void> changeUsername(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @PathVariable UUID id,
             @RequestBody ChangeUsernameRequestDTO request) {
         commandBus.dispatch(new ChangeUsernameCommand(
-                request.user_id(),
-                request.new_username()), extractToken(authHeader));
+                id,
+                request.newUsername()), extractToken(authHeader));
         return ApiResponse.success(null);
     }
 
     /**
      * Changes a user's password.
      */
-    @PutMapping("password")
+    @PutMapping("/{id}/password")
     public ApiResponse<Void> changePassword(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @PathVariable UUID id,
             @RequestBody ChangePasswordRequestDTO request) {
         commandBus.dispatch(new ChangeUserPasswordCommand(
-                request.user_id(),
-                request.new_password()), extractToken(authHeader));
-        return ApiResponse.success(null);
-    }
-
-    /**
-     * Changes a user's role.
-     */
-    @PutMapping("role")
-    public ApiResponse<Void> changeRole(
-            @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @RequestBody ChangeUserRoleRequestDTO request) {
-        commandBus.dispatch(new ChangeUserRoleCommand(
-                request.user_id(),
-                request.new_role()), extractToken(authHeader));
+                id,
+                request.newPassword()), extractToken(authHeader));
         return ApiResponse.success(null);
     }
 
     /**
      * Deletes a user from the system.
      */
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteUser(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @RequestBody DeleteUserRequestDTO request) {
-        commandBus.dispatch(new RemoveUserCommand(request.user_id()), extractToken(authHeader));
+            @PathVariable UUID id) {
+        commandBus.dispatch(new RemoveUserCommand(id), extractToken(authHeader));
         return ApiResponse.success(null);
+    }
+
+    private UserResponseDTO mapToResponse(UserDTO u) {
+        RoleDTO role = userRoleService.getRoleId(u.id())
+                .flatMap(userRoleService::getRole)
+                .orElse(null);
+        return new UserResponseDTO(u.id(), u.username(), role);
     }
 }

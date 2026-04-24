@@ -12,6 +12,7 @@ import ledge.shared.infrastructure.queries.QueryBus;
 import ledge.shared.infrastructure.commands.CommandBus;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
  * Controller for managing inventory/product-related API requests.
  */
 @RestController
-@RequestMapping("/api/inventory")
+@RequestMapping("/api/products")
 public class InventoryController {
     private final CommandBus commandBus;
     private final QueryBus queryBus;
@@ -51,48 +52,46 @@ public class InventoryController {
      * Adds a new product to the inventory.
      */
     @PostMapping
-    public ApiResponse<ProductResponseDTO> createProduct(
+    public ApiResponse<Void> createProduct(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @RequestBody CreateProductRequestDTO request) {
-        ProductDTO dto = new ProductDTO(
-                null,
+        commandBus.dispatch(new AddProductCommand(
                 request.name(),
+                "", // description (optional or separate field)
                 request.purchasePrice(),
                 request.sellingPrice(),
                 request.stockQuantity(),
-                request.taxRate());
-
-        commandBus.dispatch(new AddProductCommand(dto), extractToken(authHeader));
+                request.taxRate()), extractToken(authHeader));
         return ApiResponse.success(null);
     }
 
     /**
      * Updates an existing product's details.
      */
-    @PutMapping
+    @PutMapping("/{id}")
     public ApiResponse<Void> updateProduct(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @PathVariable UUID id,
             @RequestBody UpdateProductRequestDTO request) {
-        ProductDTO dto = new ProductDTO(
-                request.id(),
+        commandBus.dispatch(new UpdateProductCommand(
+                id,
                 request.name(),
+                "", // description
                 request.purchasePrice(),
                 request.sellingPrice(),
                 request.stockQuantity(),
-                request.taxRate());
-
-        commandBus.dispatch(new UpdateProductCommand(dto), extractToken(authHeader));
+                request.taxRate()), extractToken(authHeader));
         return ApiResponse.success(null);
     }
 
     /**
      * Removes a product from the inventory.
      */
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteProduct(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @RequestBody DeleteProductRequestDTO request) {
-        commandBus.dispatch(new RemoveProductCommand(request.id()), extractToken(authHeader));
+            @PathVariable UUID id) {
+        commandBus.dispatch(new RemoveProductCommand(id), extractToken(authHeader));
         return ApiResponse.success(null);
     }
 

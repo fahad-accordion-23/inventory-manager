@@ -1,7 +1,6 @@
 package ledge.api.users.dto.request;
 
-import java.util.UUID;
-
-public record ChangePasswordRequestDTO(
-        UUID user_id,
-        String new_password) {}
+/**
+ * Request payload to change a user password.
+ */
+public record ChangePasswordRequestDTO(String newPassword) {}

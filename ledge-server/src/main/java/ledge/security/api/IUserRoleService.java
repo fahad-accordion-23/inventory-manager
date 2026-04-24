@@ -1,7 +1,9 @@
 package ledge.security.api;
 
 import ledge.security.api.dto.PermissionDTO;
+import ledge.security.api.dto.RoleDTO;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -15,6 +17,16 @@ public interface IUserRoleService {
      * Registers a new custom role in the system.
      */
     UUID registerRole(String name, Set<PermissionDTO> permissions);
+
+    /**
+     * Retrieves all defined roles.
+     */
+    List<RoleDTO> getAllRoles();
+
+    /**
+     * Retrieves a role by its ID.
+     */
+    Optional<RoleDTO> getRole(UUID roleId);
 
     /**
      * Assigns a role to a user, replacing any previously assigned role.
