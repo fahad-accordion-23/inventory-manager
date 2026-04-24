@@ -8,6 +8,7 @@ import ledge.shared.types.Resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -15,19 +16,17 @@ import static org.mockito.Mockito.*;
 
 class CommandBusTest {
 
-    private CommandBus commandBus;
     private IAuthorizationService authService;
 
     @BeforeEach
     void setUp() {
         authService = mock(IAuthorizationService.class);
-        commandBus = new CommandBus(authService);
     }
 
     @Test
-    void testRegisterAndDispatch() {
+    void testDispatch() {
         TestHandler handler = new TestHandler();
-        commandBus.register(handler);
+        CommandBus commandBus = new CommandBus(List.of(handler), authService);
 
         TestCommand command = new TestCommand("data");
         commandBus.dispatch(command, "valid-token");
@@ -38,8 +37,8 @@ class CommandBusTest {
 
     @Test
     void testAuthorizationEnforcement() {
-        TestHandler handler = new TestHandler();
-        commandBus.register(handler);
+        TestHandlerWithPermission handler = new TestHandlerWithPermission();
+        CommandBus commandBus = new CommandBus(List.of(handler), authService);
 
         doThrow(new AuthorizationException("Denied")).when(authService).require("bad-token", new Permission(Resource.PRODUCT, Action.UPDATE));
 
@@ -51,12 +50,14 @@ class CommandBusTest {
 
     @Test
     void testDuplicateHandlerRegistration() {
-        commandBus.register(new TestHandler());
-        assertThrows(IllegalStateException.class, () -> commandBus.register(new TestHandler()));
+        TestHandler h1 = new TestHandler();
+        TestHandler h2 = new TestHandler();
+        assertThrows(IllegalStateException.class, () -> new CommandBus(List.of(h1, h2), authService));
     }
 
     @Test
     void testMissingHandler() {
+        CommandBus commandBus = new CommandBus(List.of(), authService);
         assertThrows(IllegalStateException.class, () -> commandBus.dispatch(new TestCommand("data"), "token"));
     }
 
@@ -71,18 +72,22 @@ class CommandBusTest {
         @Override public Optional<Permission> getRequiredPermission() { return Optional.of(new Permission(Resource.PRODUCT, Action.UPDATE)); }
     }
 
-    static class TestHandler {
+    static class TestHandler implements CommandHandler<TestCommand> {
         boolean executed = false;
         String receivedData;
 
-        @CommandHandler
+        @Override
         public void handle(TestCommand command) {
             this.executed = true;
             this.receivedData = command.data;
         }
+    }
 
-        @CommandHandler
-        public void handlePermissioned(TestCommandWithPermission command) {
+    static class TestHandlerWithPermission implements CommandHandler<TestCommandWithPermission> {
+        boolean executed = false;
+
+        @Override
+        public void handle(TestCommandWithPermission command) {
             this.executed = true;
         }
     }

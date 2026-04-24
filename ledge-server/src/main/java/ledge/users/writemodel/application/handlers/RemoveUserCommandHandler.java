@@ -1,11 +1,14 @@
 package ledge.users.writemodel.application.handlers;
 
+import org.springframework.stereotype.Service;
+
 import ledge.shared.infrastructure.commands.CommandHandler;
 import ledge.users.readmodel.infrastructure.IUserReadRepository;
 import ledge.users.writemodel.commands.RemoveUserCommand;
 import ledge.users.writemodel.infrastructure.IUserWriteRepository;
 
-public class RemoveUserCommandHandler {
+@Service
+public class RemoveUserCommandHandler implements CommandHandler<RemoveUserCommand> {
     private final IUserWriteRepository userWriteRepository;
     private final IUserReadRepository userReadRepository;
 
@@ -14,7 +17,7 @@ public class RemoveUserCommandHandler {
         this.userReadRepository = userReadRepository;
     }
 
-    @CommandHandler
+    @Override
     public void handle(RemoveUserCommand command) {
         userWriteRepository.delete(command.id());
         userReadRepository.deleteById(command.id());

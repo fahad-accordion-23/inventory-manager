@@ -31,7 +31,7 @@ class AddProductCommandHandlerTest {
         AddProductCommand command = new AddProductCommand(
                 "Phone", new BigDecimal("500"), new BigDecimal("700"), 5, new BigDecimal("0.05"));
         
-        handler.handleAddProduct(command);
+        handler.handle(command);
 
         // Verify write repository saved the product
         ArgumentCaptor<Product> productCaptor = ArgumentCaptor.forClass(Product.class);

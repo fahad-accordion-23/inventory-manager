@@ -1,14 +1,12 @@
 package ledge.shared.infrastructure.queries;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 /**
- * Identifies a method as a handler for a specific Query type.
+ * Implemented by classes that handle specific Query types.
+ * * @param
+ * <Q>The specific Query type.
+ * 
+ * @param <R> The return type of the Query.
  */
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface QueryHandler {
+public interface QueryHandler<Q extends Query<R>, R> {
+    R handle(Q query);
 }

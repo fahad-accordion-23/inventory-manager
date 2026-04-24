@@ -6,8 +6,8 @@ import ledge.api.users.dto.request.CreateUserRequestDTO;
 import ledge.api.users.dto.response.UserResponseDTO;
 import ledge.shared.types.Role;
 import ledge.users.readmodel.dtos.UserDTO;
-import ledge.users.readmodel.infrastructure.messaging.UserQueryBus;
-import ledge.users.writemodel.infrastructure.messaging.UserCommandBus;
+import ledge.shared.infrastructure.queries.QueryBus;
+import ledge.shared.infrastructure.commands.CommandBus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -20,14 +20,14 @@ import static org.mockito.Mockito.*;
 class UserControllerTest {
 
     private UserController controller;
-    private UserCommandBus commandBus;
-    private UserQueryBus queryBus;
+    private CommandBus commandBus;
+    private QueryBus queryBus;
     private AuthContext authContext;
 
     @BeforeEach
     void setUp() {
-        commandBus = mock(UserCommandBus.class);
-        queryBus = mock(UserQueryBus.class);
+        commandBus = mock(CommandBus.class);
+        queryBus = mock(QueryBus.class);
         controller = new UserController(commandBus, queryBus);
         authContext = new AuthContext("token");
     }

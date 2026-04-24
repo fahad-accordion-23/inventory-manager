@@ -13,11 +13,14 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.stereotype.Repository;
+
 /**
  * Implementation of ProductReadRepository optimized for high-read performance.
  * Uses a ConcurrentHashMap for O(1) lookups and thread-safe operations.
  * Initializes data from a JSON file.
  */
+@Repository
 public class ProductReadRepository implements IProductReadRepository {
 
     private final Map<UUID, ProductDTO> products = new ConcurrentHashMap<>();

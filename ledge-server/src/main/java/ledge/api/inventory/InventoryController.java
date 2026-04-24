@@ -5,11 +5,11 @@ import ledge.api.inventory.dto.response.ProductResponseDTO;
 import ledge.api.shared.ApiResponse;
 import ledge.inventory.readmodel.contracts.GetAllProductsQuery;
 import ledge.inventory.readmodel.dtos.ProductDTO;
-import ledge.inventory.readmodel.infrastructure.messaging.InventoryQueryBus;
 import ledge.inventory.writemodel.contracts.AddProductCommand;
 import ledge.inventory.writemodel.contracts.RemoveProductCommand;
 import ledge.inventory.writemodel.contracts.UpdateProductCommand;
-import ledge.inventory.writemodel.infrastructure.messaging.InventoryCommandBus;
+import ledge.shared.infrastructure.queries.QueryBus;
+import ledge.shared.infrastructure.commands.CommandBus;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,10 +22,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/inventory")
 public class InventoryController {
-    private final InventoryCommandBus commandBus;
-    private final InventoryQueryBus queryBus;
+    private final CommandBus commandBus;
+    private final QueryBus queryBus;
 
-    public InventoryController(InventoryCommandBus commandBus, InventoryQueryBus queryBus) {
+    public InventoryController(CommandBus commandBus, QueryBus queryBus) {
         this.commandBus = commandBus;
         this.queryBus = queryBus;
     }

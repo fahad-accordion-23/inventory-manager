@@ -7,9 +7,12 @@ import ledge.users.readmodel.dtos.UserDTO;
 
 import java.util.Optional;
 
+import org.springframework.stereotype.Service;
+
 /**
- * Service for enforcing authorization rules based on session tokens.
+ * Service responsible for evaluating permissions against a user's token.
  */
+@Service
 public class AuthorizationService implements IAuthorizationService {
     private final ISessionService sessionService;
 

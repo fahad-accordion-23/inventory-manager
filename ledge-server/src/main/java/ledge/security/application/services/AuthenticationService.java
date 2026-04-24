@@ -8,9 +8,12 @@ import ledge.util.PasswordHasher;
 
 import java.util.Optional;
 
+import org.springframework.stereotype.Service;
+
 /**
  * Service for handling user authentication and token-based sessions.
  */
+@Service
 public class AuthenticationService implements IAuthenticationService {
     private final ISessionService sessionService;
     private final IUserReadRepository userReadRepository;

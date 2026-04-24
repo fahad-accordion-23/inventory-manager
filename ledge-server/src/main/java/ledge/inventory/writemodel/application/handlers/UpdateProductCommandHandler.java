@@ -7,7 +7,10 @@ import ledge.inventory.readmodel.dtos.ProductDTO;
 import ledge.inventory.readmodel.infrastructure.IProductReadRepository;
 import ledge.inventory.writemodel.infrastructure.IProductWriteRepository;
 
-public class UpdateProductCommandHandler {
+import org.springframework.stereotype.Service;
+
+@Service
+public class UpdateProductCommandHandler implements CommandHandler<UpdateProductCommand> {
     private final IProductWriteRepository writeProductRepository;
     private final IProductReadRepository readProductRepository;
 
@@ -17,8 +20,8 @@ public class UpdateProductCommandHandler {
         this.readProductRepository = readProductRepository;
     }
 
-    @CommandHandler
-    public void handleProductUpdated(UpdateProductCommand command) {
+    @Override
+    public void handle(UpdateProductCommand command) {
         Product updatedProduct = Product.rehydrate(
                 command.id(),
                 command.name(),

@@ -28,7 +28,7 @@ class RemoveProductCommandHandlerTest {
         UUID productId = UUID.randomUUID();
         RemoveProductCommand command = new RemoveProductCommand(productId);
         
-        handler.handleProductRemoved(command);
+        handler.handle(command);
 
         // Verify both repositories had the product deleted
         verify(writeRepository).delete(productId);
