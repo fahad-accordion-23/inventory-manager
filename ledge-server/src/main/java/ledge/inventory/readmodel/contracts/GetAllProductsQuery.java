@@ -1,10 +1,10 @@
 package ledge.inventory.readmodel.contracts;
 
 import ledge.inventory.readmodel.dtos.ProductDTO;
+import ledge.security.internal.domain.models.Action;
+import ledge.security.internal.domain.models.Permission;
+import ledge.security.internal.domain.models.Resource;
 import ledge.shared.infrastructure.queries.Query;
-import ledge.security.writemodel.domain.Action;
-import ledge.security.writemodel.domain.Permission;
-import ledge.security.writemodel.domain.Resource;
 
 import java.util.List;
 import java.util.Optional;

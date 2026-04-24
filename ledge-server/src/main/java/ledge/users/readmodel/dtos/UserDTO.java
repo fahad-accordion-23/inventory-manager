@@ -1,7 +1,8 @@
 package ledge.users.readmodel.dtos;
 
 import com.google.gson.annotations.SerializedName;
-import ledge.security.writemodel.domain.Role;
+
+import ledge.security.internal.domain.models.Role;
 import ledge.users.writemodel.domain.User;
 
 import java.util.UUID;

@@ -1,4 +1,4 @@
-package ledge.security.shared.infrastructure;
+package ledge.security.internal.infrastructure;
 
 import java.util.Set;
 import java.util.UUID;

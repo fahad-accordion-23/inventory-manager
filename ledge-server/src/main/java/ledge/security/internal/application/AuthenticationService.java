@@ -1,7 +1,8 @@
-package ledge.security.writemodel.application.services;
+package ledge.security.internal.application;
 
-import ledge.security.writemodel.application.events.AuthenticationException;
-import ledge.security.writemodel.domain.services.ISessionService;
+import ledge.security.api.exceptions.AuthenticationException;
+import ledge.security.api.IAuthenticationService;
+import ledge.security.internal.domain.services.ISessionService;
 import ledge.users.readmodel.dtos.UserDTO;
 import ledge.users.readmodel.infrastructure.IUserReadRepository;
 import ledge.util.PasswordHasher;

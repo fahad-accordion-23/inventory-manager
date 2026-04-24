@@ -1,6 +1,6 @@
-package ledge.security.writemodel.application.services;
+package ledge.security.api;
 
-import ledge.security.writemodel.application.events.AuthenticationException;
+import ledge.security.api.exceptions.AuthenticationException;
 
 public interface IAuthenticationService {
     String login(String username, String password) throws AuthenticationException;

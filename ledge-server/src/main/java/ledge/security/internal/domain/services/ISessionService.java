@@ -1,4 +1,4 @@
-package ledge.security.writemodel.domain.services;
+package ledge.security.internal.domain.services;
 
 import java.util.Optional;
 import java.util.UUID;

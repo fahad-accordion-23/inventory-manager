@@ -2,7 +2,7 @@ package ledge.shared.infrastructure.queries;
 
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.stereotype.Component;
-import ledge.security.writemodel.application.services.IAuthorizationService;
+import ledge.security.api.IAuthorizationService;
 
 import java.util.HashMap;
 import java.util.List;

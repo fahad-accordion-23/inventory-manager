@@ -1,4 +1,4 @@
-package ledge.security.shared.infrastructure;
+package ledge.security.internal.infrastructure;
 
 import org.springframework.stereotype.Repository;
 

@@ -1,7 +1,8 @@
-package ledge.security.shared.infrastructure;
+package ledge.security.internal.infrastructure;
 
-import ledge.security.writemodel.domain.*;
 import org.springframework.stereotype.Repository;
+
+import ledge.security.internal.domain.models.*;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

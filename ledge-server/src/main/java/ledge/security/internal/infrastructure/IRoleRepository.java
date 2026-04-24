@@ -1,9 +1,10 @@
-package ledge.security.shared.infrastructure;
+package ledge.security.internal.infrastructure;
 
-import ledge.security.writemodel.domain.Role;
 import java.util.Optional;
 import java.util.List;
 import java.util.UUID;
+
+import ledge.security.internal.domain.models.Role;
 
 /**
  * Interface for Role repository.

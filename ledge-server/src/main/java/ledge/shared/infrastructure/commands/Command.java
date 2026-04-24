@@ -2,7 +2,7 @@ package ledge.shared.infrastructure.commands;
 
 import java.util.Optional;
 
-import ledge.security.writemodel.domain.Permission;
+import ledge.security.internal.domain.models.Permission;
 
 /**
  * Represents an intent to change the state of the system.

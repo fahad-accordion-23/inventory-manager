@@ -1,4 +1,4 @@
-package ledge.security.writemodel.application.events;
+package ledge.security.api.exceptions;
 
 public class AuthorizationException extends RuntimeException {
     public AuthorizationException(String message) {

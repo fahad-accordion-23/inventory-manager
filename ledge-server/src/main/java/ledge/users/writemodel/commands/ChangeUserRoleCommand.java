@@ -1,10 +1,10 @@
 package ledge.users.writemodel.commands;
 
+import ledge.security.internal.domain.models.Action;
+import ledge.security.internal.domain.models.Permission;
+import ledge.security.internal.domain.models.Resource;
+import ledge.security.internal.domain.models.Role;
 import ledge.shared.infrastructure.commands.Command;
-import ledge.security.writemodel.domain.Action;
-import ledge.security.writemodel.domain.Permission;
-import ledge.security.writemodel.domain.Resource;
-import ledge.security.writemodel.domain.Role;
 
 import java.util.Optional;
 import java.util.UUID;

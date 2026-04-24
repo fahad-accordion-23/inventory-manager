@@ -3,7 +3,7 @@ package ledge.users.writemodel.domain;
 import java.util.Objects;
 import java.util.UUID;
 
-import ledge.security.writemodel.domain.Role;
+import ledge.security.internal.domain.models.Role;
 
 public class User {
     private final UUID id;

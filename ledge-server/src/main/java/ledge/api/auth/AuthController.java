@@ -4,9 +4,9 @@ import ledge.api.auth.dto.LoginRequestDTO;
 import ledge.api.auth.dto.LoginResponseDTO;
 import ledge.api.shared.ApiResponse;
 import ledge.api.users.dto.response.UserResponseDTO;
-import ledge.security.writemodel.application.events.AuthenticationException;
-import ledge.security.writemodel.application.services.IAuthenticationService;
-import ledge.security.writemodel.domain.services.ISessionService;
+import ledge.security.api.exceptions.AuthenticationException;
+import ledge.security.internal.domain.models.services.ISessionService;
+import ledge.security.api.IAuthenticationService;
 import ledge.users.readmodel.dtos.UserDTO;
 
 import java.util.Optional;

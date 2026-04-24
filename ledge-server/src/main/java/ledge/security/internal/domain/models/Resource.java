@@ -1,4 +1,4 @@
-package ledge.security.writemodel.domain;
+package ledge.security.internal.domain.models;
 
 public enum Resource {
     PRODUCT,
