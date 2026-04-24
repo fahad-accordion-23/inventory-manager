@@ -29,6 +29,11 @@ public interface IUserRoleService {
     Optional<RoleDTO> getRole(UUID roleId);
 
     /**
+     * Retrieves a role by its name.
+     */
+    Optional<RoleDTO> getRoleByName(String name);
+
+    /**
      * Assigns a role to a user, replacing any previously assigned role.
      */
     void assignRole(UUID userId, UUID roleId);

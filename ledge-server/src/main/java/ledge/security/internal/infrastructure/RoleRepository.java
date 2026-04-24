@@ -41,6 +41,10 @@ public class RoleRepository implements IRoleRepository {
         save(Role.register("SALES_STAFF", Set.of(
                 new Permission(Resource.PRODUCT, Action.READ),
                 new Permission(Resource.INVOICE, Action.CREATE))));
+
+        // DEFAULT_USER
+        save(Role.register("DEFAULT_USER", Set.of(
+                new Permission(Resource.PRODUCT, Action.READ))));
     }
 
     @Override

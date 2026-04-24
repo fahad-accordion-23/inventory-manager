@@ -56,6 +56,11 @@ public class UserRoleService implements IUserRoleService {
     }
 
     @Override
+    public Optional<RoleDTO> getRoleByName(String name) {
+        return roleRepository.findByName(name).map(this::mapToDTO);
+    }
+
+    @Override
     public void assignRole(UUID userId, UUID roleId) {
         userRoleRepository.saveRole(userId, roleId);
     }
