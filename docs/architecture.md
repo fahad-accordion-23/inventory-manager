@@ -1,20 +1,23 @@
 # System Architecture: Ledge Inventory Manager
 
-This document outlines the architectural design of the Ledge Inventory Manager following its transition to a modular, API-driven, and CQRS-based system.
+This document outlines the architectural design of the Ledge Inventory Manager after its transition to a **Client-Server Distributed Architecture** using Spring Boot and JavaFX.
+
 
 ## 1. Architectural Philosophy
 
-The system embraces several modern architectural patterns to ensure scalability, maintainability, and domain separation:
+The system is designed with a strong focus on separation of concerns, utilizing a decoupled infrastructure to ensure the frontend and backend can evolve independently:
 
-*   **Modular Monolith**: Code is organized by bounded contexts (Modules) rather than technical layers. Each module encapsulates its own domain, infrastructure, and application logic.
+*   **Distributed Client-Server**: The application is split into a standalone REST API (Server) and a desktop client (UI), communicating exclusively over HTTP.
 
-*   **Command Query Responsibility Segregation (CQRS)**: Strict separation between state-mutating operations (Commands) and data-retrieval operations (Queries).
+*   **Contract-First Design**: Communication between layers is governed by dedicated Contract DTOs, ensuring binary independence between the client and the server internals.
 
-*   **API Gateway Pattern**: The UI does not interact with the domain boundaries directly. Instead, an API layer provides a well-defined boundary, routing requests and returning DTOs.
+*   **Command Query Responsibility Segregation (CQRS)**: Strict separation between state-mutating operations (Commands) and data-retrieval operations (Queries) within the server.
 
-*   **Custom Dependency Injection**: A lightweight `ModuleRegistry` manages singleton instantiation and dependency resolution across the application lifecycle.
+*   **Spring-Powered Backend**: The server utilizes Spring Boot for dependency injection, REST orchestration, and lifecycle management, replacing the legacy manual `ModuleRegistry`.
+
 
 ---
+
 
 ## 2. System Overview
 
@@ -25,239 +28,165 @@ graph TD
 
 User[User]
 
+subgraph Client Node
+    UI[Ledge-UI JavaFX]
+    Clients[HTTP Proxy Clients]
+end
+
+subgraph Server Node
+    API[Spring REST Controllers]
+    Buses[Command/Query Buses]
+    Modules[Domain Modules]
+end
+
 User --> UI
-
-UI --> API
-
-API --> CommandBus
-
-API --> QueryBus
-
-CommandBus --> UsersModule
-
-CommandBus --> InventoryModule
-
-QueryBus --> UsersReadModel
-
-QueryBus --> InventoryReadModel
-
-UsersModule --> DB
-
-InventoryModule --> DB
-
-UsersReadModel --> DB
-
-InventoryReadModel --> DB
+UI --> Clients
+Clients -->|HTTP REST + JSON| API
+API --> Buses
+Buses --> Modules
 ```
+
 
 ### Detailed Component Flow
 
 ```mermaid
 graph TD
     UI[UI Layer JavaFX]
-    API[API Controllers Layer]
+    HClient[HTTP Proxy Clients]
     
-    subgraph Command Pipeline
+    subgraph Ledge-Server Node
+        REST[REST Controllers]
         CB[Command Bus]
-        WH[Write Handlers]
-        Domain[Domain Models]
-        WR[Write Repositories]
-    end
-    
-    subgraph Query Pipeline
         QB[Query Bus]
-        QH[Query Handlers]
-        RR[Read Repositories]
+        
+        subgraph Domain Boundary
+            WH[Write Handlers]
+            QH[Query Handlers]
+            Domain[Domain Models]
+            DB[(JSON Persistence)]
+        end
     end
     
-    DB[(In-Memory Maps & JSON)]
+    UI --> HClient
+    HClient -->|Authorization: Bearer <token>| REST
     
-    UI -->|DTOs + Token| API
-    API -->|Commands| CB
-    API -->|Queries| QB
+    REST -->|Commands| CB
+    REST -->|Queries| QB
     
     CB --> WH
     WH --> Domain
-    WH --> WR
-    WR -->|Updates/Manages| RR
-    WR --> DB
+    WH --> DB
     
     QB --> QH
-    QH --> RR
-    RR --> DB
+    QH --> DB
 ```
 
----
-
-## 3. Module Breakdown
-
-The application is composed of several independent modules, wired together by the `boot` container.
-
-### `boot`
-
-The entry point of the application. It contains the `App` runner and the `ModuleRegistry` which acts as a lightweight IoC container. The registry resolves all inter-module dependencies before launching the UI.
-
-### `api`
-
-The API gateway. Classes here (`UserController`, `InventoryController`, `AuthController`) receive UI requests, extract authentication, build Commands/Queries, dispatch them to the appropriate bus, and wrap the responses in an `ApiResponse` DTO.
-
-### `security`
-
-Manages identity and access control. 
-
-* Provides `AuthenticationService` and `AuthorizationService`.
-
-* Handles session management (`SessionService`) mapping tokens to `UserDTO`s.
-
-### `shared`
-
-Contains the core CQRS infrastructure (`CommandBus`, `QueryBus`, `EventBroker`) and global types (`Role`, `Permission`, `Resource`, `Action`). 
-
-*   **CommandBus/QueryBus**: Intercept requests to perform authorization checks against the provided Token before invoking the target handler.
-
-### `users` & `inventory` (Domain Modules)
-
-These are the core business modules for user management and product inventory management. 
-
-They are internally split by the CQRS pattern:
-
-*   **`writemodel`**: Contains the rich Domain Entities (e.g., `Product`, `User`), Command Handlers (e.g., `AddProductCommandHandler`), and Write-Optimized Repositories.
-
-*   **`readmodel`**: Contains flat DTOs (`ProductDTO`, `UserDTO`), Query Handlers, and Read-Optimized Repositories (such as O(1) `ConcurrentHashMap` caches populated from JSON files).
-
-### `ui`
-
-The JavaFX presentation layer. 
-
-*   Follows modern JavaFX practices with a `UIEventBroker` for cross-component reactive messaging (e.g., switching pages after a login event).
-
-*   Communicates strictly with the `api` module via API Controllers seamlessly injected by the `App` bootstrapper.
-
-### Module Dependency Diagram
-
-```mermaid
-graph TD
-    Boot --> UI
-    
-    Boot --> API
-    
-    Boot --> Security
-    
-    Boot --> Shared
-    
-    Boot --> Users
-    
-    Boot --> Inventory
-    
-    UI --> API
-    
-    API --> Security
-    
-    API --> Shared
-    
-    API --> Users
-    
-    API --> Inventory
-    
-    Users --> Shared
-    
-    Inventory --> Shared
-```
 
 ---
 
-## 4. The DTO Boundary
 
-A **CRITICAL** architectural rule in this system is the strict use of Data Transfer Objects (DTOs) for boundary crossing. 
+## 3. Physical Module Breakdown
 
-*   **No Domain Bleed**: Domain models (`Product`, `User`) MUST NEVER leave the `writemodel` boundaries. They contain rich behavior and invariants that the UI should not depend on.
+The project is structured as a Maven multi-module reactor with three distinct physical artifacts:
 
-*   **The API Gateway Contract**: The `API` layer acts as the definitive contract. The UI passes `RequestDTO`s to the API, and the API returns `ResponseDTO`s wrapped in an `ApiResponse`.
 
-*   **Read-Model Projections**: The `readmodel` packages solely deal with DTOs. When the `API` layer queries data, it receives DTOs representing flat, presentation-ready projections of the standard domain state. 
+### `ledge-contracts`
 
-This strict separation guarantees that refactoring domain logic will never directly break the UI compilation or execution, provided the API boundaries remain consistent.
+The shared binary foundation. Contains only data and service definitions that both sides must agree on.
 
----
+*   **DTOs**: All API Request and Response objects.
 
-## 5. CQRS Data Flow
+*   **Core Logic**: Shared infrastructure like the `EventBroker` and core security types (`Role`, `Permission`).
 
-### The Write Flow (State Mutation)
+*   **Zero Dependencies**: This module has no dependencies on Spring or JavaFX to remain as small as possible.
 
-1.  **UI** captures user input and calls the `API Controller`.
 
-2.  **API** builds a `Command` object and dispatches it via the `CommandBus`.
+### `ledge-server`
 
-3.  **CommandBus** checks the `AuthContext` to ensure the user has the required `Permission`.
+A standalone Spring Boot application providing the business logic and persistence.
 
-4.  The appropriate **CommandHandler** takes over.
+*   **REST Controllers**: Expose the domain to the network, translating HTTP headers (Tokens) into `AuthContext`.
 
-5.  The Handler invokes methods on the rich **Domain Entity** to ensure business rules are validated.
+*   **CQRS Interior**: Houses the Command/Query buses and all domain handlers.
 
-6.  The Handler saves the Entity to the **Write Repository**.
+*   **In-Memory DB**: Manages the JSON-based persistence layers for Users and Inventory.
 
-7.  The Handler creates a projection (DTO) and saves it directly to the **Read Repository**.
 
-### The Read Flow (Data Retrieval)
+### `ledge-ui`
 
-1.  **UI** requests data to render a page via the `API Controller`.
+The JavaFX desktop client.
 
-2.  **API** builds a `Query` object and dispatches it via the `QueryBus`.
+*   **HTTP Adapters**: Contains `HttpAuthClient`, `HttpInventoryClient`, etc., which proxy the UI's requests over the network.
 
-3.  **QueryBus** verifies access permissions.
+*   **Presentation**: Pure FXML-based views and ViewModels for user interaction.
 
-4.  The **QueryHandler** retrieves the flattened data directly from the **Read Repository**. 
+*   **Decoupled**: Has zero knowledge of the server's domain logic or database structure.
 
-5.  No rich domain models or complex joins are invoked, leading to sub-millisecond retrieval times.
 
 ---
 
-## 6. Security & Authorization
 
-Security is fundamentally integrated into the Command/Query dispatch infrastructure.
+## 4. The Network Boundary
 
-*   Upon login, the `AuthenticationService` returns a secure token string.
+The most critical architectural rule in the current system is the physical network boundary. 
 
-*   Every `Command` and `Query` must implement a `getRequiredPermission()` method returning an `Optional<Permission>`.
 
-*   Before invoking a physical Handler, the `CommandBus`/`QueryBus` queries the `AuthorizationService` using the token to evaluate if the mapped `Role` satisfies the `Permission` requirements (Resource + Action).
+*   **DTO Exclusivity**: No server-side Domain Models (`Product`, `User`) are ever serialized. Communication is performed strictly via `ledge-contracts` DTOs.
 
-### Token Flow Diagram
+*   **Identity via Headers**: The client never sees the server's session state. It simply persists a Token and provides it in the `Authorization: Bearer <token>` header for every request.
+
+*   **Serialization**: All network payloads are serialized using **Gson**, ensuring consistent behavior across the boundary.
+
+
+---
+
+
+## 5. Security & Authorization
+
+Security remains fundamentally integrated into the Server-side dispatch infrastructure.
+
+
+*   **Token-Based**: Upon login, the Server returns a token string. The Client stores this in the `SessionManager`.
+
+*   **Bus-Level Guards**: Even if an endpoint is called via REST, the internal `CommandBus` and `QueryBus` re-verify permissions against the `AuthorizationService` before executing any logic.
+
+*   **Exception Mapping**: Server-side `AuthorizationException` is automatically translated to HTTP 403 Forbidden by a `GlobalExceptionHandler`, allowing the UI to react (e.g., showing a "Permission Denied" notification).
+
+
+### Distributed Token Flow
 
 ```mermaid
 sequenceDiagram
-    participant U as User/UI
-    participant Auth as AuthController
-    participant API as API Controllers
-    participant Bus as Command/Query Bus
-    participant AS as AuthorizationService
-    participant H as Handlers
+    participant U as UI (JavaFX)
+    participant C as HTTP Client
+    participant S as Spring Controller
+    participant B as Command/Query Bus
+    participant H as Handler
 
-    U->>Auth: login(username, password)
-    Auth-->>U: token (UUID string)
-    
-    U->>API: executeAction(AuthContext(token), DataDTO)
-    API->>Bus: dispatch(Command/Query, token)
-    
-    Bus->>AS: require(token, requiredPermission)
-    AS-->>Bus: throws AuthException / returns
-    
-    Bus->>H: invoke()
-    H-->>Bus: result
-    Bus-->>API: result
-    API-->>U: ApiResponse(result)
+    U->>C: request(LoginDTO)
+    C->>S: POST /api/auth/login
+    S-->>C: ApiResponse(Token)
+    C-->>U: token stored
+
+    U->>C: request(UpdateProductDTO)
+    C->>S: PUT /api/inventory (Auth: Bearer)
+    S->>B: dispatch(Command, token)
+    B->>B: validatePermissions(token)
+    B->>H: execute()
+    H-->>S: void/result
+    S-->>U: ApiResponse(success)
 ```
+
 
 ---
 
-## 7. Explicit Architectural Rules
 
-To maintain the integrity of the system architecture, all developers MUST adhere to the following rules:
+## 6. Explicit Architectural Rules
 
-1.  **UI Isolation**: The `ui` package may ONLY depend on the `api` and `shared` modules. It cannot directly instantiate handlers, repositories, or buses.
+1.  **Strict Module Isolation**: The `ledge-ui` module MUST NOT depend on `ledge-server`. It only interacts via the `ledge-contracts` and network calls.
 
-2.  **DTO Exclusivity**: The API layer must exclusively use DTOs for parameters and return types. No raw Collections containing entities, and no domain logic in the API methods.
+2.  **Stateless API**: The Server must not rely on HTTP Sessions. Every request must be self-describing via the Authorization header.
 
-3.  **Read vs Write Segregation**: Never inject a `WriteRepository` into a Query handler. Never inject a `ReadRepository` into a Write handler for the purpose of querying business rules. *Note: Write handlers currently update Read repositories as a simplified projection mechanism.*
+3.  **Unified Results**: Every API response must be wrapped in the `ApiResponse<T>` envelope to provide a consistent error-handling contract for the UI.
 
-4.  **Security by Default**: All new Commands and Queries must implement `getRequiredPermission()`. Missing permissions defaults to denying access.
+4.  **No Direct DB Access**: Only the `ledge-server` is allowed to touch the `data/` directory. The UI has zero filesystem knowledge of the database.
