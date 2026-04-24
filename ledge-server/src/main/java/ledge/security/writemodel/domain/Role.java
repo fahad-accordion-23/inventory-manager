@@ -3,17 +3,27 @@ package ledge.security.writemodel.domain;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Domain model representing a user role with a set of associated permissions.
  */
 public class Role {
+    private final UUID id;
     private final String name;
     private final Set<Permission> permissions;
 
     public Role(String name, Set<Permission> permissions) {
+        this.id = UUID.randomUUID();
         this.name = name;
         this.permissions = Collections.unmodifiableSet(new HashSet<>(permissions));
+    }
+
+    // TOOD: rehydrate
+    // TODO: register
+
+    public UUID getId() {
+        return id;
     }
 
     public String getName() {
@@ -34,14 +44,16 @@ public class Role {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Role role = (Role) o;
-        return name.equals(role.name);
+        return id.equals(role.id);
     }
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        return id.hashCode();
     }
 }

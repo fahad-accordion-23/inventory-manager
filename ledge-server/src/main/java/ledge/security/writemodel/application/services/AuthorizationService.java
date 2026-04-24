@@ -1,11 +1,10 @@
 package ledge.security.writemodel.application.services;
 
 import ledge.security.writemodel.application.events.AuthorizationException;
-import ledge.security.writemodel.domain.ISessionService;
 import ledge.security.writemodel.domain.Permission;
-import ledge.users.readmodel.dtos.UserDTO;
+import ledge.security.writemodel.domain.services.ISessionService;
 
-import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -15,9 +14,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthorizationService implements IAuthorizationService {
     private final ISessionService sessionService;
+    private final IUserRoleService userRoleService;
 
-    public AuthorizationService(ISessionService sessionService) {
+    public AuthorizationService(ISessionService sessionService, IUserRoleService userRoleService) {
         this.sessionService = sessionService;
+        this.userRoleService = userRoleService;
     }
 
     /**
@@ -28,22 +29,18 @@ public class AuthorizationService implements IAuthorizationService {
      * @throws AuthorizationException if the token is invalid or the user lacks
      *                                permission.
      */
+    @Override
     public void require(String token, Permission permission) throws AuthorizationException, IllegalArgumentException {
         if (token == null || token.isBlank()) {
             throw new IllegalArgumentException("Authentication token is missing");
         }
 
-        Optional<UserDTO> userOpt = sessionService.getUserByToken(token);
+        UUID userId = sessionService.getUserIdByToken(token)
+                .orElseThrow(() -> new AuthorizationException("Invalid authentication token"));
 
-        if (userOpt.isEmpty()) {
-            throw new AuthorizationException("Invalid authentication token");
-        }
-
-        UserDTO user = userOpt.get();
-
-        if (permission != null && !user.role().hasPermission(permission)) {
+        if (permission != null && !userRoleService.hasPermission(userId, permission)) {
             throw new AuthorizationException(
-                    "User " + user.username() + " does not have required permission: " + permission);
+                    "User does not have required permission: " + permission);
         }
     }
 }

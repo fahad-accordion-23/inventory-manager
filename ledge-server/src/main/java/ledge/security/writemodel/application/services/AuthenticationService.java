@@ -1,7 +1,7 @@
 package ledge.security.writemodel.application.services;
 
 import ledge.security.writemodel.application.events.AuthenticationException;
-import ledge.security.writemodel.domain.ISessionService;
+import ledge.security.writemodel.domain.services.ISessionService;
 import ledge.users.readmodel.dtos.UserDTO;
 import ledge.users.readmodel.infrastructure.IUserReadRepository;
 import ledge.util.PasswordHasher;
@@ -31,6 +31,7 @@ public class AuthenticationService implements IAuthenticationService {
      * @return A unique session token string.
      * @throws AuthenticationException if authentication fails.
      */
+    @Override
     public String login(String username, String password) throws AuthenticationException {
         Optional<UserDTO> userOpt = userReadRepository.findByUsername(username);
 
@@ -44,7 +45,7 @@ public class AuthenticationService implements IAuthenticationService {
             throw new AuthenticationException("Invalid username or password");
         }
 
-        return sessionService.createToken(user);
+        return sessionService.createToken(user.id());
     }
 
     /**
@@ -52,6 +53,7 @@ public class AuthenticationService implements IAuthenticationService {
      * 
      * @param token The session token to invalidate.
      */
+    @Override
     public void logout(String token) {
         if (token != null) {
             sessionService.removeToken(token);

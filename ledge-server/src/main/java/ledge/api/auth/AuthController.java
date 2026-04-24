@@ -6,7 +6,7 @@ import ledge.api.shared.ApiResponse;
 import ledge.api.users.dto.response.UserResponseDTO;
 import ledge.security.writemodel.application.events.AuthenticationException;
 import ledge.security.writemodel.application.services.IAuthenticationService;
-import ledge.security.writemodel.domain.ISessionService;
+import ledge.security.writemodel.domain.services.ISessionService;
 import ledge.users.readmodel.dtos.UserDTO;
 
 import java.util.Optional;

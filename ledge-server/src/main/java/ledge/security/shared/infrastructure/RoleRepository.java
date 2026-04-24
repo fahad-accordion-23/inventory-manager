@@ -4,13 +4,14 @@ import ledge.security.writemodel.domain.*;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * In-memory repository for user roles.
  */
 @Repository
 public class RoleRepository implements IRoleRepository {
-    private final Map<String, Role> roles = new HashMap<>();
+    private final Map<UUID, Role> rolesById = new ConcurrentHashMap<>();
 
     public RoleRepository() {
         seedRoles();
@@ -40,17 +41,24 @@ public class RoleRepository implements IRoleRepository {
     }
 
     @Override
+    public Optional<Role> findById(UUID id) {
+        return Optional.ofNullable(rolesById.get(id));
+    }
+
+    @Override
     public Optional<Role> findByName(String name) {
-        return Optional.ofNullable(roles.get(name));
+        return rolesById.values().stream()
+                .filter(role -> role.getName().equalsIgnoreCase(name))
+                .findFirst();
     }
 
     @Override
     public List<Role> findAll() {
-        return new ArrayList<>(roles.values());
+        return new ArrayList<>(rolesById.values());
     }
 
     @Override
     public void save(Role role) {
-        roles.put(role.getName(), role);
+        rolesById.put(role.getId(), role);
     }
 }

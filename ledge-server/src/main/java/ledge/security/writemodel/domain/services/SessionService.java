@@ -1,34 +1,34 @@
-package ledge.security.writemodel.domain;
+package ledge.security.writemodel.domain.services;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import ledge.users.readmodel.dtos.UserDTO;
 import org.springframework.stereotype.Service;
 
 /**
  * Service for managing security tokens and sessions.
- * Provides functionality to create, delete, and look up tokens.
+ * Maps tokens against user IDs.
  */
 @Service
 public class SessionService implements ISessionService {
-    private final Map<String, UserDTO> sessions = new ConcurrentHashMap<>();
+    private final Map<String, UUID> sessions = new ConcurrentHashMap<>();
 
     /**
      * Creates a new unique token for a user and stores it.
      * 
-     * @param userId The user for whom the token is created.
+     * @param userId The ID of the user for whom the token is created.
      * @return The generated unique token string.
      */
-    public String createToken(UserDTO user) {
-        if (user == null) {
-            throw new IllegalArgumentException("User cannot be null");
+    @Override
+    public String createToken(UUID userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
         }
 
         String token = UUID.randomUUID().toString();
-        sessions.put(token, user);
+        sessions.put(token, userId);
         return token;
     }
 
@@ -37,6 +37,7 @@ public class SessionService implements ISessionService {
      * 
      * @param token The token string to remove.
      */
+    @Override
     public void removeToken(String token) {
         if (token == null) {
             throw new IllegalArgumentException("Token cannot be null");
@@ -46,12 +47,13 @@ public class SessionService implements ISessionService {
     }
 
     /**
-     * Retrieves the user associated with the given token.
+     * Retrieves the user ID associated with the given token.
      * 
      * @param token The token string.
-     * @return An Optional containing the user if found, or empty otherwise.
+     * @return An Optional containing the user ID if found, or empty otherwise.
      */
-    public Optional<UserDTO> getUserByToken(String token) {
+    @Override
+    public Optional<UUID> getUserIdByToken(String token) {
         if (token == null) {
             throw new IllegalArgumentException("Token cannot be null");
         }
