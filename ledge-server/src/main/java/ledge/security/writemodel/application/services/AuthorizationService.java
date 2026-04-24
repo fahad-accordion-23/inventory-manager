@@ -1,8 +1,8 @@
-package ledge.security.application.services;
+package ledge.security.writemodel.application.services;
 
-import ledge.security.application.events.AuthorizationException;
-import ledge.security.domain.ISessionService;
-import ledge.shared.types.Permission;
+import ledge.security.writemodel.application.events.AuthorizationException;
+import ledge.security.writemodel.domain.ISessionService;
+import ledge.security.writemodel.domain.Permission;
 import ledge.users.readmodel.dtos.UserDTO;
 
 import java.util.Optional;

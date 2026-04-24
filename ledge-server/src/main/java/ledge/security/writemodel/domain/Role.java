@@ -1,4 +1,4 @@
-package ledge.security.domain;
+package ledge.security.writemodel.domain;
 
 import java.util.Collections;
 import java.util.HashSet;

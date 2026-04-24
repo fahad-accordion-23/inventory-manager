@@ -1,9 +1,9 @@
 package ledge.users.readmodel.contracts;
 
 import ledge.shared.infrastructure.queries.Query;
-import ledge.shared.types.Action;
-import ledge.shared.types.Permission;
-import ledge.shared.types.Resource;
+import ledge.security.writemodel.domain.Action;
+import ledge.security.writemodel.domain.Permission;
+import ledge.security.writemodel.domain.Resource;
 import ledge.users.readmodel.dtos.UserDTO;
 
 import java.util.List;

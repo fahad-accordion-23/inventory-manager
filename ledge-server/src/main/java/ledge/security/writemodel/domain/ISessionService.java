@@ -1,4 +1,4 @@
-package ledge.security.domain;
+package ledge.security.writemodel.domain;
 
 import java.util.Optional;
 

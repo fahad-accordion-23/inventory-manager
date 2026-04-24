@@ -1,9 +1,9 @@
 package ledge.inventory.writemodel.contracts;
 
 import ledge.shared.infrastructure.commands.Command;
-import ledge.shared.types.Action;
-import ledge.shared.types.Permission;
-import ledge.shared.types.Resource;
+import ledge.security.writemodel.domain.Action;
+import ledge.security.writemodel.domain.Permission;
+import ledge.security.writemodel.domain.Resource;
 
 import java.util.Optional;
 import java.util.UUID;

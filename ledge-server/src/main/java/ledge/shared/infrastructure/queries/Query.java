@@ -2,7 +2,7 @@ package ledge.shared.infrastructure.queries;
 
 import java.util.Optional;
 
-import ledge.shared.types.Permission;
+import ledge.security.writemodel.domain.Permission;
 
 /**
  * Represents a request to read data from the system without causing side

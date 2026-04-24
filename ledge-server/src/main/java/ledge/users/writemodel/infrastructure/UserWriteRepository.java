@@ -4,7 +4,7 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
 import ledge.util.PasswordHasher;
-import ledge.shared.types.Role;
+import ledge.security.writemodel.domain.Role;
 import ledge.users.writemodel.domain.User;
 
 import java.io.File;

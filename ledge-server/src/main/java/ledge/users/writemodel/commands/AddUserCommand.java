@@ -1,10 +1,10 @@
 package ledge.users.writemodel.commands;
 
 import ledge.shared.infrastructure.commands.Command;
-import ledge.shared.types.Action;
-import ledge.shared.types.Permission;
-import ledge.shared.types.Resource;
-import ledge.shared.types.Role;
+import ledge.security.writemodel.domain.Action;
+import ledge.security.writemodel.domain.Permission;
+import ledge.security.writemodel.domain.Resource;
+import ledge.security.writemodel.domain.Role;
 import ledge.users.readmodel.dtos.UserDTO;
 
 import java.util.Optional;
