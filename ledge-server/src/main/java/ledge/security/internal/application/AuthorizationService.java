@@ -1,8 +1,6 @@
 package ledge.security.internal.application;
 
 import ledge.security.api.dto.PermissionDTO;
-import ledge.security.api.models.Action;
-import ledge.security.api.models.Resource;
 import ledge.security.api.exceptions.AuthorizationException;
 import ledge.security.api.IAuthorizationService;
 import ledge.security.api.IUserRoleService;

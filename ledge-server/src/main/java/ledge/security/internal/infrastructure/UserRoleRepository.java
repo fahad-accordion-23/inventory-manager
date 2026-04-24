@@ -6,27 +6,32 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * In-memory implementation of IUserRoleRepository using ID references.
+ * In-memory implementation of IUserRoleRepository restricted to a single role
+ * per user.
  */
 @Repository
 public class UserRoleRepository implements IUserRoleRepository {
-    private final Map<UUID, Set<UUID>> userRoles = new ConcurrentHashMap<>();
+    private final Map<UUID, UUID> userRoles = new ConcurrentHashMap<>();
 
     @Override
-    public void saveRoles(UUID userId, Set<UUID> roleIds) {
-        if (userId == null || roleIds == null) {
-            throw new IllegalArgumentException("User ID and role IDs cannot be null");
+    public void saveRole(UUID userId, UUID roleId) {
+        if (userId == null || roleId == null) {
+            throw new IllegalArgumentException("User ID and role ID cannot be null");
         }
-        userRoles.put(userId, new HashSet<>(roleIds));
+        userRoles.put(userId, roleId);
     }
 
     @Override
-    public Set<UUID> findRolesByUserId(UUID userId) {
-        return userRoles.getOrDefault(userId, Collections.emptySet());
+    public Optional<UUID> findRoleByUserId(UUID userId) {
+        if (userId == null)
+            return Optional.empty();
+        return Optional.ofNullable(userRoles.get(userId));
     }
 
     @Override
-    public void deleteRoles(UUID userId) {
-        userRoles.remove(userId);
+    public void deleteRole(UUID userId) {
+        if (userId != null) {
+            userRoles.remove(userId);
+        }
     }
 }

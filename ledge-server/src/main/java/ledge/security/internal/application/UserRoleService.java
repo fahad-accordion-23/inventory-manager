@@ -11,8 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 /**
- * Service that manages the mapping between user IDs and their assigned roles
- * using ID references and allows registration of custom roles.
+ * Service that manages the mapping between user IDs and their assigned roles.
  */
 @Service
 public class UserRoleService implements IUserRoleService {
@@ -44,28 +43,17 @@ public class UserRoleService implements IUserRoleService {
 
     @Override
     public void assignRole(UUID userId, UUID roleId) {
-        if (userId == null || roleId == null) {
-            throw new IllegalArgumentException("User ID and role ID cannot be null");
-        }
-        Set<UUID> roleIds = new HashSet<>(userRoleRepository.findRolesByUserId(userId));
-        roleIds.add(roleId);
-        userRoleRepository.saveRoles(userId, roleIds);
+        userRoleRepository.saveRole(userId, roleId);
     }
 
     @Override
-    public void removeRole(UUID userId, UUID roleId) {
-        if (userId == null || roleId == null) {
-            throw new IllegalArgumentException("User ID and role ID cannot be null");
-        }
-        Set<UUID> roleIds = new HashSet<>(userRoleRepository.findRolesByUserId(userId));
-        if (roleIds.remove(roleId)) {
-            userRoleRepository.saveRoles(userId, roleIds);
-        }
+    public void removeRole(UUID userId) {
+        userRoleRepository.deleteRole(userId);
     }
 
     @Override
-    public Set<UUID> getRoleIds(UUID userId) {
-        return Collections.unmodifiableSet(userRoleRepository.findRolesByUserId(userId));
+    public Optional<UUID> getRoleId(UUID userId) {
+        return userRoleRepository.findRoleByUserId(userId);
     }
 
     @Override
@@ -75,9 +63,9 @@ public class UserRoleService implements IUserRoleService {
 
         Permission permission = new Permission(permissionDTO.resource(), permissionDTO.action());
 
-        return getRoleIds(userId).stream()
-                .map(roleRepository::findById)
-                .flatMap(Optional::stream)
-                .anyMatch(role -> role.hasPermission(permission));
+        return getRoleId(userId)
+                .flatMap(roleRepository::findById)
+                .map(role -> role.hasPermission(permission))
+                .orElse(false);
     }
 }

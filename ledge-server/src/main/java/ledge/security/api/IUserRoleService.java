@@ -1,29 +1,38 @@
 package ledge.security.api;
 
 import ledge.security.api.dto.PermissionDTO;
-import ledge.security.api.models.Action;
-import ledge.security.api.models.Resource;
+
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 /**
  * Public interface for managing user roles (Open Host Service).
+ * Refined to support exactly one role per user.
  */
 public interface IUserRoleService {
     /**
      * Registers a new custom role in the system.
-     * 
-     * @param name        The unique name of the role.
-     * @param permissions The set of permissions to associate with this role.
-     * @return The UUID of the newly created role.
      */
     UUID registerRole(String name, Set<PermissionDTO> permissions);
 
+    /**
+     * Assigns a role to a user, replacing any previously assigned role.
+     */
     void assignRole(UUID userId, UUID roleId);
 
-    void removeRole(UUID userId, UUID roleId);
+    /**
+     * Removes the role assignment from a user.
+     */
+    void removeRole(UUID userId);
 
-    Set<UUID> getRoleIds(UUID userId);
+    /**
+     * Retrieves the ID of the role assigned to the user.
+     */
+    Optional<UUID> getRoleId(UUID userId);
 
+    /**
+     * Checks if a user has a specific permission based on their assigned role.
+     */
     boolean hasPermission(UUID userId, PermissionDTO permission);
 }

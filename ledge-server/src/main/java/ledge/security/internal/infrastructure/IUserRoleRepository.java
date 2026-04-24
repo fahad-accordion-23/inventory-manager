@@ -1,15 +1,25 @@
 package ledge.security.internal.infrastructure;
 
-import java.util.Set;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Repository interface for storing user-role mappings using ID references.
+ * Repository interface for storing user-to-role mappings using ID references.
+ * Each user is restricted to a single role assignment.
  */
 public interface IUserRoleRepository {
-    void saveRoles(UUID userId, Set<UUID> roleIds);
+    /**
+     * Persists a role assignment for a user. Overwrites any existing assignment.
+     */
+    void saveRole(UUID userId, UUID roleId);
 
-    Set<UUID> findRolesByUserId(UUID userId);
+    /**
+     * Retrieves the role ID assigned to a user.
+     */
+    Optional<UUID> findRoleByUserId(UUID userId);
 
-    void deleteRoles(UUID userId);
+    /**
+     * Removes the role assignment from a user.
+     */
+    void deleteRole(UUID userId);
 }
