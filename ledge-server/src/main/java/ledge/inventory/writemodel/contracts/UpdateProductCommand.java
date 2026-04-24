@@ -1,25 +1,27 @@
 package ledge.inventory.writemodel.contracts;
 
-import ledge.inventory.readmodel.dtos.ProductDTO;
-import ledge.security.internal.domain.models.Action;
-import ledge.security.internal.domain.models.Permission;
-import ledge.security.internal.domain.models.Resource;
+import ledge.security.api.dto.PermissionDTO;
+import ledge.security.api.models.Action;
+import ledge.security.api.models.Resource;
 import ledge.shared.infrastructure.commands.Command;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
 
-public record UpdateProductCommand(UUID id, String name, BigDecimal purchasePrice, BigDecimal sellingPrice,
-        int stockQuantity, BigDecimal taxRate) implements Command {
-    public static final Permission REQUIRED = new Permission(Resource.PRODUCT, Action.UPDATE);
+public record UpdateProductCommand(
+        UUID id,
+        String name,
+        String description,
+        BigDecimal purchasePrice,
+        BigDecimal sellingPrice,
+        int stockQuantity,
+        BigDecimal taxRate) implements Command {
 
-    public UpdateProductCommand(ProductDTO dto) {
-        this(dto.id(), dto.name(), dto.purchasePrice(), dto.sellingPrice(), dto.stockQuantity(), dto.taxRate());
-    }
+    private static final PermissionDTO REQUIRED = new PermissionDTO(Resource.PRODUCT, Action.UPDATE);
 
     @Override
-    public Optional<Permission> getRequiredPermission() {
+    public Optional<PermissionDTO> getRequiredPermission() {
         return Optional.of(REQUIRED);
     }
 }

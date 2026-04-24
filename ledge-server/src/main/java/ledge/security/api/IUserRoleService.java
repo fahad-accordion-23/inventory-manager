@@ -1,6 +1,8 @@
 package ledge.security.api;
 
 import ledge.security.api.dto.PermissionDTO;
+import ledge.security.api.models.Action;
+import ledge.security.api.models.Resource;
 import java.util.Set;
 import java.util.UUID;
 

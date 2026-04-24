@@ -1,4 +1,4 @@
-package ledge.security.internal.domain.models;
+package ledge.security.api.models;
 
 public enum Action {
     CREATE,

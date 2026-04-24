@@ -2,9 +2,7 @@ package ledge.security.internal.application;
 
 import ledge.security.api.dto.PermissionDTO;
 import ledge.security.api.IUserRoleService;
-import ledge.security.internal.domain.models.Action;
 import ledge.security.internal.domain.models.Permission;
-import ledge.security.internal.domain.models.Resource;
 import ledge.security.internal.domain.models.Role;
 import ledge.security.internal.infrastructure.IRoleRepository;
 import ledge.security.internal.infrastructure.IUserRoleRepository;
@@ -35,9 +33,7 @@ public class UserRoleService implements IUserRoleService {
         Set<Permission> permissions = new HashSet<>();
         if (permissionDTOs != null) {
             for (PermissionDTO dto : permissionDTOs) {
-                permissions.add(new Permission(
-                        Resource.valueOf(dto.resource().toUpperCase()),
-                        Action.valueOf(dto.action().toUpperCase())));
+                permissions.add(new Permission(dto.resource(), dto.action()));
             }
         }
 
@@ -77,17 +73,11 @@ public class UserRoleService implements IUserRoleService {
         if (permissionDTO == null)
             return true;
 
-        try {
-            Permission permission = new Permission(
-                    Resource.valueOf(permissionDTO.resource().toUpperCase()),
-                    Action.valueOf(permissionDTO.action().toUpperCase()));
+        Permission permission = new Permission(permissionDTO.resource(), permissionDTO.action());
 
-            return getRoleIds(userId).stream()
-                    .map(roleRepository::findById)
-                    .flatMap(Optional::stream)
-                    .anyMatch(role -> role.hasPermission(permission));
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
+        return getRoleIds(userId).stream()
+                .map(roleRepository::findById)
+                .flatMap(Optional::stream)
+                .anyMatch(role -> role.hasPermission(permission));
     }
 }

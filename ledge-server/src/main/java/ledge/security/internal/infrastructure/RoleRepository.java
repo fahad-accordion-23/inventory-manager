@@ -2,6 +2,8 @@ package ledge.security.internal.infrastructure;
 
 import org.springframework.stereotype.Repository;
 
+import ledge.security.api.models.Action;
+import ledge.security.api.models.Resource;
 import ledge.security.internal.domain.models.*;
 
 import java.util.*;
