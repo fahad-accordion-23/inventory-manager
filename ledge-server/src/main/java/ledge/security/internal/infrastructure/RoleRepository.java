@@ -2,9 +2,6 @@ package ledge.security.internal.infrastructure;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import ledge.security.api.models.Action;
-import ledge.security.api.models.Resource;
-import ledge.security.internal.domain.models.Permission;
 import ledge.security.internal.domain.models.Role;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
@@ -29,48 +26,20 @@ public class RoleRepository implements IRoleRepository {
         this.gson = new GsonBuilder()
                 .setPrettyPrinting()
                 .create();
-        
+
         File dir = new File(DATA_DIR);
-        if (!dir.exists()) dir.mkdirs();
+        if (!dir.exists())
+            dir.mkdirs();
 
         load();
-        if (database.isEmpty()) {
-            seed();
-        }
-    }
-
-    private void seed() {
-        // ADMIN
-        Set<Permission> adminPerms = new HashSet<>();
-        for (Resource r : Resource.values()) {
-            for (Action a : Action.values()) {
-                adminPerms.add(new Permission(r, a));
-            }
-        }
-        save(Role.register("ADMIN", adminPerms));
-
-        // INVENTORY_MANAGER
-        save(Role.register("INVENTORY_MANAGER", Set.of(
-                new Permission(Resource.PRODUCT, Action.CREATE),
-                new Permission(Resource.PRODUCT, Action.READ),
-                new Permission(Resource.PRODUCT, Action.UPDATE),
-                new Permission(Resource.PRODUCT, Action.DELETE))));
-
-        // SALES_STAFF
-        save(Role.register("SALES_STAFF", Set.of(
-                new Permission(Resource.PRODUCT, Action.READ),
-                new Permission(Resource.INVOICE, Action.CREATE))));
-
-        // DEFAULT_USER
-        save(Role.register("DEFAULT_USER", Set.of(
-                new Permission(Resource.PRODUCT, Action.READ))));
     }
 
     private void load() {
         File file = new File(FILE_PATH);
         if (file.exists()) {
             try (Reader reader = new FileReader(file)) {
-                Type type = new TypeToken<List<Role>>() {}.getType();
+                Type type = new TypeToken<List<Role>>() {
+                }.getType();
                 List<Role> roles = gson.fromJson(reader, type);
                 if (roles != null) {
                     for (Role role : roles) {

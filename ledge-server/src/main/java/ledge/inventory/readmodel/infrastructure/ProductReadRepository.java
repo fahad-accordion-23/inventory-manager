@@ -31,7 +31,12 @@ public class ProductReadRepository implements IProductReadRepository {
     }
 
     private void loadInitialData() {
-        try (FileReader reader = new FileReader("data/inventory.json")) {
+        java.io.File file = new java.io.File("data/inventory.json");
+        if (!file.exists()) {
+            return;
+        }
+
+        try (FileReader reader = new FileReader(file)) {
             Type listType = new TypeToken<List<ProductDTO>>() {}.getType();
             List<ProductDTO> initialProducts = gson.fromJson(reader, listType);
             if (initialProducts != null) {
@@ -40,7 +45,7 @@ public class ProductReadRepository implements IProductReadRepository {
                 }
             }
         } catch (IOException e) {
-            System.err.println("Warning: Could not load initial inventory from data/inventory.json: " + e.getMessage());
+            System.err.println("Error: Failed to load initial inventory from data/inventory.json: " + e.getMessage());
         }
     }
 

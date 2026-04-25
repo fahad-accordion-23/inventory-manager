@@ -29,7 +29,12 @@ public class UserReadRepository implements IUserReadRepository {
     }
 
     private void loadInitialData() {
-        try (FileReader reader = new FileReader("data/users.json")) {
+        java.io.File file = new java.io.File("data/users.json");
+        if (!file.exists()) {
+            return;
+        }
+
+        try (FileReader reader = new FileReader(file)) {
             Type listType = new TypeToken<List<UserDTO>>() {
             }.getType();
             List<UserDTO> initialUsers = gson.fromJson(reader, listType);
@@ -39,7 +44,7 @@ public class UserReadRepository implements IUserReadRepository {
                 }
             }
         } catch (IOException e) {
-            System.err.println("Warning: Could not load initial users from data/users.json: " + e.getMessage());
+            System.err.println("Error: Failed to load initial users from data/users.json: " + e.getMessage());
         }
     }
 

@@ -3,7 +3,6 @@ package ledge.users.writemodel.infrastructure;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
-import ledge.util.PasswordHasher;
 import ledge.users.writemodel.domain.User;
 
 import java.io.File;
@@ -20,7 +19,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class UserWriteRepository implements IUserWriteRepository {
-    private static final String DATA_DIR = System.getProperty("user.dir") + "/data";
+    private static final String DATA_DIR = "data";
     private static final String FILE_PATH = DATA_DIR + "/users.json";
     private final List<User> database = new ArrayList<>();
     private final Gson gson;
@@ -32,14 +31,6 @@ public class UserWriteRepository implements IUserWriteRepository {
 
         new File(DATA_DIR).mkdirs();
         loadDatabase();
-
-        if (database.isEmpty()) {
-            seedDatabase();
-        }
-    }
-
-    private void seedDatabase() {
-        save(User.register("admin", PasswordHasher.hash("admin123")));
     }
 
     private void loadDatabase() {

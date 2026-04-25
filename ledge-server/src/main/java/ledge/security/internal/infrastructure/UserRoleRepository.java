@@ -23,13 +23,16 @@ public class UserRoleRepository implements IUserRoleRepository {
     private final Gson gson;
 
     public UserRoleRepository() {
+        System.out.println("initialized!");
+
         this.gson = new GsonBuilder()
                 .setPrettyPrinting()
                 .create();
-        
+
         File dir = new File(DATA_DIR);
-        if (!dir.exists()) dir.mkdirs();
-        
+        if (!dir.exists())
+            dir.mkdirs();
+
         load();
     }
 
@@ -37,7 +40,8 @@ public class UserRoleRepository implements IUserRoleRepository {
         File file = new File(FILE_PATH);
         if (file.exists()) {
             try (Reader reader = new FileReader(file)) {
-                Type type = new TypeToken<Map<UUID, UUID>>() {}.getType();
+                Type type = new TypeToken<Map<UUID, UUID>>() {
+                }.getType();
                 Map<UUID, UUID> loaded = gson.fromJson(reader, type);
                 if (loaded != null) {
                     database.putAll(loaded);
