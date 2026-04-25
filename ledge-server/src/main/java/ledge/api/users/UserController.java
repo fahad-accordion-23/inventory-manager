@@ -5,6 +5,7 @@ import ledge.api.shared.ContractMapper;
 import ledge.api.users.dto.request.*;
 import ledge.api.users.dto.response.GetAllUsersResponseDTO;
 import ledge.api.users.dto.UserResponseDTO;
+import ledge.security.api.IRoleService;
 import ledge.security.api.IUserRoleService;
 import ledge.security.api.dto.RoleDTO;
 import ledge.users.readmodel.contracts.GetAllUsersQuery;
@@ -30,11 +31,13 @@ public class UserController {
     private final CommandBus commandBus;
     private final QueryBus queryBus;
     private final IUserRoleService userRoleService;
+    private final IRoleService roleService;
 
-    public UserController(CommandBus commandBus, QueryBus queryBus, IUserRoleService userRoleService) {
+    public UserController(CommandBus commandBus, QueryBus queryBus, IUserRoleService userRoleService, IRoleService roleService) {
         this.commandBus = commandBus;
         this.queryBus = queryBus;
         this.userRoleService = userRoleService;
+        this.roleService = roleService;
     }
 
     private String extractToken(String authHeader) {
@@ -127,7 +130,7 @@ public class UserController {
 
     private UserResponseDTO mapToContract(UserDTO u, String token) {
         RoleDTO internalRole = userRoleService.getRoleId(u.id())
-                .flatMap(userRoleService::getRole)
+                .flatMap(roleService::getRole)
                 .orElse(null);
         return ContractMapper.mapUser(u, internalRole);
     }

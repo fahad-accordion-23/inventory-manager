@@ -4,6 +4,7 @@ import ledge.api.shared.ApiResponse;
 import ledge.api.users.dto.request.CreateUserRequestDTO;
 import ledge.api.users.dto.response.GetAllUsersResponseDTO;
 import ledge.api.users.dto.UserResponseDTO;
+import ledge.security.api.IRoleService;
 import ledge.security.api.IUserRoleService;
 import ledge.users.readmodel.dtos.UserDTO;
 import ledge.shared.infrastructure.queries.QueryBus;
@@ -24,13 +25,15 @@ class UserControllerTest {
     private CommandBus commandBus;
     private QueryBus queryBus;
     private IUserRoleService userRoleService;
+    private IRoleService roleService;
 
     @BeforeEach
     void setUp() {
         commandBus = mock(CommandBus.class);
         queryBus = mock(QueryBus.class);
         userRoleService = mock(IUserRoleService.class);
-        controller = new UserController(commandBus, queryBus, userRoleService);
+        roleService = mock(IRoleService.class);
+        controller = new UserController(commandBus, queryBus, userRoleService, roleService);
     }
 
     @Test

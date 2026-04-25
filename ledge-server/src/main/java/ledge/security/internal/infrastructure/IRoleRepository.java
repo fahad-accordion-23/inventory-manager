@@ -17,4 +17,6 @@ public interface IRoleRepository {
     List<Role> findAll();
 
     void save(Role role);
+
+    void delete(UUID id);
 }

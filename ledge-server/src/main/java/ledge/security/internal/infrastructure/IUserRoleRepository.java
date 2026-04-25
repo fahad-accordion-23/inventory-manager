@@ -22,4 +22,9 @@ public interface IUserRoleRepository {
      * Removes the role assignment from a user.
      */
     void deleteRole(UUID userId);
+
+    /**
+     * Checks if a role is assigned to any user.
+     */
+    boolean isRoleAssigned(UUID roleId);
 }

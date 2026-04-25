@@ -2,6 +2,7 @@ package ledge.users.writemodel.application.handlers;
 
 import org.springframework.stereotype.Service;
 
+import ledge.security.api.IRoleService;
 import ledge.security.api.IUserRoleService;
 import ledge.security.api.dto.RoleDTO;
 import ledge.shared.infrastructure.commands.CommandHandler;
@@ -17,13 +18,16 @@ public class AddUserCommandHandler implements CommandHandler<AddUserCommand> {
     private final IUserWriteRepository userWriteRepository;
     private final IUserReadRepository userReadRepository;
     private final IUserRoleService userRoleService;
+    private final IRoleService roleService;
 
     public AddUserCommandHandler(IUserWriteRepository userWriteRepository,
             IUserReadRepository userReadRepository,
-            IUserRoleService userRoleService) {
+            IUserRoleService userRoleService,
+            IRoleService roleService) {
         this.userWriteRepository = userWriteRepository;
         this.userReadRepository = userReadRepository;
         this.userRoleService = userRoleService;
+        this.roleService = roleService;
     }
 
     @Override
@@ -33,7 +37,7 @@ public class AddUserCommandHandler implements CommandHandler<AddUserCommand> {
         userWriteRepository.save(user);
 
         // Assign default role (DEFAULT_USER)
-        userRoleService.getRoleByName("DEFAULT_USER")
+        roleService.getRoleByName("DEFAULT_USER")
                 .map(RoleDTO::id)
                 .ifPresent(roleId -> userRoleService.assignRole(user.getId(), roleId));
 

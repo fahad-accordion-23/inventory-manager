@@ -5,6 +5,7 @@ import ledge.api.auth.dto.response.LoginResponseDTO;
 import ledge.api.shared.ApiResponse;
 import ledge.api.shared.ContractMapper;
 import ledge.api.users.dto.UserResponseDTO;
+import ledge.security.api.IRoleService;
 import ledge.security.api.exceptions.AuthenticationException;
 import ledge.security.internal.domain.services.ISessionService;
 import ledge.security.api.IAuthenticationService;
@@ -28,13 +29,15 @@ public class AuthController {
     private final IAuthenticationService authService;
     private final ISessionService sessionService;
     private final IUserRoleService userRoleService;
+    private final IRoleService roleService;
     private final QueryBus queryBus;
 
     public AuthController(IAuthenticationService authService, ISessionService sessionService,
-            IUserRoleService userRoleService, QueryBus queryBus) {
+            IUserRoleService userRoleService, IRoleService roleService, QueryBus queryBus) {
         this.authService = authService;
         this.sessionService = sessionService;
         this.userRoleService = userRoleService;
+        this.roleService = roleService;
         this.queryBus = queryBus;
     }
 
@@ -101,7 +104,7 @@ public class AuthController {
 
     private UserResponseDTO mapToContract(UserDTO u) {
         RoleDTO internalRole = userRoleService.getRoleId(u.id())
-                .flatMap(userRoleService::getRole)
+                .flatMap(roleService::getRole)
                 .orElse(null);
         return ContractMapper.mapUser(u, internalRole);
     }

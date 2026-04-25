@@ -23,8 +23,6 @@ public class UserRoleRepository implements IUserRoleRepository {
     private final Gson gson;
 
     public UserRoleRepository() {
-        System.out.println("initialized!");
-
         this.gson = new GsonBuilder()
                 .setPrettyPrinting()
                 .create();
@@ -76,5 +74,10 @@ public class UserRoleRepository implements IUserRoleRepository {
         if (database.remove(userId) != null) {
             persist();
         }
+    }
+
+    @Override
+    public boolean isRoleAssigned(UUID roleId) {
+        return database.values().contains(roleId);
     }
 }

@@ -82,4 +82,11 @@ public class RoleRepository implements IRoleRepository {
         database.put(role.getId(), role);
         persist();
     }
+
+    @Override
+    public void delete(UUID id) {
+        if (database.remove(id) != null) {
+            persist();
+        }
+    }
 }

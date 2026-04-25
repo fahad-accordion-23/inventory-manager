@@ -7,6 +7,7 @@ import ledge.api.security.dto.response.GetAllRolesResponseDTO;
 import ledge.api.security.dto.response.GetUserRoleResponseDTO;
 import ledge.api.shared.ApiResponse;
 import ledge.api.shared.ContractMapper;
+import ledge.security.api.IRoleService;
 import ledge.security.api.IUserRoleService;
 import ledge.security.api.dto.PermissionDTO;
 import ledge.security.api.IAuthorizationService;
@@ -17,21 +18,24 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
  * Controller for managing security roles and assignments.
- * Aligned with the latest API documentation and ContractMapper.
+ * Aligned with the latest API documentation and split service layer.
  */
 @RestController
 @RequestMapping("/api/security")
 public class SecurityController {
     private final IUserRoleService userRoleService;
+    private final IRoleService roleService;
     private final IAuthorizationService authorizationService;
 
-    public SecurityController(IUserRoleService userRoleService, IAuthorizationService authorizationService) {
+    public SecurityController(IUserRoleService userRoleService, IRoleService roleService, IAuthorizationService authorizationService) {
         this.userRoleService = userRoleService;
+        this.roleService = roleService;
         this.authorizationService = authorizationService;
     }
 
@@ -47,7 +51,7 @@ public class SecurityController {
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
         authorizationService.require(extractToken(authHeader), new PermissionDTO(Resource.ROLE, Action.READ));
 
-        List<RoleResponseDTO> roleContracts = userRoleService.getAllRoles().stream()
+        List<RoleResponseDTO> roleContracts = roleService.getAllRoles().stream()
                 .map(ContractMapper::mapRole)
                 .collect(Collectors.toList());
 
@@ -91,9 +95,6 @@ public class SecurityController {
         return ApiResponse.success(null);
     }
 
-    // Role creation/deletion APIs placeholders (not implemented as per user
-    // request)
-
     /**
      * Registers a new custom role.
      */
@@ -102,7 +103,13 @@ public class SecurityController {
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @RequestBody RegisterRoleRequestDTO request) {
         authorizationService.require(extractToken(authHeader), new PermissionDTO(Resource.ROLE, Action.CREATE));
-        return ApiResponse.error("Not Implemented", "NOT_IMPLEMENTED");
+
+        Set<PermissionDTO> permissions = request.permissions().entrySet().stream()
+                .flatMap(e -> e.getValue().stream().map(a -> new PermissionDTO(e.getKey(), a)))
+                .collect(Collectors.toSet());
+
+        roleService.registerRole(request.name(), permissions);
+        return ApiResponse.success(null);
     }
 
     /**
@@ -114,6 +121,7 @@ public class SecurityController {
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @PathVariable UUID roleId) {
         authorizationService.require(extractToken(authHeader), new PermissionDTO(Resource.ROLE, Action.DELETE));
-        return ApiResponse.error("Not Implemented", "NOT_IMPLEMENTED");
+        roleService.deleteRole(roleId);
+        return ApiResponse.success(null);
     }
 }

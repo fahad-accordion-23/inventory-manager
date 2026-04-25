@@ -1,5 +1,6 @@
 package ledge.users.writemodel.application.handlers;
 
+import ledge.security.api.IRoleService;
 import ledge.security.api.IUserRoleService;
 import ledge.security.api.dto.RoleDTO;
 import ledge.users.readmodel.infrastructure.IUserReadRepository;
@@ -23,13 +24,15 @@ class AddUserCommandHandlerTest {
     private IUserWriteRepository writeRepository;
     private IUserReadRepository readRepository;
     private IUserRoleService userRoleService;
+    private IRoleService roleService;
 
     @BeforeEach
     void setUp() {
         writeRepository = mock(IUserWriteRepository.class);
         readRepository = mock(IUserReadRepository.class);
         userRoleService = mock(IUserRoleService.class);
-        handler = new AddUserCommandHandler(writeRepository, readRepository, userRoleService);
+        roleService = mock(IRoleService.class);
+        handler = new AddUserCommandHandler(writeRepository, readRepository, userRoleService, roleService);
     }
 
     @Test
@@ -38,7 +41,7 @@ class AddUserCommandHandlerTest {
         UUID roleId = UUID.randomUUID();
         RoleDTO defaultRole = new RoleDTO(roleId, "DEFAULT_USER", Set.of());
         
-        when(userRoleService.getRoleByName("DEFAULT_USER")).thenReturn(Optional.of(defaultRole));
+        when(roleService.getRoleByName("DEFAULT_USER")).thenReturn(Optional.of(defaultRole));
 
         handler.handle(command);
 
