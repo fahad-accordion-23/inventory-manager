@@ -6,7 +6,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import ledge.ui.clients.HttpInventoryClient;
 import ledge.api.inventory.dto.request.CreateProductRequestDTO;
-import ledge.api.inventory.dto.response.ProductResponseDTO;
 import ledge.api.shared.ApiResponse;
 import ledge.api.shared.AuthContext;
 import ledge.ui.core.SessionManager;
@@ -72,7 +71,7 @@ public class AddProductView {
             alert.showAndWait();
             return;
         }
-        ApiResponse<ProductResponseDTO> response = inventoryController.createProduct(
+        ApiResponse<Void> response = inventoryController.createProduct(
                 authContext.get(), request);
 
         if (response.success()) {

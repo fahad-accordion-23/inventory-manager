@@ -7,9 +7,7 @@ import javafx.scene.control.Alert.AlertType;
 import ledge.api.shared.AuthContext;
 import ledge.api.shared.ApiResponse;
 import ledge.ui.clients.HttpUserClient;
-import ledge.api.users.dto.response.UserResponseDTO;
 import ledge.api.users.dto.request.CreateUserRequestDTO;
-import ledge.shared.types.Role;
 import ledge.ui.core.SessionManager;
 import ledge.ui.util.FormValidator;
 
@@ -20,9 +18,6 @@ public class AddUserView {
 
     @FXML
     private PasswordField passwordField;
-
-    @FXML
-    private ComboBox<Role> roleComboBox;
 
     private final HttpUserClient userController;
     private final SessionManager sessionManager;
@@ -35,42 +30,33 @@ public class AddUserView {
     }
 
     @FXML
-    public void initialize() {
-        roleComboBox.getItems().setAll(Role.values());
-        roleComboBox.getSelectionModel().select(Role.SALES_STAFF);
-    }
-
-    @FXML
     public void handleRegister() {
         FormValidator v = new FormValidator();
 
         String username = v.requireNonBlank(usernameField, "Username");
         String password = v.requireNonBlank(passwordField, "Password");
-        Role role = roleComboBox.getValue();
 
         if (v.hasErrors()) {
             new Alert(Alert.AlertType.ERROR, v.getErrorSummary()).showAndWait();
             return;
         }
 
-        CreateUserRequestDTO request = new CreateUserRequestDTO(username, password, role);
+        // CreateUserRequestDTO no longer includes the role; it's assigned by default in the handler
+        CreateUserRequestDTO request = new CreateUserRequestDTO(username, password);
 
         AuthContext authContext = sessionManager.getAuthContext().orElse(null);
         if (authContext == null) {
-            Alert alert = new Alert(AlertType.ERROR, "You are not logged in.");
-            alert.showAndWait();
+            new Alert(AlertType.ERROR, "You are not logged in.").showAndWait();
             return;
         }
 
-        ApiResponse<UserResponseDTO> response = userController.createUser(authContext, request);
+        ApiResponse<Void> response = userController.createUser(authContext, request);
 
         if (response.success()) {
-            Alert alert = new Alert(AlertType.INFORMATION, "User registered successfully!");
-            alert.showAndWait();
+            new Alert(AlertType.INFORMATION, "User registered successfully!").showAndWait();
             onCancel.run();
         } else {
-            Alert alert = new Alert(AlertType.ERROR, response.error().message());
-            alert.showAndWait();
+            new Alert(AlertType.ERROR, response.error().message()).showAndWait();
         }
     }
 

@@ -44,6 +44,18 @@ public class SessionManager {
     }
 
     /**
+     * Refreshes the current user info using the auth token.
+     */
+    public void refreshSession() {
+        if (authContext == null) return;
+        
+        ApiResponse<UserResponseDTO> response = authController.me(authContext);
+        if (response.success()) {
+            this.currentUser = response.data();
+        }
+    }
+
+    /**
      * Clears the current session and invalidates the token on the server.
      */
     public void logout() {
@@ -81,6 +93,9 @@ public class SessionManager {
      * Checks if the current user has the given capability.
      */
     public boolean isAllowed(Capability capability) {
-        return currentUser.role().hasPermission(capability.permission());
+        if (currentUser == null || currentUser.role() == null) {
+            return false;
+        }
+        return currentUser.role().permissions().contains(capability.permission());
     }
 }

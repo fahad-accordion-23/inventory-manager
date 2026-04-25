@@ -9,7 +9,6 @@ import javafx.scene.layout.HBox;
 import ledge.api.shared.ApiResponse;
 import ledge.api.shared.AuthContext;
 import ledge.ui.clients.HttpUserClient;
-import ledge.api.users.dto.request.DeleteUserRequestDTO;
 import ledge.api.users.dto.response.UserListResponseDTO;
 import ledge.api.users.dto.response.UserResponseDTO;
 import ledge.ui.core.Capability;
@@ -136,8 +135,7 @@ public class UserDashboardView {
             if (authContext.isEmpty())
                 return;
 
-            ApiResponse<Void> response = userController.deleteUser(authContext.get(),
-                    new DeleteUserRequestDTO(user.getId()));
+            ApiResponse<Void> response = userController.deleteUser(authContext.get(), user.getId());
 
             if (response.success()) {
                 loadAllUsers();

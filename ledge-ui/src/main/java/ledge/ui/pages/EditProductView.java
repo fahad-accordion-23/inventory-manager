@@ -96,7 +96,7 @@ public class EditProductView {
             return;
         }
 
-        ApiResponse<Void> response = inventoryController.updateProduct(authContext.get(), request);
+        ApiResponse<Void> response = inventoryController.updateProduct(authContext.get(), productId, request);
 
         if (response.success()) {
             Alert alert = new Alert(AlertType.INFORMATION);

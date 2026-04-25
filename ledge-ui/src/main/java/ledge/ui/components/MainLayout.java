@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.layout.VBox;
 
+import ledge.ui.clients.HttpSecurityClient;
 import ledge.ui.clients.HttpInventoryClient;
 import ledge.api.inventory.dto.response.ProductResponseDTO;
 import ledge.ui.clients.HttpUserClient;
@@ -36,8 +37,8 @@ public class MainLayout {
 
     private final HttpInventoryClient inventoryController;
     private final HttpUserClient userController;
+    private final HttpSecurityClient securityController;
     private final SessionManager sessionManager;
-    // private final UIEventBroker uiEventBroker;
 
     private Parent dashboardViewCache;
     private Parent addProductViewCache;
@@ -46,12 +47,13 @@ public class MainLayout {
 
     public MainLayout(HttpInventoryClient inventoryController,
             HttpUserClient userController,
+            HttpSecurityClient securityController,
             SessionManager sessionManager,
             UIEventBroker uiEventBroker) {
         this.inventoryController = inventoryController;
         this.userController = userController;
+        this.securityController = securityController;
         this.sessionManager = sessionManager;
-        // this.uiEventBroker = uiEventBroker;
     }
 
     @FXML
@@ -135,7 +137,7 @@ public class MainLayout {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/pages/EditUserView.fxml"));
             loader.setControllerFactory(
-                    param -> new EditUserView(userController, sessionManager, this::showUserManagement));
+                    param -> new EditUserView(userController, securityController, sessionManager, this::showUserManagement));
             Parent editView = loader.load();
 
             EditUserView controller = loader.getController();
