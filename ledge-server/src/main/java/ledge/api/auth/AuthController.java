@@ -53,10 +53,12 @@ public class AuthController {
 
             if (userIdOpt.isPresent()) {
                 Optional<UserDTO> userOpt = queryBus.dispatch(new GetUserByIdQuery(userIdOpt.get()), token);
+
                 if (userOpt.isPresent()) {
                     return ApiResponse.success(new LoginResponseDTO(token, mapToContract(userOpt.get())));
                 }
             }
+
             return ApiResponse.error("Failed to resolve user session", "SESSION_ERROR");
         } catch (AuthenticationException e) {
             return ApiResponse.error(e.getMessage(), "AUTH_FAILED");

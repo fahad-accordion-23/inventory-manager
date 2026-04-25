@@ -8,7 +8,8 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import ledge.ui.clients.HttpInventoryClient;
-import ledge.api.inventory.dto.response.ProductResponseDTO;
+import ledge.api.inventory.dto.ProductResponseDTO;
+import ledge.api.inventory.dto.response.GetAllProductsResponseDTO;
 import ledge.api.shared.ApiResponse;
 import ledge.api.shared.AuthContext;
 import ledge.ui.core.Capability;
@@ -21,8 +22,7 @@ import java.util.function.Consumer;
 
 /**
  * Controller for the inventory table view via the API layer.
- * Displays products with search, low-stock highlighting, and authorized
- * actions.
+ * Updates to match the wrapped GetAllProductsResponseDTO structure.
  */
 public class InventoryDashboard {
 
@@ -91,9 +91,9 @@ public class InventoryDashboard {
         if (authContext.isEmpty())
             return;
 
-        ApiResponse<List<ProductResponseDTO>> response = inventoryController.getAllProducts(authContext.get());
+        ApiResponse<GetAllProductsResponseDTO> response = inventoryController.getAllProducts(authContext.get());
         if (response.success()) {
-            List<ProductViewModel> viewModels = response.data()
+            List<ProductViewModel> viewModels = response.data().products()
                     .stream()
                     .map(ProductViewModel::new)
                     .toList();

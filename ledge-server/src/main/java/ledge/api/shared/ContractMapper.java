@@ -8,6 +8,7 @@ import ledge.shared.security.models.Action;
 import ledge.shared.security.models.Resource;
 import ledge.users.readmodel.dtos.UserDTO;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -26,15 +27,13 @@ public class ContractMapper {
 
     /**
      * Maps an internal RoleDTO to the API RoleResponseDTO.
-     * Note: Current RoleResponseDTO contract uses a Map<Resource, Action>.
-     * If multiple actions exist for a resource, the first one is preserved.
+     * Groups multiple actions under their corresponding resource.
      */
     public static RoleResponseDTO mapRole(RoleDTO role) {
-        Map<Resource, Action> permissionMap = role.permissions().stream()
-                .collect(Collectors.toMap(
+        Map<Resource, List<Action>> permissionMap = role.permissions().stream()
+                .collect(Collectors.groupingBy(
                         PermissionDTO::resource,
-                        PermissionDTO::action,
-                        (existing, replacement) -> existing
+                        Collectors.mapping(PermissionDTO::action, Collectors.toList())
                 ));
         return new RoleResponseDTO(role.id(), role.name(), permissionMap);
     }

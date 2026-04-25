@@ -6,20 +6,19 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.util.StringConverter;
 
 import ledge.api.shared.AuthContext;
+import ledge.api.security.dto.RoleResponseDTO;
+import ledge.api.security.dto.response.GetAllRolesResponseDTO;
 import ledge.api.shared.ApiResponse;
+import ledge.api.users.dto.UserResponseDTO;
 import ledge.ui.clients.HttpSecurityClient;
 import ledge.ui.clients.HttpUserClient;
 import ledge.api.users.dto.request.CreateUserRequestDTO;
-import ledge.security.api.dto.RoleDTO;
 import ledge.ui.core.SessionManager;
 import ledge.ui.util.FormValidator;
 
-import java.util.List;
-
 /**
  * Controller for creating a new user.
- * Displays available roles but does not yet support custom role assignment
- * during creation.
+ * Aligned with the latest API response structures.
  */
 public class AddUserView {
 
@@ -30,7 +29,7 @@ public class AddUserView {
     private PasswordField passwordField;
 
     @FXML
-    private ComboBox<RoleDTO> roleComboBox;
+    private ComboBox<RoleResponseDTO> roleComboBox;
 
     private final HttpUserClient userController;
     private final HttpSecurityClient securityController;
@@ -49,12 +48,12 @@ public class AddUserView {
     public void initialize() {
         roleComboBox.setConverter(new StringConverter<>() {
             @Override
-            public String toString(RoleDTO role) {
+            public String toString(RoleResponseDTO role) {
                 return role == null ? "" : role.name();
             }
 
             @Override
-            public RoleDTO fromString(String string) {
+            public RoleResponseDTO fromString(String string) {
                 return null;
             }
         });
@@ -64,9 +63,9 @@ public class AddUserView {
 
     private void loadAvailableRoles() {
         sessionManager.getAuthContext().ifPresent(context -> {
-            ApiResponse<List<RoleDTO>> response = securityController.getAllRoles(context);
+            ApiResponse<GetAllRolesResponseDTO> response = securityController.getAllRoles(context);
             if (response.success()) {
-                roleComboBox.getItems().setAll(response.data());
+                roleComboBox.getItems().setAll(response.data().roles());
                 // Select first role by default (visual only)
                 if (!roleComboBox.getItems().isEmpty()) {
                     roleComboBox.getSelectionModel().selectFirst();
@@ -93,10 +92,9 @@ public class AddUserView {
             return;
         }
 
-        // NOTE: Selected role is ignored for now as the backend assigns DEFAULT_USER by
-        // default
+        // NOTE: Selected role is ignored for now as the backend assigns DEFAULT_USER by default
         CreateUserRequestDTO request = new CreateUserRequestDTO(username, password);
-        ApiResponse<Void> response = userController.createUser(authContext, request);
+        ApiResponse<UserResponseDTO> response = userController.createUser(authContext, request);
 
         if (response.success()) {
             new Alert(AlertType.INFORMATION, "User registered successfully!").showAndWait();

@@ -1,19 +1,20 @@
 package ledge.ui.viewmodels;
 
 import javafx.beans.property.*;
-import ledge.api.users.dto.response.UserResponseDTO;
-import ledge.security.api.dto.RoleDTO;
+import ledge.api.security.dto.RoleResponseDTO;
+import ledge.api.users.dto.UserResponseDTO;
 
 import java.util.UUID;
 
 /**
  * JavaFX-friendly view model for User.
- * Updated to support single RoleDTO architecture and separate display properties.
+ * Updated to support single RoleDTO architecture and separate display
+ * properties.
  */
 public class UserViewModel {
     private final ObjectProperty<UUID> id = new SimpleObjectProperty<>();
     private final StringProperty username = new SimpleStringProperty();
-    private final ObjectProperty<RoleDTO> role = new SimpleObjectProperty<>();
+    private final ObjectProperty<RoleResponseDTO> role = new SimpleObjectProperty<>();
     private final StringProperty roleName = new SimpleStringProperty();
 
     public UserViewModel() {
@@ -55,7 +56,7 @@ public class UserViewModel {
         return username;
     }
 
-    public ObjectProperty<RoleDTO> roleProperty() {
+    public ObjectProperty<RoleResponseDTO> roleProperty() {
         return role;
     }
 
@@ -72,7 +73,7 @@ public class UserViewModel {
         return username.get();
     }
 
-    public RoleDTO getRole() {
+    public RoleResponseDTO getRole() {
         return role.get();
     }
 
@@ -88,7 +89,7 @@ public class UserViewModel {
         this.username.set(username);
     }
 
-    public void setRole(RoleDTO role) {
+    public void setRole(RoleResponseDTO role) {
         this.role.set(role);
     }
 }

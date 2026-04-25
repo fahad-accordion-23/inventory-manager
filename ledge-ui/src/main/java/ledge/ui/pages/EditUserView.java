@@ -6,21 +6,21 @@ import javafx.util.StringConverter;
 import ledge.api.shared.ApiResponse;
 import ledge.api.shared.AuthContext;
 import ledge.api.users.dto.request.ChangeUsernameRequestDTO;
-import ledge.api.users.dto.response.UserResponseDTO;
-import ledge.api.security.dto.AssignRoleRequestDTO;
-import ledge.security.api.dto.RoleDTO;
+import ledge.api.users.dto.UserResponseDTO;
+import ledge.api.security.dto.RoleResponseDTO;
+import ledge.api.security.dto.request.AssignRoleRequestDTO;
+import ledge.api.security.dto.response.GetAllRolesResponseDTO;
 import ledge.ui.clients.HttpSecurityClient;
 import ledge.ui.clients.HttpUserClient;
 import ledge.ui.core.SessionManager;
 import ledge.ui.util.FormValidator;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 /**
  * Controller for editing an existing user's details.
- * Interacts with both User and Security clients.
+ * Updates to match the revised GetAllRolesResponseDTO structure.
  */
 public class EditUserView {
 
@@ -28,7 +28,7 @@ public class EditUserView {
     private TextField usernameField;
 
     @FXML
-    private ComboBox<RoleDTO> roleComboBox;
+    private ComboBox<RoleResponseDTO> roleComboBox;
 
     private final HttpUserClient userController;
     private final HttpSecurityClient securityController;
@@ -37,7 +37,7 @@ public class EditUserView {
 
     private UUID userId;
     private String originalUsername;
-    private RoleDTO originalRole;
+    private RoleResponseDTO originalRole;
 
     public EditUserView(HttpUserClient userController, HttpSecurityClient securityController,
             SessionManager sessionManager, Runnable onCancel) {
@@ -51,12 +51,12 @@ public class EditUserView {
     public void initialize() {
         roleComboBox.setConverter(new StringConverter<>() {
             @Override
-            public String toString(RoleDTO role) {
+            public String toString(RoleResponseDTO role) {
                 return role == null ? "" : role.name();
             }
 
             @Override
-            public RoleDTO fromString(String string) {
+            public RoleResponseDTO fromString(String string) {
                 return null;
             }
         });
@@ -66,9 +66,9 @@ public class EditUserView {
 
     private void loadAvailableRoles() {
         sessionManager.getAuthContext().ifPresent(context -> {
-            ApiResponse<List<RoleDTO>> response = securityController.getAllRoles(context);
+            ApiResponse<GetAllRolesResponseDTO> response = securityController.getAllRoles(context);
             if (response.success()) {
-                roleComboBox.getItems().setAll(response.data());
+                roleComboBox.getItems().setAll(response.data().roles());
                 if (originalRole != null) {
                     roleComboBox.setValue(originalRole);
                 }
@@ -94,7 +94,7 @@ public class EditUserView {
     public void handleSave() {
         FormValidator v = new FormValidator();
         String newUsername = v.requireNonBlank(usernameField, "Username");
-        RoleDTO newRole = roleComboBox.getValue();
+        RoleResponseDTO newRole = roleComboBox.getValue();
 
         if (v.hasErrors()) {
             new Alert(Alert.AlertType.ERROR, v.getErrorSummary()).showAndWait();

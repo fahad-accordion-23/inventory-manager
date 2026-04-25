@@ -1,9 +1,10 @@
 package ledge.ui.clients;
 
 import com.google.gson.reflect.TypeToken;
-import ledge.api.auth.dto.LoginRequestDTO;
-import ledge.api.auth.dto.LoginResponseDTO;
-import ledge.api.users.dto.response.UserResponseDTO;
+
+import ledge.api.auth.dto.request.LoginRequestDTO;
+import ledge.api.auth.dto.response.LoginResponseDTO;
+import ledge.api.users.dto.UserResponseDTO;
 import ledge.api.shared.ApiResponse;
 import ledge.api.shared.AuthContext;
 

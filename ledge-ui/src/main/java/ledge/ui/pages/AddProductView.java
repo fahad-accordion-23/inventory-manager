@@ -5,6 +5,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import ledge.ui.clients.HttpInventoryClient;
+import ledge.api.inventory.dto.ProductResponseDTO;
 import ledge.api.inventory.dto.request.CreateProductRequestDTO;
 import ledge.api.shared.ApiResponse;
 import ledge.api.shared.AuthContext;
@@ -16,7 +17,7 @@ import java.util.Optional;
 
 /**
  * Controller for the Add Product view.
- * Handles form validation and dispatches the AddProductCommand.
+ * Updated to match the revised return type of createProduct.
  */
 public class AddProductView {
 
@@ -71,7 +72,7 @@ public class AddProductView {
             alert.showAndWait();
             return;
         }
-        ApiResponse<Void> response = inventoryController.createProduct(
+        ApiResponse<ProductResponseDTO> response = inventoryController.createProduct(
                 authContext.get(), request);
 
         if (response.success()) {

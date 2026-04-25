@@ -27,6 +27,10 @@ public class ApiClient {
         return sendRequest("PUT", path, body, token, responseType);
     }
 
+    protected <T, R> ApiResponse<R> patch(String path, T body, String token, Type responseType) {
+        return sendRequest("PATCH", path, body, token, responseType);
+    }
+
     protected <R> ApiResponse<R> get(String path, String token, Type responseType) {
         return sendRequest("GET", path, null, token, responseType);
     }

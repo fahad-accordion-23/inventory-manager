@@ -7,9 +7,9 @@ import javafx.scene.layout.VBox;
 
 import ledge.ui.clients.HttpSecurityClient;
 import ledge.ui.clients.HttpInventoryClient;
-import ledge.api.inventory.dto.response.ProductResponseDTO;
+import ledge.api.inventory.dto.ProductResponseDTO;
 import ledge.ui.clients.HttpUserClient;
-import ledge.api.users.dto.response.UserResponseDTO;
+import ledge.api.users.dto.UserResponseDTO;
 import ledge.ui.core.Capability;
 import ledge.ui.core.SessionManager;
 import ledge.ui.messaging.UIEventBroker;

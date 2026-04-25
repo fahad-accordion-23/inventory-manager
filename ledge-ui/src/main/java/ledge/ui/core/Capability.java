@@ -1,39 +1,46 @@
 package ledge.ui.core;
 
-import ledge.security.api.dto.PermissionDTO;
-import ledge.security.api.models.Action;
-import ledge.security.api.models.Resource;
+import ledge.shared.security.models.Action;
+import ledge.shared.security.models.Resource;
 
 /**
- * High-level UI capabilities mapped to underlying PermissionDTO contracts.
+ * High-level UI capabilities mapped to underlying security Resource and Action.
+ * PermissionResponseDTO was removed intentionally; capabilities now store raw
+ * Resource/Action pairs.
  */
 public enum Capability {
 
-    VIEW_DASHBOARD(new PermissionDTO(Resource.PRODUCT, Action.READ)),
+    VIEW_DASHBOARD(Resource.PRODUCT, Action.READ),
 
-    VIEW_PRODUCTS(new PermissionDTO(Resource.PRODUCT, Action.READ)),
-    CREATE_PRODUCT(new PermissionDTO(Resource.PRODUCT, Action.CREATE)),
-    EDIT_PRODUCT(new PermissionDTO(Resource.PRODUCT, Action.UPDATE)),
-    DELETE_PRODUCT(new PermissionDTO(Resource.PRODUCT, Action.DELETE)),
+    VIEW_PRODUCTS(Resource.PRODUCT, Action.READ),
+    CREATE_PRODUCT(Resource.PRODUCT, Action.CREATE),
+    EDIT_PRODUCT(Resource.PRODUCT, Action.UPDATE),
+    DELETE_PRODUCT(Resource.PRODUCT, Action.DELETE),
 
-    VIEW_USERS(new PermissionDTO(Resource.USER, Action.READ)),
-    CREATE_USER(new PermissionDTO(Resource.USER, Action.CREATE)),
-    EDIT_USER(new PermissionDTO(Resource.USER, Action.UPDATE)),
-    DELETE_USER(new PermissionDTO(Resource.USER, Action.DELETE)),
+    VIEW_USERS(Resource.USER, Action.READ),
+    CREATE_USER(Resource.USER, Action.CREATE),
+    EDIT_USER(Resource.USER, Action.UPDATE),
+    DELETE_USER(Resource.USER, Action.DELETE),
 
-    VIEW_INVOICES(new PermissionDTO(Resource.INVOICE, Action.READ)),
-    CREATE_INVOICE(new PermissionDTO(Resource.INVOICE, Action.CREATE)),
+    VIEW_INVOICES(Resource.INVOICE, Action.READ),
+    CREATE_INVOICE(Resource.INVOICE, Action.CREATE),
 
-    VIEW_ROLES(new PermissionDTO(Resource.ROLE, Action.READ)),
-    MANAGE_ROLES(new PermissionDTO(Resource.ROLE, Action.UPDATE));
+    VIEW_ROLES(Resource.ROLE, Action.READ),
+    MANAGE_ROLES(Resource.ROLE, Action.UPDATE);
 
-    private final PermissionDTO permission;
+    private final Resource resource;
+    private final Action action;
 
-    Capability(PermissionDTO permission) {
-        this.permission = permission;
+    Capability(Resource resource, Action action) {
+        this.resource = resource;
+        this.action = action;
     }
 
-    public PermissionDTO permission() {
-        return permission;
+    public Resource resource() {
+        return resource;
+    }
+
+    public Action action() {
+        return action;
     }
 }
