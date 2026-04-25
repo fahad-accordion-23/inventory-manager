@@ -78,7 +78,7 @@ public class InventoryController {
     @PutMapping("/{id}")
     public ApiResponse<ledge.api.inventory.dto.ProductResponseDTO> updateProduct(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @RequestBody UpdateProductRequestDTO request) {
         String token = extractToken(authHeader);
         commandBus.dispatch(new UpdateProductCommand(
@@ -103,7 +103,7 @@ public class InventoryController {
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteProduct(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @PathVariable UUID id) {
+            @PathVariable("id") UUID id) {
         commandBus.dispatch(new RemoveProductCommand(id), extractToken(authHeader));
         return ApiResponse.success(null);
     }

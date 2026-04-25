@@ -171,8 +171,20 @@ public class MainLayout {
     }
 
     public void showEditRole(RoleResponseDTO role) {
-        // Shared view between Add and Edit for simplicity
-        showAddRole();
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/pages/AddRoleView.fxml"));
+            loader.setControllerFactory(
+                    param -> new AddRoleView(securityController, sessionManager, this::showRoleManagement));
+            Parent editView = loader.load();
+
+            AddRoleView controller = loader.getController();
+            controller.setRole(role);
+
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(editView);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void showEditUser(UserResponseDTO user) {

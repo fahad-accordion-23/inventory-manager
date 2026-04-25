@@ -64,7 +64,7 @@ public class UserController {
     @GetMapping("/{id}")
     public ApiResponse<UserResponseDTO> getUserById(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @PathVariable UUID id) {
+            @PathVariable("id") UUID id) {
         String token = extractToken(authHeader);
         return queryBus.dispatch(new GetUserByIdQuery(id), token)
                 .map(u -> ApiResponse.success(mapToContract(u, token)))
@@ -95,7 +95,7 @@ public class UserController {
     @PatchMapping("/{id}/username")
     public ApiResponse<Void> updateUsername(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @RequestBody ChangeUsernameRequestDTO request) {
         commandBus.dispatch(new ChangeUsernameCommand(
                 id,
@@ -109,7 +109,7 @@ public class UserController {
     @PatchMapping("/{id}/password")
     public ApiResponse<Void> updatePassword(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @RequestBody ChangePasswordRequestDTO request) {
         commandBus.dispatch(new ChangeUserPasswordCommand(
                 id,
@@ -123,7 +123,7 @@ public class UserController {
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteUser(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @PathVariable UUID id) {
+            @PathVariable("id") UUID id) {
         commandBus.dispatch(new RemoveUserCommand(id), extractToken(authHeader));
         return ApiResponse.success(null);
     }

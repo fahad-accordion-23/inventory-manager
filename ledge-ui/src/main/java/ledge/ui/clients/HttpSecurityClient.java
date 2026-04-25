@@ -36,6 +36,18 @@ public class HttpSecurityClient extends ApiClient {
         return post("/security/roles", request, context.token(), type);
     }
 
+    public ApiResponse<Void> updateRole(AuthContext context, UUID roleId, RegisterRoleRequestDTO request) {
+        Type type = new TypeToken<ApiResponse<Void>>() {
+        }.getType();
+        return put("/security/roles/" + roleId, request, context.token(), type);
+    }
+
+    public ApiResponse<Void> deleteRole(AuthContext context, UUID roleId) {
+        Type type = new TypeToken<ApiResponse<Void>>() {
+        }.getType();
+        return delete("/security/roles/" + roleId, null, context.token(), type);
+    }
+
     public ApiResponse<Void> assignRole(AuthContext context, UUID userId, AssignRoleRequestDTO request) {
         Type type = new TypeToken<ApiResponse<Void>>() {
         }.getType();

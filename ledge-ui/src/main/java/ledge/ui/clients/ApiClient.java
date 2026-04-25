@@ -58,7 +58,20 @@ public class ApiClient {
 
             HttpResponse<String> response = httpClient.send(requestBuilder.build(),
                     HttpResponse.BodyHandlers.ofString());
-            return gson.fromJson(response.body(), responseType);
+
+            // Handle success with no body (e.g., 204 No Content)
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                if (response.body() == null || response.body().isBlank()) {
+                    return ApiResponse.success(null);
+                }
+                return gson.fromJson(response.body(), responseType);
+            } else {
+                // If the body is not empty, try to parse the error response
+                if (response.body() != null && !response.body().isBlank()) {
+                    return gson.fromJson(response.body(), responseType);
+                }
+                return ApiResponse.error("Server returned error: " + response.statusCode(), "SERVER_ERROR");
+            }
         } catch (IOException | InterruptedException e) {
             return ApiResponse.error("Network error: " + e.getMessage(), "NETWORK_ERROR");
         }
