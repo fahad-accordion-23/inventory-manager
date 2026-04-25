@@ -18,6 +18,11 @@ public interface IRoleService {
     UUID registerRole(String name, Set<PermissionDTO> permissions);
 
     /**
+     * Updates an existing role's permissions or name.
+     */
+    void updateRole(UUID roleId, String name, Set<PermissionDTO> permissions);
+
+    /**
      * Retrieves all roles.
      */
     List<RoleDTO> getAllRoles();

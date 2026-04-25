@@ -35,16 +35,38 @@ public class RoleService implements IRoleService {
             throw new IllegalStateException("Role with name '" + name + "' already exists");
         }
 
-        Set<Permission> permissions = new HashSet<>();
-        if (permissionDTOs != null) {
-            for (PermissionDTO dto : permissionDTOs) {
-                permissions.add(new Permission(dto.resource(), dto.action()));
-            }
-        }
+        Set<Permission> permissions = mapPermissions(permissionDTOs);
 
         Role newRole = Role.register(name, permissions);
         roleRepository.save(newRole);
         return newRole.getId();
+    }
+
+    @Override
+    public void updateRole(UUID roleId, String name, Set<PermissionDTO> permissionDTOs) {
+        Role role = roleRepository.findById(roleId)
+                .orElseThrow(() -> new NoSuchElementException("Role not found with ID: " + roleId));
+
+        // If name changes, check for unique name constraint
+        if (name != null && !name.equalsIgnoreCase(role.getName())) {
+            if (roleRepository.findByName(name).isPresent()) {
+                throw new IllegalStateException("Role with name '" + name + "' already exists");
+            }
+        }
+
+        Set<Permission> permissions = mapPermissions(permissionDTOs);
+        role.update(name, permissions);
+        roleRepository.save(role);
+    }
+
+    private Set<Permission> mapPermissions(Set<PermissionDTO> dtos) {
+        Set<Permission> permissions = new HashSet<>();
+        if (dtos != null) {
+            for (PermissionDTO dto : dtos) {
+                permissions.add(new Permission(dto.resource(), dto.action()));
+            }
+        }
+        return permissions;
     }
 
     @Override

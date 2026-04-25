@@ -13,8 +13,8 @@ import java.util.UUID;
  */
 public class Role {
     private final UUID id;
-    private final String name;
-    private final Set<Permission> permissions;
+    private String name;
+    private Set<Permission> permissions;
 
     private Role(UUID id, String name, Set<Permission> permissions) {
         this.id = id;
@@ -37,6 +37,15 @@ public class Role {
             throw new IllegalArgumentException("ID cannot be null when rehydrating a role");
         }
         return new Role(id, name, permissions);
+    }
+
+    public void update(String name, Set<Permission> permissions) {
+        if (name != null && !name.isBlank()) {
+            this.name = name;
+        }
+        if (permissions != null) {
+            this.permissions = Collections.unmodifiableSet(new HashSet<>(permissions));
+        }
     }
 
     public UUID getId() {

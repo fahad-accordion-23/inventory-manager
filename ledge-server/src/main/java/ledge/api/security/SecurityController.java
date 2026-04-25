@@ -104,12 +104,30 @@ public class SecurityController {
             @RequestBody RegisterRoleRequestDTO request) {
         authorizationService.require(extractToken(authHeader), new PermissionDTO(Resource.ROLE, Action.CREATE));
 
-        Set<PermissionDTO> permissions = request.permissions().entrySet().stream()
-                .flatMap(e -> e.getValue().stream().map(a -> new PermissionDTO(e.getKey(), a)))
-                .collect(Collectors.toSet());
-
+        Set<PermissionDTO> permissions = mapToInternal(request.permissions());
         roleService.registerRole(request.name(), permissions);
         return ApiResponse.success(null);
+    }
+
+    /**
+     * Updates an existing role.
+     */
+    @PutMapping("/roles/{roleId}")
+    public ApiResponse<Void> updateRole(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @PathVariable UUID roleId,
+            @RequestBody RegisterRoleRequestDTO request) {
+        authorizationService.require(extractToken(authHeader), new PermissionDTO(Resource.ROLE, Action.UPDATE));
+
+        Set<PermissionDTO> permissions = mapToInternal(request.permissions());
+        roleService.updateRole(roleId, request.name(), permissions);
+        return ApiResponse.success(null);
+    }
+
+    private Set<PermissionDTO> mapToInternal(java.util.Map<Resource, List<Action>> requestPermissions) {
+        return requestPermissions.entrySet().stream()
+                .flatMap(e -> e.getValue().stream().map(a -> new PermissionDTO(e.getKey(), a)))
+                .collect(Collectors.toSet());
     }
 
     /**
