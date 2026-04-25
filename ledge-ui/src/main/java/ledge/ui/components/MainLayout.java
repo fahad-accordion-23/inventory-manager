@@ -122,7 +122,7 @@ public class MainLayout {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/pages/AddUserView.fxml"));
                 loader.setControllerFactory(
-                        param -> new AddUserView(userController, sessionManager, this::showUserManagement));
+                        param -> new AddUserView(userController, securityController, sessionManager, this::showUserManagement));
                 addUserViewCache = loader.load();
             } catch (IOException e) {
                 e.printStackTrace();
