@@ -26,7 +26,7 @@ public class HttpUserClient extends ApiClient {
     public ApiResponse<Void> createUser(AuthContext context, CreateUserRequestDTO request) {
         Type type = new TypeToken<ApiResponse<Void>>() {
         }.getType();
-        return post("/users", request, context.token(), type);
+        return post("/users/register", request, context.token(), type);
     }
 
     public ApiResponse<Void> changeUsername(AuthContext context, UUID userId, ChangeUsernameRequestDTO request) {
