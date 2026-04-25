@@ -32,7 +32,6 @@ class InventoryControllerTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void testGetAllProducts() {
         ProductDTO product = new ProductDTO(UUID.randomUUID(), "Laptop", new BigDecimal("800"), new BigDecimal("1200"),
                 10, new BigDecimal("0.1"));
@@ -46,14 +45,13 @@ class InventoryControllerTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void testCreateProduct() {
         CreateProductRequestDTO request = new CreateProductRequestDTO(
                 "Phone", new BigDecimal("500"), new BigDecimal("700"), 5, new BigDecimal("0.05"));
 
         ProductDTO product = new ProductDTO(UUID.randomUUID(), "Phone", new BigDecimal("500"), new BigDecimal("700"),
                 5, new BigDecimal("0.05"));
-        
+
         when(queryBus.dispatch(any(), eq("valid-token"))).thenReturn(List.of(product));
 
         ApiResponse<ProductResponseDTO> response = controller.createProduct("Bearer valid-token", request);

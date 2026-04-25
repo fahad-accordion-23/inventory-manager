@@ -37,7 +37,6 @@ class UserControllerTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void testGetAllUsers() {
         UUID id = UUID.randomUUID();
         UserDTO user = new UserDTO(id, "targetUser", "hash");
@@ -50,11 +49,10 @@ class UserControllerTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     void testCreateUser() {
         CreateUserRequestDTO request = new CreateUserRequestDTO("newuser", "password");
         UserDTO user = new UserDTO(UUID.randomUUID(), "newuser", "hash");
-        
+
         when(queryBus.dispatch(any(), any())).thenReturn(Optional.of(user));
 
         ApiResponse<UserResponseDTO> response = controller.createUser("Bearer token", request);
