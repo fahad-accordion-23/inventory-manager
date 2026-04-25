@@ -3,12 +3,18 @@ package ledge.ui.clients;
 import com.google.gson.reflect.TypeToken;
 import ledge.api.shared.ApiResponse;
 import ledge.api.shared.AuthContext;
-import ledge.api.users.dto.request.*;
+import ledge.api.users.dto.request.ChangePasswordRequestDTO;
+import ledge.api.users.dto.request.ChangeUsernameRequestDTO;
+import ledge.api.users.dto.request.CreateUserRequestDTO;
 import ledge.api.users.dto.response.UserListResponseDTO;
-import ledge.api.users.dto.response.UserResponseDTO;
 
 import java.lang.reflect.Type;
+import java.util.UUID;
 
+/**
+ * Client for user-related endpoints.
+ * Updated to match the new REST paths using PathVariables.
+ */
 public class HttpUserClient extends ApiClient {
 
     public ApiResponse<UserListResponseDTO> getAllUsers(AuthContext context) {
@@ -17,33 +23,27 @@ public class HttpUserClient extends ApiClient {
         return get("/users", context.token(), type);
     }
 
-    public ApiResponse<UserResponseDTO> createUser(AuthContext context, CreateUserRequestDTO request) {
-        Type type = new TypeToken<ApiResponse<UserResponseDTO>>() {
-        }.getType();
-        return post("/users/register", request, context.token(), type);
-    }
-
-    public ApiResponse<Void> changeUsername(AuthContext context, ChangeUsernameRequestDTO request) {
+    public ApiResponse<Void> createUser(AuthContext context, CreateUserRequestDTO request) {
         Type type = new TypeToken<ApiResponse<Void>>() {
         }.getType();
-        return put("/users/username", request, context.token(), type);
+        return post("/users", request, context.token(), type);
     }
 
-    public ApiResponse<Void> changePassword(AuthContext context, ChangePasswordRequestDTO request) {
+    public ApiResponse<Void> changeUsername(AuthContext context, UUID userId, ChangeUsernameRequestDTO request) {
         Type type = new TypeToken<ApiResponse<Void>>() {
         }.getType();
-        return put("/users/password", request, context.token(), type);
+        return put("/users/" + userId + "/username", request, context.token(), type);
     }
 
-    public ApiResponse<Void> changeRole(AuthContext context, ChangeUserRoleRequestDTO request) {
+    public ApiResponse<Void> changePassword(AuthContext context, UUID userId, ChangePasswordRequestDTO request) {
         Type type = new TypeToken<ApiResponse<Void>>() {
         }.getType();
-        return put("/users/role", request, context.token(), type);
+        return put("/users/" + userId + "/password", request, context.token(), type);
     }
 
-    public ApiResponse<Void> deleteUser(AuthContext context, DeleteUserRequestDTO request) {
+    public ApiResponse<Void> deleteUser(AuthContext context, UUID userId) {
         Type type = new TypeToken<ApiResponse<Void>>() {
         }.getType();
-        return delete("/users", request, context.token(), type);
+        return delete("/users/" + userId, null, context.token(), type);
     }
 }
