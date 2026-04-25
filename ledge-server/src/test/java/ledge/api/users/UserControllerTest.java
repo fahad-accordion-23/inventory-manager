@@ -2,7 +2,8 @@ package ledge.api.users;
 
 import ledge.api.shared.ApiResponse;
 import ledge.api.users.dto.request.CreateUserRequestDTO;
-import ledge.api.users.dto.response.UserListResponseDTO;
+import ledge.api.users.dto.response.GetAllUsersResponseDTO;
+import ledge.api.users.dto.UserResponseDTO;
 import ledge.security.api.IUserRoleService;
 import ledge.users.readmodel.dtos.UserDTO;
 import ledge.shared.infrastructure.queries.QueryBus;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -32,24 +34,30 @@ class UserControllerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void testGetAllUsers() {
         UUID id = UUID.randomUUID();
         UserDTO user = new UserDTO(id, "targetUser", "hash");
-        when(queryBus.dispatch(any(), eq("token"))).thenReturn(List.of(user));
+        when(queryBus.dispatch(any(), any())).thenReturn(List.of(user));
 
-        ApiResponse<UserListResponseDTO> response = controller.getAllUsers("Bearer token");
+        ApiResponse<GetAllUsersResponseDTO> response = controller.getAllUsers("Bearer token");
 
         assertTrue(response.success());
         assertEquals(1, response.data().users().size());
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void testCreateUser() {
         CreateUserRequestDTO request = new CreateUserRequestDTO("newuser", "password");
+        UserDTO user = new UserDTO(UUID.randomUUID(), "newuser", "hash");
+        
+        when(queryBus.dispatch(any(), any())).thenReturn(Optional.of(user));
 
-        ApiResponse<Void> response = controller.createUser("Bearer token", request);
+        ApiResponse<UserResponseDTO> response = controller.createUser("Bearer token", request);
 
         assertTrue(response.success());
+        assertEquals("newuser", response.data().username());
         verify(commandBus).dispatch(any(), eq("token"));
     }
 }

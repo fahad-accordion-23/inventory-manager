@@ -1,4 +1,4 @@
-package ledge.security.api.models;
+package ledge.shared.security.models;
 
 public enum Resource {
     PRODUCT,

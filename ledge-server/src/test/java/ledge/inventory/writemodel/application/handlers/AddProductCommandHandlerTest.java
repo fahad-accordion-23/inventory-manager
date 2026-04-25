@@ -29,14 +29,14 @@ class AddProductCommandHandlerTest {
     @Test
     void testHandleAddProduct() {
         AddProductCommand command = new AddProductCommand(
-                "Phone", "Description", new BigDecimal("500"), new BigDecimal("700"), 5, new BigDecimal("0.05"));
-        
+                "Phone", new BigDecimal("500"), new BigDecimal("700"), 5, new BigDecimal("0.05"));
+
         handler.handle(command);
 
         // Verify write repository saved the product
         ArgumentCaptor<Product> productCaptor = ArgumentCaptor.forClass(Product.class);
         verify(writeRepository).save(productCaptor.capture());
-        
+
         Product savedProduct = productCaptor.getValue();
         assertEquals("Phone", savedProduct.getName());
         assertEquals(5, savedProduct.getStockQuantity());

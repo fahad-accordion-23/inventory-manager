@@ -1,7 +1,7 @@
 package ledge.security.internal.domain.models;
 
-import ledge.security.api.models.Action;
-import ledge.security.api.models.Resource;
+import ledge.shared.security.models.Action;
+import ledge.shared.security.models.Resource;
 
 import java.util.Collections;
 import java.util.HashSet;

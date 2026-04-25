@@ -1,7 +1,7 @@
 package ledge.boot;
 
-import ledge.security.api.models.Action;
-import ledge.security.api.models.Resource;
+import ledge.shared.security.models.Action;
+import ledge.shared.security.models.Resource;
 import ledge.security.internal.domain.models.Permission;
 import ledge.security.internal.domain.models.Role;
 import ledge.security.internal.infrastructure.IRoleRepository;
@@ -19,6 +19,7 @@ import java.util.Set;
 
 /**
  * Bootstrapper to seed initial system data (roles, admin user, and assignments).
+ * Updated with correct security model packages.
  */
 @Component
 public class DatabaseBootstrapper implements CommandLineRunner {
@@ -28,9 +29,9 @@ public class DatabaseBootstrapper implements CommandLineRunner {
     private final IUserRoleRepository userRoleRepository;
 
     public DatabaseBootstrapper(IRoleRepository roleRepository,
-                                IUserWriteRepository userWriteRepository,
-                                IUserReadRepository userReadRepository,
-                                IUserRoleRepository userRoleRepository) {
+                                 IUserWriteRepository userWriteRepository,
+                                 IUserReadRepository userReadRepository,
+                                 IUserRoleRepository userRoleRepository) {
         this.roleRepository = roleRepository;
         this.userWriteRepository = userWriteRepository;
         this.userReadRepository = userReadRepository;

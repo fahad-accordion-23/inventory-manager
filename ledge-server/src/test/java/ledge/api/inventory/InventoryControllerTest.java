@@ -1,7 +1,8 @@
 package ledge.api.inventory;
 
 import ledge.api.inventory.dto.request.CreateProductRequestDTO;
-import ledge.api.inventory.dto.response.ProductResponseDTO;
+import ledge.api.inventory.dto.response.GetAllProductsResponseDTO;
+import ledge.api.inventory.dto.ProductResponseDTO;
 import ledge.api.shared.ApiResponse;
 import ledge.inventory.readmodel.dtos.ProductDTO;
 import ledge.inventory.writemodel.contracts.AddProductCommand;
@@ -31,26 +32,34 @@ class InventoryControllerTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void testGetAllProducts() {
         ProductDTO product = new ProductDTO(UUID.randomUUID(), "Laptop", new BigDecimal("800"), new BigDecimal("1200"),
                 10, new BigDecimal("0.1"));
         when(queryBus.dispatch(any(), eq("valid-token"))).thenReturn(List.of(product));
 
-        ApiResponse<List<ProductResponseDTO>> response = controller.getAllProducts("Bearer valid-token");
+        ApiResponse<GetAllProductsResponseDTO> response = controller.getAllProducts("Bearer valid-token");
 
         assertTrue(response.success());
-        assertEquals(1, response.data().size());
-        assertEquals("Laptop", response.data().get(0).name());
+        assertEquals(1, response.data().products().size());
+        assertEquals("Laptop", response.data().products().get(0).name());
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void testCreateProduct() {
         CreateProductRequestDTO request = new CreateProductRequestDTO(
                 "Phone", new BigDecimal("500"), new BigDecimal("700"), 5, new BigDecimal("0.05"));
 
-        ApiResponse<Void> response = controller.createProduct("Bearer valid-token", request);
+        ProductDTO product = new ProductDTO(UUID.randomUUID(), "Phone", new BigDecimal("500"), new BigDecimal("700"),
+                5, new BigDecimal("0.05"));
+        
+        when(queryBus.dispatch(any(), eq("valid-token"))).thenReturn(List.of(product));
+
+        ApiResponse<ProductResponseDTO> response = controller.createProduct("Bearer valid-token", request);
 
         assertTrue(response.success());
+        assertEquals("Phone", response.data().name());
         verify(commandBus).dispatch(any(AddProductCommand.class), eq("valid-token"));
     }
 }

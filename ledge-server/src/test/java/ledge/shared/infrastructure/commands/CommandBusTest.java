@@ -3,8 +3,8 @@ package ledge.shared.infrastructure.commands;
 import ledge.security.api.IAuthorizationService;
 import ledge.security.api.dto.PermissionDTO;
 import ledge.security.api.exceptions.AuthorizationException;
-import ledge.security.api.models.Action;
-import ledge.security.api.models.Resource;
+import ledge.shared.security.models.Action;
+import ledge.shared.security.models.Resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -44,7 +44,7 @@ class CommandBusTest {
         doThrow(new AuthorizationException("Denied")).when(authService).require("bad-token", required);
 
         TestCommandWithPermission command = new TestCommandWithPermission();
-        
+
         assertThrows(AuthorizationException.class, () -> commandBus.dispatch(command, "bad-token"));
         assertFalse(handler.executed);
     }
@@ -65,13 +65,21 @@ class CommandBusTest {
     // Test classes
     static class TestCommand implements Command {
         final String data;
-        TestCommand(String data) { this.data = data; }
-        @Override public Optional<PermissionDTO> getRequiredPermission() { return Optional.empty(); }
+
+        TestCommand(String data) {
+            this.data = data;
+        }
+
+        @Override
+        public Optional<PermissionDTO> getRequiredPermission() {
+            return Optional.empty();
+        }
     }
 
     static class TestCommandWithPermission implements Command {
-        @Override public Optional<PermissionDTO> getRequiredPermission() { 
-            return Optional.of(new PermissionDTO(Resource.PRODUCT, Action.UPDATE)); 
+        @Override
+        public Optional<PermissionDTO> getRequiredPermission() {
+            return Optional.of(new PermissionDTO(Resource.PRODUCT, Action.UPDATE));
         }
     }
 

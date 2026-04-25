@@ -1,15 +1,14 @@
 package ledge.api.inventory;
 
 import ledge.api.inventory.dto.request.*;
-import ledge.api.inventory.dto.response.ProductResponseDTO;
+import ledge.api.inventory.dto.response.GetAllProductsResponseDTO;
 import ledge.api.shared.ApiResponse;
 import ledge.inventory.readmodel.contracts.GetAllProductsQuery;
-import ledge.inventory.readmodel.dtos.ProductDTO;
+import ledge.shared.infrastructure.queries.QueryBus;
+import ledge.shared.infrastructure.commands.CommandBus;
 import ledge.inventory.writemodel.contracts.AddProductCommand;
 import ledge.inventory.writemodel.contracts.RemoveProductCommand;
 import ledge.inventory.writemodel.contracts.UpdateProductCommand;
-import ledge.shared.infrastructure.queries.QueryBus;
-import ledge.shared.infrastructure.commands.CommandBus;
 
 import java.util.List;
 import java.util.UUID;
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * Controller for managing inventory/product-related API requests.
+ * Aligned with the latest API documentation and simplified ProductDTO.
  */
 @RestController
 @RequestMapping("/api/products")
@@ -36,52 +36,65 @@ public class InventoryController {
     }
 
     /**
-     * Retrieves all products in the inventory.
+     * Lists all products.
      */
     @GetMapping
-    public ApiResponse<List<ProductResponseDTO>> getAllProducts(
+    public ApiResponse<GetAllProductsResponseDTO> getAllProducts(
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
-        List<ProductDTO> products = queryBus.dispatch(new GetAllProductsQuery(), extractToken(authHeader));
-        List<ProductResponseDTO> responseList = products.stream()
-                .map(this::mapToResponse)
+        String token = extractToken(authHeader);
+        List<ledge.inventory.readmodel.dtos.ProductDTO> products = queryBus.dispatch(new GetAllProductsQuery(), token);
+        List<ledge.api.inventory.dto.ProductResponseDTO> responseList = products.stream()
+                .map(this::mapToContract)
                 .collect(Collectors.toList());
-        return ApiResponse.success(responseList);
+        return ApiResponse.success(new GetAllProductsResponseDTO(responseList));
     }
 
     /**
      * Adds a new product to the inventory.
      */
     @PostMapping
-    public ApiResponse<Void> createProduct(
+    public ApiResponse<ledge.api.inventory.dto.ProductResponseDTO> createProduct(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @RequestBody CreateProductRequestDTO request) {
+        String token = extractToken(authHeader);
         commandBus.dispatch(new AddProductCommand(
                 request.name(),
-                "", // description (optional or separate field)
                 request.purchasePrice(),
                 request.sellingPrice(),
                 request.stockQuantity(),
-                request.taxRate()), extractToken(authHeader));
-        return ApiResponse.success(null);
+                request.taxRate()), token);
+
+        // Fetch the list to find the newly created product (by name as ID is unknown)
+        return queryBus.dispatch(new GetAllProductsQuery(), token).stream()
+                .filter(p -> p.name().equals(request.name()))
+                .findFirst()
+                .map(p -> ApiResponse.success(mapToContract(p)))
+                .orElse(ApiResponse.error("Failed to retrieve created product", "INTERNAL_ERROR"));
     }
 
     /**
      * Updates an existing product's details.
      */
     @PutMapping("/{id}")
-    public ApiResponse<Void> updateProduct(
+    public ApiResponse<ledge.api.inventory.dto.ProductResponseDTO> updateProduct(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @PathVariable UUID id,
             @RequestBody UpdateProductRequestDTO request) {
+        String token = extractToken(authHeader);
         commandBus.dispatch(new UpdateProductCommand(
                 id,
                 request.name(),
-                "", // description
                 request.purchasePrice(),
                 request.sellingPrice(),
                 request.stockQuantity(),
-                request.taxRate()), extractToken(authHeader));
-        return ApiResponse.success(null);
+                request.taxRate()), token);
+
+        // Fetch the updated product
+        return queryBus.dispatch(new GetAllProductsQuery(), token).stream()
+                .filter(p -> p.id().equals(id))
+                .findFirst()
+                .map(p -> ApiResponse.success(mapToContract(p)))
+                .orElse(ApiResponse.error("Product not found after update", "NOT_FOUND"));
     }
 
     /**
@@ -95,8 +108,8 @@ public class InventoryController {
         return ApiResponse.success(null);
     }
 
-    private ProductResponseDTO mapToResponse(ProductDTO dto) {
-        return new ProductResponseDTO(
+    private ledge.api.inventory.dto.ProductResponseDTO mapToContract(ledge.inventory.readmodel.dtos.ProductDTO dto) {
+        return new ledge.api.inventory.dto.ProductResponseDTO(
                 dto.id(),
                 dto.name(),
                 dto.purchasePrice(),

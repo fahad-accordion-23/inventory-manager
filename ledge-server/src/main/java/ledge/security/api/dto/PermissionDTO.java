@@ -1,7 +1,7 @@
 package ledge.security.api.dto;
 
-import ledge.security.api.models.Action;
-import ledge.security.api.models.Resource;
+import ledge.shared.security.models.Action;
+import ledge.shared.security.models.Resource;
 
 /**
  * Public DTO for permissions exposed by the Security OHS.

@@ -1,8 +1,8 @@
 package ledge.users.readmodel.contracts;
 
 import ledge.security.api.dto.PermissionDTO;
-import ledge.security.api.models.Action;
-import ledge.security.api.models.Resource;
+import ledge.shared.security.models.Action;
+import ledge.shared.security.models.Resource;
 import ledge.shared.infrastructure.queries.Query;
 import ledge.users.readmodel.dtos.UserDTO;
 

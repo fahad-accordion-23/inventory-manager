@@ -1,11 +1,8 @@
-package ledge.api.inventory.dto.response;
+package ledge.api.inventory.dto;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
-/**
- * response DTO for product data.
- */
 public record ProductResponseDTO(
                 UUID id,
                 String name,

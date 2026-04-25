@@ -9,8 +9,12 @@ Manage user authentication and session state.
 
 ### `POST /api/auth/login`
 Authenticates a user and provides a session token.
-- **Request Body**: `{ "username": "...", "password": "..." }`
-- **Response**: `{ "token": "uuid-token", "expiresAt": "..." }`
+- **Request Body**: `LoginRequestDTO`
+    - `username`: `String`
+    - `password`: `String`
+- **Response**: `LoginResponseDTO`
+    - `token`: `String`
+    - `user`: `UserResponseDTO`
 
 ### `POST /api/auth/logout`
 Invalidates the current session token provided in the header.
@@ -20,7 +24,7 @@ Invalidates the current session token provided in the header.
 ### `GET /api/auth/me`
 Retrieves details about the currently authenticated user and their effective permissions.
 - **Header**: `Authorization: Bearer <token>`
-- **Response**: `{ "userId": "...", "username": "...", "role": "...", "permissions": [{ "resource": "...", "action": "..." }] }`
+- **Response**: `UserResponseDTO`
 
 ---
 
@@ -29,25 +33,30 @@ Administrative actions for user profiles.
 
 ### `GET /api/users`
 Lists all registered users. Requires `USER:READ` permission.
-- **Response**: `Array<UserDTO>`
+- **Response**: `GetAllUsersResponseDTO`
+    - `users`: `Array<UserResponseDTO>`
 
 ### `GET /api/users/{id}`
 Retrieves a specific user by ID. Requires `USER:READ` permission.
-- **Response**: `UserDTO`
+- **Response**: `UserResponseDTO`
 
 ### `POST /api/users`
 Creates a new user account. Requires `USER:CREATE` permission.
-- **Request Body**: `{ "username": "...", "password": "..." }`
-- **Response**: `UserDTO`
+- **Request Body**: `CreateUserRequestDTO`
+    - `username`: `String`
+    - `password`: `String`
+- **Response**: `UserResponseDTO`
 
 ### `PATCH /api/users/{id}/username`
 Updates the username of an existing user. Requires `USER:UPDATE` permission.
-- **Request Body**: `{ "newUsername": "..." }`
+- **Request Body**: `UpdateUsernameRequestDTO`
+    - `newUsername`: `String`
 - **Response**: `200 OK`
 
 ### `PATCH /api/users/{id}/password`
-Updates the password of an existing user. Requires `USER:UPDATE` permission or ownership.
-- **Request Body**: `{ "newPassword": "..." }`
+Updates the password of an existing user. Requires `USER:UPDATE` permission.
+- **Request Body**: `UpdatePasswordRequestDTO`
+    - `newPassword`: `String`
 - **Response**: `200 OK`
 
 ### `DELETE /api/users/{id}`
@@ -61,24 +70,35 @@ Manage roles, permissions, and user assignments. **A user can only have one role
 
 ### `GET /api/security/roles`
 Lists all roles defined in the system.
-- **Response**: `Array<RoleDTO>`
+- **Response**: `GetAllRolesResponseDTO`
+    - `roles`: `Array<RoleResponseDTO>`
 
 ### `POST /api/security/roles`
 Registers a new custom role.
-- **Request Body**: `{ "name": "...", "permissions": [{ "resource": "ResourceEnum", "action": "ActionEnum" }] }`
-- **Response**: `{ "roleId": "..." }`
+- **Request Body**: `CreateRoleRequestDTO`
+    - `name`: `String`
+    - `permissions`: `Array<PermissionDTO>`
+    
+- **Response**: `CreateRoleResponseDTO`
+    - `role`: `RoleResponseDTO`
 
-### `GET /api/security/assignments/{userId}`
+### `GET /api/security/users/{userId}/role`
 Retrieves the role ID assigned to a specific user.
-- **Response**: `{ "userId": "...", "roleId": "..." }`
+- **Response**: `GetUserRoleResponseDTO`
+    - `roleId`: `UUID`
 
-### `PUT /api/security/assignments/{userId}`
+### `PUT /api/security/users/{userId}/role`
 Assigns a single role to a user. This overwrites any previously assigned role.
-- **Request Body**: `{ "roleId": "..." }`
+- **Request Body**: `AssignRoleRequestDTO`
+    - `roleId`: `UUID`
 - **Response**: `200 OK`
 
-### `DELETE /api/security/assignments/{userId}`
+### `DELETE /api/security/users/{userId}`
 Revokes the role assignment from the user, leaving them with no role.
+- **Response**: `204 No Content`
+
+### `DELETE /api/security/roles/{roleId}`
+Deletes a role from the system. Will fail if the role is assigned to any user.
 - **Response**: `204 No Content`
 
 ---
@@ -88,17 +108,30 @@ Manage products and stock.
 
 ### `GET /api/products`
 Lists all products. Requires `PRODUCT:READ` permission.
-- **Response**: `Array<ProductDTO>`
+- **Response**: `GetAllProductsResponseDTO`
+    - `products`: `Array<ProductResponseDTO>`
 
 ### `POST /api/products`
 Adds a new product to the inventory. Requires `PRODUCT:CREATE` permission.
-- **Request Body**: `{ "name": "...", "description": "...", "purchasePrice": 0.0, "sellingPrice": 0.0, "stockQuantity": 0, "taxRate": 0.1 }`
-- **Response**: `ProductDTO`
+- **Request Body**: `CreateProductRequestDTO`
+    - `name`: `String`
+    - `description`: `String`
+    - `purchasePrice`: `BigDecimal`
+    - `sellingPrice`: `BigDecimal`
+    - `stockQuantity`: `Integer`
+    - `taxRate`: `BigDecimal`
+- **Response**: `ProductResponseDTO`
 
 ### `PUT /api/products/{id}`
 Updates an existing product. Requires `PRODUCT:UPDATE` permission.
-- **Request Body**: `{ "name": "...", "purchasePrice": 0.0, ... }`
-- **Response**: `ProductDTO`
+- **Request Body**: `UpdateProductRequestDTO`
+    - `name`: `String`
+    - `description`: `String`
+    - `purchasePrice`: `BigDecimal`
+    - `sellingPrice`: `BigDecimal`
+    - `stockQuantity`: `Integer`
+    - `taxRate`: `BigDecimal`
+- **Response**: `ProductResponseDTO`
 
 ### `DELETE /api/products/{id}`
 Removes a product from the catalog. Requires `PRODUCT:DELETE` permission.

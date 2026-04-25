@@ -1,12 +1,15 @@
 package ledge.api.users;
 
 import ledge.api.shared.ApiResponse;
+import ledge.api.shared.ContractMapper;
 import ledge.api.users.dto.request.*;
-import ledge.api.users.dto.response.UserListResponseDTO;
-import ledge.api.users.dto.response.UserResponseDTO;
+import ledge.api.users.dto.response.GetAllUsersResponseDTO;
+import ledge.api.users.dto.UserResponseDTO;
 import ledge.security.api.IUserRoleService;
 import ledge.security.api.dto.RoleDTO;
 import ledge.users.readmodel.contracts.GetAllUsersQuery;
+import ledge.users.readmodel.contracts.GetUserByUsernameQuery;
+import ledge.users.readmodel.contracts.GetUserByIdQuery;
 import ledge.users.readmodel.dtos.UserDTO;
 import ledge.shared.infrastructure.queries.QueryBus;
 import ledge.shared.infrastructure.commands.CommandBus;
@@ -39,36 +42,55 @@ public class UserController {
     }
 
     /**
-     * Retrieves all users in the system.
+     * Lists all registered users.
      */
     @GetMapping
-    public ApiResponse<UserListResponseDTO> getAllUsers(
+    public ApiResponse<GetAllUsersResponseDTO> getAllUsers(
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
-        List<UserDTO> users = queryBus.dispatch(new GetAllUsersQuery(), extractToken(authHeader));
+        String token = extractToken(authHeader);
+        List<UserDTO> users = queryBus.dispatch(new GetAllUsersQuery(), token);
         List<UserResponseDTO> responseList = users.stream()
-                .map(this::mapToResponse)
+                .map(u -> mapToContract(u, token))
                 .collect(Collectors.toList());
-        return ApiResponse.success(new UserListResponseDTO(responseList));
+        return ApiResponse.success(new GetAllUsersResponseDTO(responseList));
     }
 
     /**
-     * Registers a new user.
+     * Retrieves a specific user by ID.
      */
-    @PostMapping("/register")
-    public ApiResponse<Void> createUser(
+    @GetMapping("/{id}")
+    public ApiResponse<UserResponseDTO> getUserById(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @PathVariable UUID id) {
+        String token = extractToken(authHeader);
+        return queryBus.dispatch(new GetUserByIdQuery(id), token)
+                .map(u -> ApiResponse.success(mapToContract(u, token)))
+                .orElse(ApiResponse.error("User not found", "NOT_FOUND"));
+    }
+
+    /**
+     * Creates a new user account.
+     */
+    @PostMapping
+    public ApiResponse<UserResponseDTO> createUser(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @RequestBody CreateUserRequestDTO request) {
+        String token = extractToken(authHeader);
         commandBus.dispatch(new AddUserCommand(
                 request.username(),
-                request.password()), extractToken(authHeader));
-        return ApiResponse.success(null);
+                request.password()), token);
+
+        // Fetch the newly created user to return it
+        return queryBus.dispatch(new GetUserByUsernameQuery(request.username()), token)
+                .map(u -> ApiResponse.success(mapToContract(u, token)))
+                .orElse(ApiResponse.error("Failed to retrieve created user", "INTERNAL_ERROR"));
     }
 
     /**
-     * Changes a user's username.
+     * Updates the username of an existing user.
      */
-    @PutMapping("/{id}/username")
-    public ApiResponse<Void> changeUsername(
+    @PatchMapping("/{id}/username")
+    public ApiResponse<Void> updateUsername(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @PathVariable UUID id,
             @RequestBody ChangeUsernameRequestDTO request) {
@@ -79,10 +101,10 @@ public class UserController {
     }
 
     /**
-     * Changes a user's password.
+     * Updates the password of an existing user.
      */
-    @PutMapping("/{id}/password")
-    public ApiResponse<Void> changePassword(
+    @PatchMapping("/{id}/password")
+    public ApiResponse<Void> updatePassword(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @PathVariable UUID id,
             @RequestBody ChangePasswordRequestDTO request) {
@@ -103,10 +125,10 @@ public class UserController {
         return ApiResponse.success(null);
     }
 
-    private UserResponseDTO mapToResponse(UserDTO u) {
-        RoleDTO role = userRoleService.getRoleId(u.id())
+    private UserResponseDTO mapToContract(UserDTO u, String token) {
+        RoleDTO internalRole = userRoleService.getRoleId(u.id())
                 .flatMap(userRoleService::getRole)
                 .orElse(null);
-        return new UserResponseDTO(u.id(), u.username(), role);
+        return ContractMapper.mapUser(u, internalRole);
     }
 }

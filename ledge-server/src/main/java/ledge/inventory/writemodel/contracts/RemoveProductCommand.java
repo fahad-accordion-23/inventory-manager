@@ -1,8 +1,8 @@
 package ledge.inventory.writemodel.contracts;
 
 import ledge.security.api.dto.PermissionDTO;
-import ledge.security.api.models.Action;
-import ledge.security.api.models.Resource;
+import ledge.shared.security.models.Action;
+import ledge.shared.security.models.Resource;
 import ledge.shared.infrastructure.commands.Command;
 import java.util.Optional;
 import java.util.UUID;

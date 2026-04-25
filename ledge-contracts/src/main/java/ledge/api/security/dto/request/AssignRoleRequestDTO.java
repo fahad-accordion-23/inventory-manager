@@ -1,4 +1,4 @@
-package ledge.api.security.dto;
+package ledge.api.security.dto.request;
 
 import java.util.UUID;
 
