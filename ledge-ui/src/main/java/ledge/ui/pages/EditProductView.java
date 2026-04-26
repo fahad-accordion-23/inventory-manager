@@ -6,7 +6,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Alert.AlertType;
 import ledge.ui.clients.HttpInventoryClient;
 import ledge.api.inventory.dto.request.UpdateProductRequestDTO;
-import ledge.api.inventory.dto.response.ProductResponseDTO;
+import ledge.api.inventory.dto.ProductResponseDTO;
 import ledge.api.shared.ApiResponse;
 import ledge.api.shared.AuthContext;
 import ledge.ui.core.SessionManager;
@@ -18,8 +18,7 @@ import java.util.UUID;
 
 /**
  * Controller for the Edit Product view.
- * Handles existing product data loading, validation, and update command
- * dispatch via the API layer.
+ * Updated to match the revised return type of updateProduct.
  */
 public class EditProductView {
 
@@ -96,7 +95,7 @@ public class EditProductView {
             return;
         }
 
-        ApiResponse<Void> response = inventoryController.updateProduct(authContext.get(), request);
+        ApiResponse<ProductResponseDTO> response = inventoryController.updateProduct(authContext.get(), productId, request);
 
         if (response.success()) {
             Alert alert = new Alert(AlertType.INFORMATION);

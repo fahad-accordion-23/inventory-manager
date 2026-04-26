@@ -1,10 +1,10 @@
 package ledge.shared.infrastructure.commands;
 
-import ledge.security.application.services.IAuthorizationService;
-import ledge.security.application.events.AuthorizationException;
-import ledge.shared.types.Action;
-import ledge.shared.types.Permission;
-import ledge.shared.types.Resource;
+import ledge.security.api.IAuthorizationService;
+import ledge.security.api.dto.PermissionDTO;
+import ledge.security.api.exceptions.AuthorizationException;
+import ledge.shared.security.models.Action;
+import ledge.shared.security.models.Resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -40,10 +40,11 @@ class CommandBusTest {
         TestHandlerWithPermission handler = new TestHandlerWithPermission();
         CommandBus commandBus = new CommandBus(List.of(handler), authService);
 
-        doThrow(new AuthorizationException("Denied")).when(authService).require("bad-token", new Permission(Resource.PRODUCT, Action.UPDATE));
+        PermissionDTO required = new PermissionDTO(Resource.PRODUCT, Action.UPDATE);
+        doThrow(new AuthorizationException("Denied")).when(authService).require("bad-token", required);
 
         TestCommandWithPermission command = new TestCommandWithPermission();
-        
+
         assertThrows(AuthorizationException.class, () -> commandBus.dispatch(command, "bad-token"));
         assertFalse(handler.executed);
     }
@@ -64,12 +65,22 @@ class CommandBusTest {
     // Test classes
     static class TestCommand implements Command {
         final String data;
-        TestCommand(String data) { this.data = data; }
-        @Override public Optional<Permission> getRequiredPermission() { return Optional.empty(); }
+
+        TestCommand(String data) {
+            this.data = data;
+        }
+
+        @Override
+        public Optional<PermissionDTO> getRequiredPermission() {
+            return Optional.empty();
+        }
     }
 
     static class TestCommandWithPermission implements Command {
-        @Override public Optional<Permission> getRequiredPermission() { return Optional.of(new Permission(Resource.PRODUCT, Action.UPDATE)); }
+        @Override
+        public Optional<PermissionDTO> getRequiredPermission() {
+            return Optional.of(new PermissionDTO(Resource.PRODUCT, Action.UPDATE));
+        }
     }
 
     static class TestHandler implements CommandHandler<TestCommand> {

@@ -3,8 +3,6 @@ package ledge.users.writemodel.infrastructure;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 
-import ledge.util.PasswordHasher;
-import ledge.shared.types.Role;
 import ledge.users.writemodel.domain.User;
 
 import java.io.File;
@@ -21,28 +19,18 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class UserWriteRepository implements IUserWriteRepository {
-    private static final String DATA_DIR = System.getProperty("user.dir") + "/data";
+    private static final String DATA_DIR = "data";
     private static final String FILE_PATH = DATA_DIR + "/users.json";
     private final List<User> database = new ArrayList<>();
     private final Gson gson;
 
     public UserWriteRepository() {
-        // Register custom TypeAdapter for Role to save/load just the role name
         this.gson = new GsonBuilder()
-                .registerTypeAdapter(Role.class, new RoleTypeAdapter())
                 .setPrettyPrinting()
                 .create();
 
         new File(DATA_DIR).mkdirs();
         loadDatabase();
-
-        if (database.isEmpty()) {
-            seedDatabase();
-        }
-    }
-
-    private void seedDatabase() {
-        save(User.register("admin", PasswordHasher.hash("admin123"), Role.ADMIN));
     }
 
     private void loadDatabase() {
@@ -94,25 +82,6 @@ public class UserWriteRepository implements IUserWriteRepository {
     public void delete(UUID id) {
         if (database.removeIf(u -> u.getId().equals(id))) {
             saveDatabase();
-        }
-    }
-
-    // Custom TypeAdapter to serialize Role as string and deserialize back to static
-    // instances
-    private static class RoleTypeAdapter implements JsonSerializer<Role>, JsonDeserializer<Role> {
-        @Override
-        public JsonElement serialize(Role src, Type typeOfSrc, JsonSerializationContext context) {
-            return new JsonPrimitive(src.name());
-        }
-
-        @Override
-        public Role deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-                throws JsonParseException {
-            try {
-                return Role.valueOf(json.getAsString());
-            } catch (IllegalArgumentException e) {
-                throw new JsonParseException("Unknown role: " + json.getAsString());
-            }
         }
     }
 }

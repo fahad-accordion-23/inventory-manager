@@ -8,11 +8,10 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import ledge.ui.clients.HttpInventoryClient;
-import ledge.api.inventory.dto.request.DeleteProductRequestDTO;
-import ledge.api.inventory.dto.response.ProductResponseDTO;
+import ledge.api.inventory.dto.ProductResponseDTO;
+import ledge.api.inventory.dto.response.GetAllProductsResponseDTO;
 import ledge.api.shared.ApiResponse;
 import ledge.api.shared.AuthContext;
-import ledge.shared.types.Role;
 import ledge.ui.core.Capability;
 import ledge.ui.core.SessionManager;
 import ledge.ui.viewmodels.ProductViewModel;
@@ -23,8 +22,7 @@ import java.util.function.Consumer;
 
 /**
  * Controller for the inventory table view via the API layer.
- * Displays products with search, low-stock highlighting, and authorized
- * actions.
+ * Updates to match the wrapped GetAllProductsResponseDTO structure.
  */
 public class InventoryDashboard {
 
@@ -93,9 +91,9 @@ public class InventoryDashboard {
         if (authContext.isEmpty())
             return;
 
-        ApiResponse<List<ProductResponseDTO>> response = inventoryController.getAllProducts(authContext.get());
+        ApiResponse<GetAllProductsResponseDTO> response = inventoryController.getAllProducts(authContext.get());
         if (response.success()) {
-            List<ProductViewModel> viewModels = response.data()
+            List<ProductViewModel> viewModels = response.data().products()
                     .stream()
                     .map(ProductViewModel::new)
                     .toList();
@@ -106,12 +104,6 @@ public class InventoryDashboard {
     private void setupActionsColumn() {
         if (sessionManager.getCurrentUser().isEmpty())
             return;
-
-        Role role = sessionManager.getCurrentUser().get().role();
-        if (role == null) {
-            actionsColumn.setVisible(false);
-            return;
-        }
 
         boolean canEdit = sessionManager.isAllowed(Capability.EDIT_PRODUCT);
         boolean canDelete = sessionManager.isAllowed(Capability.DELETE_PRODUCT);
@@ -163,8 +155,7 @@ public class InventoryDashboard {
             if (authContext.isEmpty())
                 return;
 
-            ApiResponse<Void> response = inventoryController.deleteProduct(authContext.get(),
-                    new DeleteProductRequestDTO(product.getId()));
+            ApiResponse<Void> response = inventoryController.deleteProduct(authContext.get(), product.getId());
             if (response.success()) {
                 loadAllProducts();
             } else {

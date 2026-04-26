@@ -1,8 +1,11 @@
 package ledge.api.users.dto.request;
 
-import ledge.shared.types.Role;
 import java.util.UUID;
 
+/**
+ * Request payload to update a user's role.
+ * Note: This functionality is primarily moved to the Security OHS (AssignRoleRequestDTO).
+ */
 public record ChangeUserRoleRequestDTO(
-        UUID user_id,
-        Role new_role) {}
+        UUID userId,
+        UUID roleId) {}

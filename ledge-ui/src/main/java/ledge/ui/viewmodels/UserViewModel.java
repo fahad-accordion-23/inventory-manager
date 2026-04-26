@@ -1,24 +1,36 @@
 package ledge.ui.viewmodels;
 
 import javafx.beans.property.*;
-import ledge.api.users.dto.response.UserResponseDTO;
-import ledge.shared.types.Role;
+import ledge.api.security.dto.RoleResponseDTO;
+import ledge.api.users.dto.UserResponseDTO;
 
 import java.util.UUID;
 
 /**
  * JavaFX-friendly view model for User.
+ * Updated to support single RoleDTO architecture and separate display
+ * properties.
  */
 public class UserViewModel {
     private final ObjectProperty<UUID> id = new SimpleObjectProperty<>();
     private final StringProperty username = new SimpleStringProperty();
-    private final ObjectProperty<Role> role = new SimpleObjectProperty<>();
+    private final ObjectProperty<RoleResponseDTO> role = new SimpleObjectProperty<>();
+    private final StringProperty roleName = new SimpleStringProperty();
 
     public UserViewModel() {
+        setupBindings();
     }
 
     public UserViewModel(UserResponseDTO dto) {
+        setupBindings();
         updateFrom(dto);
+    }
+
+    private void setupBindings() {
+        // Sync roleName whenever the role object changes
+        role.addListener((obs, oldVal, newVal) -> {
+            roleName.set(newVal != null ? newVal.name() : "No Role");
+        });
     }
 
     public static UserViewModel fromDTO(UserResponseDTO dto) {
@@ -44,8 +56,12 @@ public class UserViewModel {
         return username;
     }
 
-    public ObjectProperty<Role> roleProperty() {
+    public ObjectProperty<RoleResponseDTO> roleProperty() {
         return role;
+    }
+
+    public StringProperty roleNameProperty() {
+        return roleName;
     }
 
     // --- Accessors ---
@@ -57,8 +73,12 @@ public class UserViewModel {
         return username.get();
     }
 
-    public Role getRole() {
+    public RoleResponseDTO getRole() {
         return role.get();
+    }
+
+    public String getRoleName() {
+        return roleName.get();
     }
 
     public void setId(UUID id) {
@@ -69,7 +89,7 @@ public class UserViewModel {
         this.username.set(username);
     }
 
-    public void setRole(Role role) {
+    public void setRole(RoleResponseDTO role) {
         this.role.set(role);
     }
 }

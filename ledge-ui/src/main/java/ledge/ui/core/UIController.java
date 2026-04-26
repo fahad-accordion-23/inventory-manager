@@ -6,6 +6,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import ledge.ui.clients.HttpSecurityClient;
 import ledge.ui.clients.HttpInventoryClient;
 import ledge.ui.clients.HttpUserClient;
 import ledge.ui.events.LoginSucceededEvent;
@@ -28,14 +29,16 @@ public class UIController {
     private final SessionManager sessionManager;
     private final HttpInventoryClient inventoryController;
     private final HttpUserClient userController;
+    private final HttpSecurityClient securityController;
 
     public UIController(Stage primaryStage, UIEventBroker uiEventBroker, SessionManager sessionManager,
-            HttpInventoryClient inventoryController, HttpUserClient userController) {
+            HttpInventoryClient inventoryController, HttpUserClient userController, HttpSecurityClient securityController) {
         this.primaryStage = primaryStage;
         this.uiEventBroker = uiEventBroker;
         this.sessionManager = sessionManager;
         this.inventoryController = inventoryController;
         this.userController = userController;
+        this.securityController = securityController;
 
         this.uiEventBroker.register(this);
     }
@@ -91,7 +94,7 @@ public class UIController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/ledge/ui/components/MainLayout.fxml"));
             loader.setControllerFactory(param -> {
                 if (param == MainLayout.class) {
-                    return new MainLayout(inventoryController, userController, sessionManager, uiEventBroker);
+                    return new MainLayout(inventoryController, userController, securityController, sessionManager, uiEventBroker);
                 }
                 if (param == Sidebar.class) {
                     return new Sidebar(sessionManager, uiEventBroker);

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ledge.ui.pages.RoleDashboardView">
+    <padding>
+        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+    </padding>
+
+    <HBox alignment="CENTER_LEFT" spacing="15.0">
+        <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Role Management" />
+        
+        <HBox HBox.hgrow="ALWAYS" /> <!-- Pushes actions to the right -->
+
+        <!-- Action Group -->
+        <HBox alignment="CENTER_RIGHT" spacing="10.0">
+            <Button onAction="#refresh" style="-fx-background-color: transparent; -fx-border-color: #bdc3c7; -fx-border-radius: 5; -fx-text-fill: #7f8c8d; -fx-font-weight: bold; -fx-padding: 6 12; -fx-cursor: hand;" text="↺ Refresh" />
+            <Button fx:id="addRoleButton" onAction="#handleAddRole" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 18; -fx-background-radius: 5; -fx-cursor: hand;" text="+ Create New Role" />
+        </HBox>
+    </HBox>
+
+    <TableView fx:id="roleTable" style="-fx-background-radius: 5; -fx-border-radius: 5;" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="nameColumn" prefWidth="400.0" text="Role Name" />
+        </columns>
+    </TableView>
+
+    <HBox alignment="CENTER_LEFT" spacing="15.0">
+        <Button onAction="#handleEditRole" style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 8 15; -fx-cursor: hand;" text="✎ Edit Selected" />
+        <Button onAction="#handleDeleteRole" style="-fx-background-color: #c0392b; -fx-text-fill: white; -fx-background-radius: 5; -fx-padding: 8 15; -fx-cursor: hand;" text="🗑 Delete Selected" />
+    </HBox>
+</VBox>

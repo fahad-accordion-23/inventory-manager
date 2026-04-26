@@ -5,6 +5,7 @@ import javafx.stage.Stage;
 
 import ledge.ui.clients.HttpAuthClient;
 import ledge.ui.clients.HttpInventoryClient;
+import ledge.ui.clients.HttpSecurityClient;
 import ledge.ui.clients.HttpUserClient;
 import ledge.ui.core.SessionManager;
 import ledge.ui.core.UIController;
@@ -20,20 +21,22 @@ public class App extends Application {
     private UIEventBroker uiEventBroker;
     private UIController uiController;
     private SessionManager sessionManager;
-    private HttpAuthClient authController;
-    private HttpInventoryClient inventoryController;
-    private HttpUserClient userController;
+    private HttpAuthClient authClient;
+    private HttpInventoryClient inventoryClient;
+    private HttpUserClient userClient;
+    private HttpSecurityClient securityClient;
 
     @Override
     public void init() throws Exception {
         // Initialize HTTP proxy clients
-        authController = new HttpAuthClient();
-        inventoryController = new HttpInventoryClient();
-        userController = new HttpUserClient();
+        authClient = new HttpAuthClient();
+        inventoryClient = new HttpInventoryClient();
+        userClient = new HttpUserClient();
+        securityClient = new HttpSecurityClient();
 
         // Initialize UI infrastructure
         uiEventBroker = new UIEventBroker();
-        sessionManager = new SessionManager(authController);
+        sessionManager = new SessionManager(authClient);
     }
 
     @Override
@@ -45,8 +48,9 @@ public class App extends Application {
                 primaryStage,
                 uiEventBroker,
                 sessionManager,
-                inventoryController,
-                userController);
+                inventoryClient,
+                userClient,
+                securityClient);
 
         uiController.showLoginScene();
         primaryStage.show();

@@ -1,10 +1,9 @@
 package ledge.inventory.writemodel.contracts;
 
-import ledge.inventory.readmodel.dtos.ProductDTO;
+import ledge.security.api.dto.PermissionDTO;
+import ledge.shared.security.models.Action;
+import ledge.shared.security.models.Resource;
 import ledge.shared.infrastructure.commands.Command;
-import ledge.shared.types.Action;
-import ledge.shared.types.Permission;
-import ledge.shared.types.Resource;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -16,15 +15,10 @@ public record AddProductCommand(
         int stockQuantity,
         BigDecimal taxRate) implements Command {
 
-    public static final Permission REQUIRED = new Permission(Resource.PRODUCT, Action.CREATE);
-
-    public AddProductCommand(ProductDTO product) {
-        this(product.name(), product.purchasePrice(), product.sellingPrice(), product.stockQuantity(),
-                product.taxRate());
-    }
+    private static final PermissionDTO REQUIRED = new PermissionDTO(Resource.PRODUCT, Action.CREATE);
 
     @Override
-    public Optional<Permission> getRequiredPermission() {
+    public Optional<PermissionDTO> getRequiredPermission() {
         return Optional.of(REQUIRED);
     }
 }

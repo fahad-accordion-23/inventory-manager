@@ -1,33 +1,46 @@
 package ledge.ui.core;
 
-import ledge.shared.types.Action;
-import ledge.shared.types.Permission;
-import ledge.shared.types.Resource;
+import ledge.shared.security.models.Action;
+import ledge.shared.security.models.Resource;
 
+/**
+ * High-level UI capabilities mapped to underlying security Resource and Action.
+ * PermissionResponseDTO was removed intentionally; capabilities now store raw
+ * Resource/Action pairs.
+ */
 public enum Capability {
 
-    VIEW_DASHBOARD(new Permission(Resource.PRODUCT, Action.READ)), // adjust if dashboard becomes its own resource
+    VIEW_DASHBOARD(Resource.PRODUCT, Action.READ),
 
-    VIEW_PRODUCTS(new Permission(Resource.PRODUCT, Action.READ)),
-    CREATE_PRODUCT(new Permission(Resource.PRODUCT, Action.CREATE)),
-    EDIT_PRODUCT(new Permission(Resource.PRODUCT, Action.UPDATE)),
-    DELETE_PRODUCT(new Permission(Resource.PRODUCT, Action.DELETE)),
+    VIEW_PRODUCTS(Resource.PRODUCT, Action.READ),
+    CREATE_PRODUCT(Resource.PRODUCT, Action.CREATE),
+    EDIT_PRODUCT(Resource.PRODUCT, Action.UPDATE),
+    DELETE_PRODUCT(Resource.PRODUCT, Action.DELETE),
 
-    VIEW_USERS(new Permission(Resource.USER, Action.READ)),
-    CREATE_USER(new Permission(Resource.USER, Action.CREATE)),
-    EDIT_USER(new Permission(Resource.USER, Action.UPDATE)),
-    DELETE_USER(new Permission(Resource.USER, Action.DELETE)),
+    VIEW_USERS(Resource.USER, Action.READ),
+    CREATE_USER(Resource.USER, Action.CREATE),
+    EDIT_USER(Resource.USER, Action.UPDATE),
+    DELETE_USER(Resource.USER, Action.DELETE),
 
-    VIEW_INVOICES(new Permission(Resource.INVOICE, Action.READ)),
-    CREATE_INVOICE(new Permission(Resource.INVOICE, Action.CREATE));
+    VIEW_INVOICES(Resource.INVOICE, Action.READ),
+    CREATE_INVOICE(Resource.INVOICE, Action.CREATE),
 
-    private final Permission permission;
+    VIEW_ROLES(Resource.ROLE, Action.READ),
+    MANAGE_ROLES(Resource.ROLE, Action.UPDATE);
 
-    Capability(Permission permission) {
-        this.permission = permission;
+    private final Resource resource;
+    private final Action action;
+
+    Capability(Resource resource, Action action) {
+        this.resource = resource;
+        this.action = action;
     }
 
-    public Permission permission() {
-        return permission;
+    public Resource resource() {
+        return resource;
+    }
+
+    public Action action() {
+        return action;
     }
 }

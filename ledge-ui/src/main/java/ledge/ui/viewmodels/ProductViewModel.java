@@ -1,14 +1,14 @@
 package ledge.ui.viewmodels;
 
 import javafx.beans.property.*;
-import ledge.api.inventory.dto.response.ProductResponseDTO;
+import ledge.api.inventory.dto.ProductResponseDTO;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 /**
  * JavaFX-friendly view model for Product.
- * Uses properties for data binding in the UI.
+ * Aligned with the consolidated API contract package.
  */
 public class ProductViewModel {
     private final ObjectProperty<UUID> id = new SimpleObjectProperty<>();

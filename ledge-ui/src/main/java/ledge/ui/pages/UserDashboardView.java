@@ -9,9 +9,8 @@ import javafx.scene.layout.HBox;
 import ledge.api.shared.ApiResponse;
 import ledge.api.shared.AuthContext;
 import ledge.ui.clients.HttpUserClient;
-import ledge.api.users.dto.request.DeleteUserRequestDTO;
-import ledge.api.users.dto.response.UserListResponseDTO;
-import ledge.api.users.dto.response.UserResponseDTO;
+import ledge.api.users.dto.response.GetAllUsersResponseDTO;
+import ledge.api.users.dto.UserResponseDTO;
 import ledge.ui.core.Capability;
 import ledge.ui.core.SessionManager;
 import ledge.ui.viewmodels.UserViewModel;
@@ -73,7 +72,7 @@ public class UserDashboardView {
         if (authContext.isEmpty())
             return;
 
-        ApiResponse<UserListResponseDTO> response = userController.getAllUsers(authContext.get());
+        ApiResponse<GetAllUsersResponseDTO> response = userController.getAllUsers(authContext.get());
         if (response.success()) {
             allUsers.setAll(response.data().users().stream().map(UserViewModel::new).toList());
         }
@@ -136,8 +135,7 @@ public class UserDashboardView {
             if (authContext.isEmpty())
                 return;
 
-            ApiResponse<Void> response = userController.deleteUser(authContext.get(),
-                    new DeleteUserRequestDTO(user.getId()));
+            ApiResponse<Void> response = userController.deleteUser(authContext.get(), user.getId());
 
             if (response.success()) {
                 loadAllUsers();

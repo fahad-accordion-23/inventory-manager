@@ -1,13 +1,17 @@
 package ledge.ui.core;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import ledge.api.shared.ApiResponse;
 import ledge.api.shared.AuthContext;
+import ledge.shared.security.models.Action;
+import ledge.shared.security.models.Resource;
 import ledge.ui.clients.HttpAuthClient;
-import ledge.api.auth.dto.LoginRequestDTO;
-import ledge.api.auth.dto.LoginResponseDTO;
-import ledge.api.users.dto.response.UserResponseDTO;
+import ledge.api.auth.dto.request.LoginRequestDTO;
+import ledge.api.auth.dto.response.LoginResponseDTO;
+import ledge.api.users.dto.UserResponseDTO;
 
 /**
  * Client-side session manager for the UI.
@@ -40,6 +44,19 @@ public class SessionManager {
             this.currentUser = response.data().user();
         } else {
             throw new Exception(response.error().message());
+        }
+    }
+
+    /**
+     * Refreshes the current user info using the auth token.
+     */
+    public void refreshSession() {
+        if (authContext == null)
+            return;
+
+        ApiResponse<UserResponseDTO> response = authController.me(authContext);
+        if (response.success()) {
+            this.currentUser = response.data();
         }
     }
 
@@ -79,8 +96,20 @@ public class SessionManager {
 
     /**
      * Checks if the current user has the given capability.
+     * Updated to check against the map-based permission structure containing multiple actions per resource.
      */
     public boolean isAllowed(Capability capability) {
-        return currentUser.role().hasPermission(capability.permission());
+        if (currentUser == null || currentUser.role() == null) {
+            return false;
+        }
+
+        Action actionToDo = capability.action();
+        Resource resourceNeeded = capability.resource();
+
+        Map<Resource, List<Action>> permissions = currentUser.role().permissions();
+
+        List<Action> allowedActions = permissions.get(resourceNeeded);
+
+        return allowedActions != null && allowedActions.contains(actionToDo);
     }
 }

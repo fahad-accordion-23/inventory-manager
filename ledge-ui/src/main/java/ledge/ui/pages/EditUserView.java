@@ -2,13 +2,16 @@ package ledge.ui.pages;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.util.StringConverter;
 import ledge.api.shared.ApiResponse;
 import ledge.api.shared.AuthContext;
-import ledge.ui.clients.HttpUserClient;
-import ledge.api.users.dto.request.ChangeUserRoleRequestDTO;
 import ledge.api.users.dto.request.ChangeUsernameRequestDTO;
-import ledge.api.users.dto.response.UserResponseDTO;
-import ledge.shared.types.Role;
+import ledge.api.users.dto.UserResponseDTO;
+import ledge.api.security.dto.RoleResponseDTO;
+import ledge.api.security.dto.request.AssignRoleRequestDTO;
+import ledge.api.security.dto.response.GetAllRolesResponseDTO;
+import ledge.ui.clients.HttpSecurityClient;
+import ledge.ui.clients.HttpUserClient;
 import ledge.ui.core.SessionManager;
 import ledge.ui.util.FormValidator;
 
@@ -16,7 +19,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Controller for editing an existing user's details via the API layer.
+ * Controller for editing an existing user's details.
+ * Updates to match the revised GetAllRolesResponseDTO structure.
  */
 public class EditUserView {
 
@@ -24,24 +28,52 @@ public class EditUserView {
     private TextField usernameField;
 
     @FXML
-    private ComboBox<Role> roleComboBox;
+    private ComboBox<RoleResponseDTO> roleComboBox;
 
     private final HttpUserClient userController;
+    private final HttpSecurityClient securityController;
     private final SessionManager sessionManager;
     private final Runnable onCancel;
+
     private UUID userId;
     private String originalUsername;
-    private Role originalRole;
+    private RoleResponseDTO originalRole;
 
-    public EditUserView(HttpUserClient userController, SessionManager sessionManager, Runnable onCancel) {
+    public EditUserView(HttpUserClient userController, HttpSecurityClient securityController,
+            SessionManager sessionManager, Runnable onCancel) {
         this.userController = userController;
+        this.securityController = securityController;
         this.sessionManager = sessionManager;
         this.onCancel = onCancel;
     }
 
     @FXML
     public void initialize() {
-        roleComboBox.getItems().setAll(Role.values());
+        roleComboBox.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(RoleResponseDTO role) {
+                return role == null ? "" : role.name();
+            }
+
+            @Override
+            public RoleResponseDTO fromString(String string) {
+                return null;
+            }
+        });
+
+        loadAvailableRoles();
+    }
+
+    private void loadAvailableRoles() {
+        sessionManager.getAuthContext().ifPresent(context -> {
+            ApiResponse<GetAllRolesResponseDTO> response = securityController.getAllRoles(context);
+            if (response.success()) {
+                roleComboBox.getItems().setAll(response.data().roles());
+                if (originalRole != null) {
+                    roleComboBox.setValue(originalRole);
+                }
+            }
+        });
     }
 
     /**
@@ -53,14 +85,16 @@ public class EditUserView {
         this.originalRole = user.role();
 
         usernameField.setText(originalUsername);
-        roleComboBox.setValue(originalRole);
+        if (!roleComboBox.getItems().isEmpty()) {
+            roleComboBox.setValue(originalRole);
+        }
     }
 
     @FXML
     public void handleSave() {
         FormValidator v = new FormValidator();
         String newUsername = v.requireNonBlank(usernameField, "Username");
-        Role newRole = roleComboBox.getValue();
+        RoleResponseDTO newRole = roleComboBox.getValue();
 
         if (v.hasErrors()) {
             new Alert(Alert.AlertType.ERROR, v.getErrorSummary()).showAndWait();
@@ -76,18 +110,20 @@ public class EditUserView {
         AuthContext context = authContext.get();
 
         try {
-            // Dispatch updates only if values changed
+            // Update username if changed
             if (!newUsername.equals(originalUsername)) {
-                ApiResponse<Void> response = userController.changeUsername(context,
-                        new ChangeUsernameRequestDTO(userId, newUsername));
+                ApiResponse<Void> response = userController.changeUsername(context, userId,
+                        new ChangeUsernameRequestDTO(newUsername));
 
                 if (!response.success()) {
                     throw new Exception(response.error().message());
                 }
             }
-            if (!newRole.equals(originalRole)) {
-                ApiResponse<Void> response = userController.changeRole(context,
-                        new ChangeUserRoleRequestDTO(userId, newRole));
+
+            // Update role if changed
+            if (newRole != null && (originalRole == null || !newRole.id().equals(originalRole.id()))) {
+                ApiResponse<Void> response = securityController.assignRole(context, userId,
+                        new AssignRoleRequestDTO(newRole.id()));
 
                 if (!response.success()) {
                     throw new Exception(response.error().message());
@@ -97,7 +133,7 @@ public class EditUserView {
             new Alert(Alert.AlertType.INFORMATION, "User updated successfully!").showAndWait();
             onCancel.run();
         } catch (Exception e) {
-            new Alert(Alert.AlertType.ERROR, e.getMessage()).showAndWait();
+            new Alert(Alert.AlertType.ERROR, "Update failed: " + e.getMessage()).showAndWait();
         }
     }
 

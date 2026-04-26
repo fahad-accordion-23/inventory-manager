@@ -1,19 +1,19 @@
 package ledge.users.readmodel.contracts;
 
+import ledge.security.api.dto.PermissionDTO;
+import ledge.shared.security.models.Action;
+import ledge.shared.security.models.Resource;
 import ledge.shared.infrastructure.queries.Query;
-import ledge.shared.types.Action;
-import ledge.shared.types.Permission;
-import ledge.shared.types.Resource;
 import ledge.users.readmodel.dtos.UserDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 public record GetAllUsersQuery() implements Query<List<UserDTO>> {
-    private static final Permission REQUIRED = new Permission(Resource.USER, Action.READ);
+    private static final PermissionDTO REQUIRED = new PermissionDTO(Resource.USER, Action.READ);
 
     @Override
-    public Optional<Permission> getRequiredPermission() {
+    public Optional<PermissionDTO> getRequiredPermission() {
         return Optional.of(REQUIRED);
     }
 }
