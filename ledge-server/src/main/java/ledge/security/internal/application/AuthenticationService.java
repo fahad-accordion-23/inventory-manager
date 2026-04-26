@@ -3,25 +3,27 @@ package ledge.security.internal.application;
 import ledge.security.api.exceptions.AuthenticationException;
 import ledge.security.api.IAuthenticationService;
 import ledge.security.internal.domain.services.ISessionService;
+import ledge.users.api.IUserService;
 import ledge.users.readmodel.dtos.UserDTO;
-import ledge.users.readmodel.infrastructure.IUserReadRepository;
 import ledge.util.PasswordHasher;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
 /**
  * Service for handling user authentication and token-based sessions.
+ * Now aligned with the Users Module Open Host Service (OHS).
  */
 @Service
 public class AuthenticationService implements IAuthenticationService {
     private final ISessionService sessionService;
-    private final IUserReadRepository userReadRepository;
+    private final IUserService userService;
 
-    public AuthenticationService(ISessionService sessionService, IUserReadRepository userReadRepository) {
+    public AuthenticationService(ISessionService sessionService, IUserService userService) {
         this.sessionService = sessionService;
-        this.userReadRepository = userReadRepository;
+        this.userService = userService;
     }
 
     /**
@@ -34,7 +36,7 @@ public class AuthenticationService implements IAuthenticationService {
      */
     @Override
     public String login(String username, String password) throws AuthenticationException {
-        Optional<UserDTO> userOpt = userReadRepository.findByUsername(username);
+        Optional<UserDTO> userOpt = userService.getUserByUsername(username);
 
         if (userOpt.isEmpty()) {
             throw new AuthenticationException("Invalid username or password");
@@ -61,4 +63,8 @@ public class AuthenticationService implements IAuthenticationService {
         }
     }
 
+    @Override
+    public Optional<UUID> getUserIdByToken(String token) {
+        return sessionService.getUserIdByToken(token);
+    }
 }

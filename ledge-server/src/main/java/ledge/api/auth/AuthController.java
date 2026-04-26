@@ -7,13 +7,11 @@ import ledge.api.shared.ContractMapper;
 import ledge.api.users.dto.UserResponseDTO;
 import ledge.security.api.IRoleService;
 import ledge.security.api.exceptions.AuthenticationException;
-import ledge.security.internal.domain.services.ISessionService;
 import ledge.security.api.IAuthenticationService;
 import ledge.security.api.IUserRoleService;
 import ledge.security.api.dto.RoleDTO;
-import ledge.users.readmodel.contracts.GetUserByIdQuery;
+import ledge.users.api.IUserService;
 import ledge.users.readmodel.dtos.UserDTO;
-import ledge.shared.infrastructure.queries.QueryBus;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -27,18 +25,16 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 public class AuthController {
     private final IAuthenticationService authService;
-    private final ISessionService sessionService;
     private final IUserRoleService userRoleService;
     private final IRoleService roleService;
-    private final QueryBus queryBus;
+    private final IUserService userService;
 
-    public AuthController(IAuthenticationService authService, ISessionService sessionService,
-            IUserRoleService userRoleService, IRoleService roleService, QueryBus queryBus) {
+    public AuthController(IAuthenticationService authService,
+            IUserRoleService userRoleService, IRoleService roleService, IUserService userService) {
         this.authService = authService;
-        this.sessionService = sessionService;
         this.userRoleService = userRoleService;
         this.roleService = roleService;
-        this.queryBus = queryBus;
+        this.userService = userService;
     }
 
     private String extractToken(String authHeader) {
@@ -52,10 +48,10 @@ public class AuthController {
     public ApiResponse<LoginResponseDTO> login(@RequestBody LoginRequestDTO request) {
         try {
             String token = authService.login(request.username(), request.password());
-            Optional<UUID> userIdOpt = sessionService.getUserIdByToken(token);
+            Optional<UUID> userIdOpt = authService.getUserIdByToken(token);
 
             if (userIdOpt.isPresent()) {
-                Optional<UserDTO> userOpt = queryBus.dispatch(new GetUserByIdQuery(userIdOpt.get()), token);
+                Optional<UserDTO> userOpt = userService.getUserById(userIdOpt.get());
 
                 if (userOpt.isPresent()) {
                     return ApiResponse.success(new LoginResponseDTO(token, mapToContract(userOpt.get())));
@@ -79,9 +75,9 @@ public class AuthController {
             return ApiResponse.error("Missing authentication token", "UNAUTHORIZED");
         }
 
-        Optional<UUID> userIdOpt = sessionService.getUserIdByToken(token);
+        Optional<UUID> userIdOpt = authService.getUserIdByToken(token);
         if (userIdOpt.isPresent()) {
-            Optional<UserDTO> userOpt = queryBus.dispatch(new GetUserByIdQuery(userIdOpt.get()), token);
+            Optional<UserDTO> userOpt = userService.getUserById(userIdOpt.get());
             if (userOpt.isPresent()) {
                 return ApiResponse.success(mapToContract(userOpt.get()));
             }

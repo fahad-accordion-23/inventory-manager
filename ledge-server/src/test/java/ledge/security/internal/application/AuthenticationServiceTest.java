@@ -2,8 +2,8 @@ package ledge.security.internal.application;
 
 import ledge.security.api.exceptions.AuthenticationException;
 import ledge.security.internal.domain.services.ISessionService;
+import ledge.users.api.IUserService;
 import ledge.users.readmodel.dtos.UserDTO;
-import ledge.users.readmodel.infrastructure.IUserReadRepository;
 import ledge.util.PasswordHasher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,13 +18,13 @@ class AuthenticationServiceTest {
 
     private AuthenticationService authService;
     private ISessionService sessionService;
-    private IUserReadRepository userReadRepository;
+    private IUserService userService;
 
     @BeforeEach
     void setUp() {
         sessionService = mock(ISessionService.class);
-        userReadRepository = mock(IUserReadRepository.class);
-        authService = new AuthenticationService(sessionService, userReadRepository);
+        userService = mock(IUserService.class);
+        authService = new AuthenticationService(sessionService, userService);
     }
 
     @Test
@@ -36,7 +36,7 @@ class AuthenticationServiceTest {
         
         UserDTO user = new UserDTO(userId, username, hashedPassword);
         
-        when(userReadRepository.findByUsername(username)).thenReturn(Optional.of(user));
+        when(userService.getUserByUsername(username)).thenReturn(Optional.of(user));
         when(sessionService.createToken(userId)).thenReturn("mock-token");
 
         String token = authService.login(username, password);
@@ -47,7 +47,7 @@ class AuthenticationServiceTest {
 
     @Test
     void testFailedLogin_InvalidUser() {
-        when(userReadRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+        when(userService.getUserByUsername(anyString())).thenReturn(Optional.empty());
 
         assertThrows(AuthenticationException.class, () -> authService.login("none", "pass"));
     }
@@ -58,7 +58,7 @@ class AuthenticationServiceTest {
         String hashedPassword = PasswordHasher.hash("correct-pass");
         UserDTO user = new UserDTO(UUID.randomUUID(), username, hashedPassword);
 
-        when(userReadRepository.findByUsername(username)).thenReturn(Optional.of(user));
+        when(userService.getUserByUsername(username)).thenReturn(Optional.of(user));
 
         assertThrows(AuthenticationException.class, () -> authService.login(username, "wrong-pass"));
     }
