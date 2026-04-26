@@ -1,46 +1,48 @@
 package ledge.users.writemodel.application.handlers;
 
-import org.springframework.stereotype.Service;
-
-import ledge.security.api.IRoleService;
-import ledge.security.api.IUserRoleService;
-import ledge.security.api.dto.RoleDTO;
 import ledge.shared.infrastructure.commands.CommandHandler;
-import ledge.users.readmodel.dtos.UserDTO;
-import ledge.users.readmodel.infrastructure.IUserReadRepository;
+import ledge.users.events.domain.UserCreatedDomainEvent;
+import ledge.users.events.integration.UserRegisteredIntegrationEvent;
 import ledge.users.writemodel.commands.AddUserCommand;
 import ledge.users.writemodel.domain.User;
 import ledge.users.writemodel.infrastructure.IUserWriteRepository;
 import ledge.util.PasswordHasher;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
 
+/**
+ * Handler for adding a new user.
+ * Decoupled from Security context and Read Model via Spring Events.
+ */
 @Service
 public class AddUserCommandHandler implements CommandHandler<AddUserCommand> {
     private final IUserWriteRepository userWriteRepository;
-    private final IUserReadRepository userReadRepository;
-    private final IUserRoleService userRoleService;
-    private final IRoleService roleService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public AddUserCommandHandler(IUserWriteRepository userWriteRepository,
-            IUserReadRepository userReadRepository,
-            IUserRoleService userRoleService,
-            IRoleService roleService) {
+                                 ApplicationEventPublisher eventPublisher) {
         this.userWriteRepository = userWriteRepository;
-        this.userReadRepository = userReadRepository;
-        this.userRoleService = userRoleService;
-        this.roleService = roleService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
     public void handle(AddUserCommand command) {
         String passwordHash = PasswordHasher.hash(command.password());
         User user = User.register(command.username(), passwordHash);
+        
         userWriteRepository.save(user);
 
-        // Assign default role (DEFAULT_USER)
-        roleService.getRoleByName("DEFAULT_USER")
-                .map(RoleDTO::id)
-                .ifPresent(roleId -> userRoleService.assignRole(user.getId(), roleId));
+        // Publish Domain Event for local synchronization (e.g. Read Model)
+        eventPublisher.publishEvent(new UserCreatedDomainEvent(
+                user.getId(), 
+                user.getUsername(), 
+                user.getPasswordHash()
+        ));
 
-        userReadRepository.save(UserDTO.fromUser(user));
+        // Publish Integration Event for cross-context side-effects (e.g. Role Assignment)
+        eventPublisher.publishEvent(new UserRegisteredIntegrationEvent(
+                user.getId(), 
+                user.getUsername()
+        ));
     }
 }

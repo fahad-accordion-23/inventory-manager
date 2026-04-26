@@ -1,23 +1,27 @@
 package ledge.inventory.writemodel.application.handlers;
 
-import ledge.shared.infrastructure.commands.CommandHandler;
+import ledge.inventory.events.domain.ProductUpdatedDomainEvent;
 import ledge.inventory.writemodel.contracts.UpdateProductCommand;
 import ledge.inventory.writemodel.domain.Product;
-import ledge.inventory.readmodel.dtos.ProductDTO;
-import ledge.inventory.readmodel.infrastructure.IProductReadRepository;
 import ledge.inventory.writemodel.infrastructure.IProductWriteRepository;
+import ledge.shared.infrastructure.commands.CommandHandler;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+/**
+ * Handler for updating an existing product.
+ * Decoupled from the Read Model via Spring Events.
+ */
 @Service
 public class UpdateProductCommandHandler implements CommandHandler<UpdateProductCommand> {
     private final IProductWriteRepository writeProductRepository;
-    private final IProductReadRepository readProductRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public UpdateProductCommandHandler(IProductWriteRepository writeProductRepository,
-            IProductReadRepository readProductRepository) {
+                                      ApplicationEventPublisher eventPublisher) {
         this.writeProductRepository = writeProductRepository;
-        this.readProductRepository = readProductRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -31,6 +35,15 @@ public class UpdateProductCommandHandler implements CommandHandler<UpdateProduct
                 command.taxRate());
 
         writeProductRepository.save(updatedProduct);
-        readProductRepository.save(ProductDTO.fromProduct(updatedProduct));
+
+        // Publish event for Read Model synchronization
+        eventPublisher.publishEvent(new ProductUpdatedDomainEvent(
+                updatedProduct.getId(),
+                updatedProduct.getName(),
+                updatedProduct.getPurchasePrice(),
+                updatedProduct.getSellingPrice(),
+                updatedProduct.getStockQuantity(),
+                updatedProduct.getTaxRate()
+        ));
     }
 }
