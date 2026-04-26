@@ -49,7 +49,7 @@ public class SecurityController {
     @GetMapping("/roles")
     public ApiResponse<GetAllRolesResponseDTO> getAllRoles(
             @RequestHeader(value = "Authorization", required = false) String authHeader) {
-        authorizationService.require(extractToken(authHeader), new PermissionDTO(Resource.ROLE, Action.READ));
+        authorizationService.authorize(extractToken(authHeader), new PermissionDTO(Resource.ROLE, Action.READ));
 
         List<RoleResponseDTO> roleContracts = roleService.getAllRoles().stream()
                 .map(ContractMapper::mapRole)
@@ -65,7 +65,7 @@ public class SecurityController {
     public ApiResponse<GetUserRoleResponseDTO> getAssignment(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @PathVariable("userId") UUID userId) {
-        authorizationService.require(extractToken(authHeader), new PermissionDTO(Resource.ROLE, Action.READ));
+        authorizationService.authorize(extractToken(authHeader), new PermissionDTO(Resource.ROLE, Action.READ));
         return ApiResponse.success(new GetUserRoleResponseDTO(userRoleService.getRoleId(userId).orElse(null)));
     }
 
@@ -77,7 +77,7 @@ public class SecurityController {
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @PathVariable("userId") UUID userId,
             @RequestBody AssignRoleRequestDTO request) {
-        authorizationService.require(extractToken(authHeader), new PermissionDTO(Resource.ROLE, Action.UPDATE));
+        authorizationService.authorize(extractToken(authHeader), new PermissionDTO(Resource.ROLE, Action.UPDATE));
         userRoleService.assignRole(userId, request.roleId());
         return ApiResponse.success(null);
     }
@@ -90,7 +90,7 @@ public class SecurityController {
     public ApiResponse<Void> removeRole(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @PathVariable("userId") UUID userId) {
-        authorizationService.require(extractToken(authHeader), new PermissionDTO(Resource.ROLE, Action.DELETE));
+        authorizationService.authorize(extractToken(authHeader), new PermissionDTO(Resource.ROLE, Action.DELETE));
         userRoleService.removeRole(userId);
         return ApiResponse.success(null);
     }
@@ -102,7 +102,7 @@ public class SecurityController {
     public ApiResponse<Void> registerRole(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @RequestBody RegisterRoleRequestDTO request) {
-        authorizationService.require(extractToken(authHeader), new PermissionDTO(Resource.ROLE, Action.CREATE));
+        authorizationService.authorize(extractToken(authHeader), new PermissionDTO(Resource.ROLE, Action.CREATE));
 
         Set<PermissionDTO> permissions = mapToInternal(request.permissions());
         roleService.registerRole(request.name(), permissions);
@@ -117,7 +117,7 @@ public class SecurityController {
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @PathVariable("roleId") UUID roleId,
             @RequestBody RegisterRoleRequestDTO request) {
-        authorizationService.require(extractToken(authHeader), new PermissionDTO(Resource.ROLE, Action.UPDATE));
+        authorizationService.authorize(extractToken(authHeader), new PermissionDTO(Resource.ROLE, Action.UPDATE));
 
         Set<PermissionDTO> permissions = mapToInternal(request.permissions());
         roleService.updateRole(roleId, request.name(), permissions);
@@ -138,7 +138,7 @@ public class SecurityController {
     public ApiResponse<Void> deleteRole(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @PathVariable("roleId") UUID roleId) {
-        authorizationService.require(extractToken(authHeader), new PermissionDTO(Resource.ROLE, Action.DELETE));
+        authorizationService.authorize(extractToken(authHeader), new PermissionDTO(Resource.ROLE, Action.DELETE));
         roleService.deleteRole(roleId);
         return ApiResponse.success(null);
     }

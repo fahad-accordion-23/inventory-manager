@@ -1,15 +1,14 @@
 package ledge.shared.infrastructure.queries;
 
 import ledge.security.api.IAuthorizationService;
-import ledge.security.api.dto.PermissionDTO;
 import ledge.security.api.exceptions.AuthorizationException;
+import ledge.security.api.annotations.RequiresPermission;
 import ledge.shared.security.models.Action;
 import ledge.shared.security.models.Resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -32,15 +31,15 @@ class QueryBusTest {
         String result = queryBus.dispatch(query, "valid-token");
 
         assertEquals("result", result);
+        verify(authService).authorize(eq("valid-token"), eq(query));
     }
 
     @Test
     void testAuthorizationEnforcement() {
-        TestHandler handler = new TestHandler();
+        TestHandlerWithPermission handler = new TestHandlerWithPermission();
         QueryBus queryBus = new QueryBus(List.of(handler), authService);
 
-        PermissionDTO required = new PermissionDTO(Resource.USER, Action.READ);
-        doThrow(new AuthorizationException("Denied")).when(authService).require("bad-token", required);
+        doThrow(new AuthorizationException("Denied")).when(authService).authorize(eq("bad-token"), any(Object.class));
 
         TestQueryWithPermission query = new TestQueryWithPermission();
 
@@ -55,22 +54,22 @@ class QueryBusTest {
 
     // Test classes
     static class TestQuery implements Query<String> {
-        @Override
-        public Optional<PermissionDTO> getRequiredPermission() {
-            return Optional.empty();
-        }
     }
 
+    @RequiresPermission(resource = Resource.USER, action = Action.READ)
     static class TestQueryWithPermission implements Query<String> {
-        @Override
-        public Optional<PermissionDTO> getRequiredPermission() {
-            return Optional.of(new PermissionDTO(Resource.USER, Action.READ));
-        }
     }
 
     static class TestHandler implements QueryHandler<TestQuery, String> {
         @Override
         public String handle(TestQuery query) {
+            return "result";
+        }
+    }
+
+    static class TestHandlerWithPermission implements QueryHandler<TestQueryWithPermission, String> {
+        @Override
+        public String handle(TestQueryWithPermission query) {
             return "result";
         }
     }
