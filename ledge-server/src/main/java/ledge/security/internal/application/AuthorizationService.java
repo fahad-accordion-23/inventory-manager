@@ -1,5 +1,6 @@
 package ledge.security.internal.application;
 
+import ledge.security.api.IPermissionResolver;
 import ledge.security.api.dto.PermissionDTO;
 import ledge.security.api.exceptions.AuthorizationException;
 import ledge.security.api.IAuthorizationService;
@@ -17,17 +18,26 @@ import org.springframework.stereotype.Service;
 public class AuthorizationService implements IAuthorizationService {
     private final ISessionService sessionService;
     private final IUserRoleService userRoleService;
+    private final IPermissionResolver permissionResolver;
 
-    public AuthorizationService(ISessionService sessionService, IUserRoleService userRoleService) {
+    public AuthorizationService(
+            ISessionService sessionService, 
+            IUserRoleService userRoleService,
+            IPermissionResolver permissionResolver) {
         this.sessionService = sessionService;
         this.userRoleService = userRoleService;
+        this.permissionResolver = permissionResolver;
     }
 
     @Override
-    public void require(String token, PermissionDTO permissionDTO)
-            throws AuthorizationException, IllegalArgumentException {
+    public void authorize(String token, Object context) throws AuthorizationException {
+        permissionResolver.resolve(context).ifPresent(permission -> authorize(token, permission));
+    }
+
+    @Override
+    public void authorize(String token, PermissionDTO permissionDTO) throws AuthorizationException {
         if (token == null || token.isBlank()) {
-            throw new IllegalArgumentException("Authentication token is missing");
+            throw new AuthorizationException("Authentication token is missing");
         }
 
         UUID userId = sessionService.getUserIdByToken(token)

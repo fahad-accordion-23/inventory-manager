@@ -1,15 +1,14 @@
 package ledge.shared.infrastructure.commands;
 
 import ledge.security.api.IAuthorizationService;
-import ledge.security.api.dto.PermissionDTO;
 import ledge.security.api.exceptions.AuthorizationException;
+import ledge.security.api.annotations.RequiresPermission;
 import ledge.shared.security.models.Action;
 import ledge.shared.security.models.Resource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -33,6 +32,7 @@ class CommandBusTest {
 
         assertTrue(handler.executed);
         assertEquals("data", handler.receivedData);
+        verify(authService).authorize(eq("valid-token"), eq(command));
     }
 
     @Test
@@ -40,8 +40,7 @@ class CommandBusTest {
         TestHandlerWithPermission handler = new TestHandlerWithPermission();
         CommandBus commandBus = new CommandBus(List.of(handler), authService);
 
-        PermissionDTO required = new PermissionDTO(Resource.PRODUCT, Action.UPDATE);
-        doThrow(new AuthorizationException("Denied")).when(authService).require("bad-token", required);
+        doThrow(new AuthorizationException("Denied")).when(authService).authorize(eq("bad-token"), any(Object.class));
 
         TestCommandWithPermission command = new TestCommandWithPermission();
 
@@ -69,18 +68,10 @@ class CommandBusTest {
         TestCommand(String data) {
             this.data = data;
         }
-
-        @Override
-        public Optional<PermissionDTO> getRequiredPermission() {
-            return Optional.empty();
-        }
     }
 
+    @RequiresPermission(resource = Resource.PRODUCT, action = Action.UPDATE)
     static class TestCommandWithPermission implements Command {
-        @Override
-        public Optional<PermissionDTO> getRequiredPermission() {
-            return Optional.of(new PermissionDTO(Resource.PRODUCT, Action.UPDATE));
-        }
     }
 
     static class TestHandler implements CommandHandler<TestCommand> {

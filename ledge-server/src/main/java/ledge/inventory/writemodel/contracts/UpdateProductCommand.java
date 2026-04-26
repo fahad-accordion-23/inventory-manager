@@ -1,14 +1,14 @@
 package ledge.inventory.writemodel.contracts;
 
-import ledge.security.api.dto.PermissionDTO;
+import ledge.security.api.annotations.RequiresPermission;
 import ledge.shared.security.models.Action;
 import ledge.shared.security.models.Resource;
 import ledge.shared.infrastructure.commands.Command;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 import java.util.UUID;
 
+@RequiresPermission(resource = Resource.PRODUCT, action = Action.UPDATE)
 public record UpdateProductCommand(
         UUID id,
         String name,
@@ -16,11 +16,4 @@ public record UpdateProductCommand(
         BigDecimal sellingPrice,
         int stockQuantity,
         BigDecimal taxRate) implements Command {
-
-    private static final PermissionDTO REQUIRED = new PermissionDTO(Resource.PRODUCT, Action.UPDATE);
-
-    @Override
-    public Optional<PermissionDTO> getRequiredPermission() {
-        return Optional.of(REQUIRED);
-    }
 }
